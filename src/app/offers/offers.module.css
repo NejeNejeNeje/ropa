@@ -1,0 +1,423 @@
+.page {
+    min-height: 100dvh;
+    padding-bottom: 80px;
+}
+
+/* ─── Role Tabs ─── */
+
+.roleTabs {
+    display: flex;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+    padding: 3px;
+    background: var(--color-bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+}
+
+.roleTab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 0.875rem;
+    transition: all var(--transition-fast);
+    background: transparent;
+}
+
+.roleTabActive {
+    background: var(--color-primary-glow);
+    color: var(--color-primary-light);
+    box-shadow: 0 2px 8px var(--color-primary-glow);
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: var(--radius-full);
+    background: var(--color-primary);
+    color: white;
+    font-size: 0.6875rem;
+    font-weight: 700;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4) var(--space-5);
+    position: sticky;
+    top: 0;
+    z-index: var(--z-nav);
+    background: var(--color-bg);
+}
+
+.header h1 {
+    font-size: 1.5rem;
+}
+
+.count {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+}
+
+.main {
+    padding: 0 var(--space-4);
+}
+
+/* ─── Tabs ─── */
+
+.tabs {
+    display: flex;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+}
+
+.tab {
+    flex: 1;
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    font-weight: 600;
+    font-size: 0.8125rem;
+    transition: all var(--transition-fast);
+}
+
+.tabActive {
+    border-color: var(--color-primary);
+    background: var(--color-primary-glow);
+    color: var(--color-primary-light);
+}
+
+/* ─── Empty ─── */
+
+.empty {
+    text-align: center;
+    padding: var(--space-16) var(--space-4);
+}
+
+.emptyIcon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: var(--space-4);
+}
+
+.empty h3 {
+    margin-bottom: var(--space-2);
+}
+
+.empty p {
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+}
+
+/* ─── Offer List ─── */
+
+.offerList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.offerCard {
+    background: var(--color-bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    padding: var(--space-4);
+    transition: all var(--transition-base);
+}
+
+.offerCard:hover {
+    border-color: var(--color-border-strong);
+}
+
+/* ─── Offer Top ─── */
+
+.offerTop {
+    display: flex;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+}
+
+.offerThumb {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-sm);
+    background-size: cover;
+    background-position: center;
+    background-color: var(--color-surface);
+    flex-shrink: 0;
+}
+
+.offerInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.offerInfo h3 {
+    font-size: 0.9375rem;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.askingLabel {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+.offerAmount {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.amountValue {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-weight: 700;
+    display: block;
+}
+
+.offerType {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.typeOVERBID {
+    color: var(--color-primary-light);
+}
+
+.typeMATCH {
+    color: var(--color-success);
+}
+
+.typeUNDERBID {
+    color: var(--color-accent-light);
+}
+
+/* ─── Buyer Row ─── */
+
+.buyerRow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-elevated);
+}
+
+.buyerAvatar {
+    border-radius: var(--radius-full);
+}
+
+.buyerInfo {
+    flex: 1;
+    font-size: 0.8125rem;
+}
+
+.buyerInfo span {
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+}
+
+.matchBadge {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* ─── Meta Row ─── */
+
+.metaRow {
+    display: flex;
+    gap: var(--space-4);
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-3);
+}
+
+.timer {
+    color: var(--color-warning);
+    font-weight: 600;
+}
+
+/* ─── Actions ─── */
+
+.offerActions {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.acceptBtn,
+.counterBtn,
+.declineBtn {
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    font-size: 0.8125rem;
+    transition: all var(--transition-fast);
+}
+
+.acceptBtn {
+    flex: 1;
+    background: linear-gradient(135deg, var(--color-success), #059669);
+    color: white;
+}
+
+.acceptBtn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.counterBtn {
+    padding: var(--space-2) var(--space-4);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+}
+
+.counterBtn:hover {
+    border-color: var(--color-primary);
+}
+
+.declineBtn {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+}
+
+.declineBtn:hover {
+    border-color: var(--color-error);
+}
+
+/* ─── Counter Form ─── */
+
+.counterForm {
+    display: flex;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border);
+}
+
+.counterInput {
+    flex: 1;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.counterInput:focus {
+    border-color: var(--color-primary);
+}
+
+.counterSubmit {
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-full);
+    background: var(--color-primary);
+    color: white;
+    font-weight: 600;
+    font-size: 0.8125rem;
+}
+
+/* ─── Counter Badge ─── */
+
+.counterBadge {
+    margin-top: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    background: rgba(249, 115, 22, 0.1);
+    font-size: 0.8125rem;
+    color: var(--color-primary-light);
+}
+
+/* ─── Buyer-Specific ─── */
+
+.offerCardHighlight {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 1px var(--color-primary-glow), 0 4px 16px var(--color-primary-glow);
+}
+
+.offerStatus {
+    text-align: right;
+    flex-shrink: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.counterResponse {
+    margin-top: var(--space-3);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.08), rgba(249, 115, 22, 0.02));
+    border: 1px solid rgba(249, 115, 22, 0.2);
+}
+
+.counterInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: var(--space-3);
+}
+
+.counterLabel {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+}
+
+.counterPrice {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-primary-light);
+}
+
+.counterDiff {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+}
+
+.counterActions {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.counterActions .acceptBtn {
+    flex: 1;
+}
+
+.counterActions .declineBtn {
+    width: auto;
+    padding: var(--space-2) var(--space-4);
+}
+
+.acceptedBadge {
+    margin-top: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    background: rgba(16, 185, 129, 0.1);
+    font-size: 0.8125rem;
+    color: var(--color-success);
+    font-weight: 600;
+}

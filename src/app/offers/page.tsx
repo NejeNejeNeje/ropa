@@ -1,0 +1,317 @@
+'use client';
+
+import { useState } from 'react';
+import Image from 'next/image';
+import Navigation from '@/components/Navigation';
+import styles from './offers.module.css';
+import { trpc } from '@/lib/trpc-client';
+
+const STATUS_ICON: Record<string, string> = {
+    pending: '⏳',
+    accepted: '✅',
+    declined: '❌',
+    expired: '⌛',
+    countered: '💬',
+};
+
+function timeLeft(expiresAt: string | Date): string {
+    const diff = new Date(expiresAt).getTime() - Date.now();
+    if (diff <= 0) return 'Expired';
+    const hours = Math.floor(diff / 3600000);
+    const minutes = Math.floor((diff % 3600000) / 60000);
+    return `${hours}h ${minutes}m left`;
+}
+
+function scoreBadge(score: number | null): { label: string; color: string } {
+    if (!score) return { label: '—', color: 'var(--color-text-muted)' };
+    if (score >= 0.7) return { label: '🟢 Great match', color: 'var(--color-success)' };
+    if (score >= 0.4) return { label: '🟡 Good match', color: 'var(--color-warning)' };
+    return { label: '🔴 Low match', color: 'var(--color-error)' };
+}
+
+// ─── Seller View ────────────────────────────────────────────────
+
+interface SellerViewProps {
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    offers: any[] | undefined;
+    refetch: () => void;
+}
+
+function SellerView({ offers, refetch }: SellerViewProps) {
+    const [tab, setTab] = useState<'active' | 'resolved'>('active');
+    const [counteringId, setCounteringId] = useState<string | null>(null);
+    const [counterAmount, setCounterAmount] = useState(0);
+
+    const acceptMutation = trpc.offer.accept.useMutation({ onSuccess: () => refetch() });
+    const declineMutation = trpc.offer.decline.useMutation({ onSuccess: () => refetch() });
+    const counterMutation = trpc.offer.counter.useMutation({ onSuccess: () => { refetch(); setCounteringId(null); } });
+
+    const all = offers || [];
+    const active = all.filter((o) => o.status === 'pending');
+    const resolved = all.filter((o) => o.status !== 'pending');
+    const displayed = tab === 'active' ? active : resolved;
+
+    return (
+        <>
+            <div className={styles.tabs}>
+                <button className={`${styles.tab} ${tab === 'active' ? styles.tabActive : ''}`} onClick={() => setTab('active')}>
+                    ⏳ Active ({active.length})
+                </button>
+                <button className={`${styles.tab} ${tab === 'resolved' ? styles.tabActive : ''}`} onClick={() => setTab('resolved')}>
+                    📋 Resolved ({resolved.length})
+                </button>
+            </div>
+
+            {displayed.length === 0 ? (
+                <div className={styles.empty}>
+                    <span className={styles.emptyIcon}>{tab === 'active' ? '📭' : '📦'}</span>
+                    <h3>{tab === 'active' ? 'No pending offers' : 'No resolved offers yet'}</h3>
+                    <p>{tab === 'active' ? 'When buyers swipe right on your items, their offers appear here.' : 'Accepted and declined offers will show here.'}</p>
+                </div>
+            ) : (
+                <div className={styles.offerList}>
+                    {displayed.map((offer) => {
+                        const images = typeof offer.listing.images === 'string' ? JSON.parse(offer.listing.images) : [];
+                        const thumbUrl = images[0]?.url || '';
+                        const badge = scoreBadge(offer.sellerScore);
+                        const isActive = offer.status === 'pending';
+
+                        return (
+                            <div key={offer.id} className={styles.offerCard}>
+                                <div className={styles.offerTop}>
+                                    <div className={styles.offerThumb} style={{ backgroundImage: thumbUrl ? `url(${thumbUrl})` : 'none' }} />
+                                    <div className={styles.offerInfo}>
+                                        <h3>{offer.listing.title}</h3>
+                                        <span className={styles.askingLabel}>
+                                            Asking: {offer.listing.price} {offer.listing.currency}
+                                        </span>
+                                    </div>
+                                    <div className={styles.offerAmount}>
+                                        <span className={styles.amountValue}>{offer.amount} {offer.currency}</span>
+                                        <span className={`${styles.offerType} ${styles[`type${offer.offerType}`]}`}>
+                                            {offer.offerType === 'OVERBID' ? '🔥' : offer.offerType === 'MATCH' ? '🤝' : '📉'} {offer.offerType}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className={styles.buyerRow}>
+                                    {offer.buyer.image && (
+                                        <Image src={offer.buyer.image} alt={offer.buyer.name} width={28} height={28} className={styles.buyerAvatar} />
+                                    )}
+                                    <div className={styles.buyerInfo}>
+                                        <strong>{offer.buyer.name}</strong>
+                                        <span>{offer.buyer.currentCity}{offer.buyer.country ? `, ${offer.buyer.country}` : ''}</span>
+                                    </div>
+                                    <span className={styles.matchBadge} style={{ color: badge.color }}>{badge.label}</span>
+                                </div>
+
+                                <div className={styles.metaRow}>
+                                    {offer.distanceKm != null && (
+                                        <span>📍 {Math.round(offer.distanceKm)}km away</span>
+                                    )}
+                                    {isActive && <span className={styles.timer}>⏰ {timeLeft(offer.expiresAt)}</span>}
+                                    <span>{STATUS_ICON[offer.status]} {offer.status}</span>
+                                </div>
+
+                                {isActive && (
+                                    <div className={styles.offerActions}>
+                                        <button className={styles.acceptBtn} onClick={() => acceptMutation.mutate(offer.id)} disabled={acceptMutation.isPending}>
+                                            ✅ Accept
+                                        </button>
+                                        <button className={styles.counterBtn} onClick={() => { setCounteringId(offer.id); setCounterAmount(offer.listing.price || 0); }}>
+                                            💬 Counter
+                                        </button>
+                                        <button className={styles.declineBtn} onClick={() => declineMutation.mutate(offer.id)} disabled={declineMutation.isPending}>
+                                            ❌
+                                        </button>
+                                    </div>
+                                )}
+
+                                {counteringId === offer.id && (
+                                    <div className={styles.counterForm}>
+                                        <input
+                                            type="number"
+                                            value={counterAmount}
+                                            onChange={(e) => setCounterAmount(Number(e.target.value))}
+                                            className={styles.counterInput}
+                                            placeholder="Your counter price"
+                                        />
+                                        <button
+                                            className={styles.counterSubmit}
+                                            onClick={() => counterMutation.mutate({ offerId: offer.id, counterAmount })}
+                                            disabled={counterMutation.isPending}
+                                        >
+                                            Send Counter
+                                        </button>
+                                    </div>
+                                )}
+
+                                {offer.status === 'countered' && offer.counterAmount && (
+                                    <div className={styles.counterBadge}>
+                                        💬 You countered with {offer.counterAmount} {offer.currency}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+        </>
+    );
+}
+
+// ─── Buyer View ────────────────────────────────────────────────
+
+interface BuyerViewProps {
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    offers: any[] | undefined;
+    refetch: () => void;
+}
+
+function BuyerView({ offers, refetch }: BuyerViewProps) {
+    const [tab, setTab] = useState<'countered' | 'all'>('countered');
+
+    const acceptCounterMutation = trpc.offer.acceptCounter.useMutation({ onSuccess: () => refetch() });
+    const declineCounterMutation = trpc.offer.declineCounter.useMutation({ onSuccess: () => refetch() });
+
+    const all = offers || [];
+    const countered = all.filter((o) => o.status === 'countered');
+    const displayed = tab === 'countered' ? countered : all;
+
+    return (
+        <>
+            <div className={styles.tabs}>
+                <button className={`${styles.tab} ${tab === 'countered' ? styles.tabActive : ''}`} onClick={() => setTab('countered')}>
+                    💬 Counter-Offers ({countered.length})
+                </button>
+                <button className={`${styles.tab} ${tab === 'all' ? styles.tabActive : ''}`} onClick={() => setTab('all')}>
+                    📋 All My Offers ({all.length})
+                </button>
+            </div>
+
+            {displayed.length === 0 ? (
+                <div className={styles.empty}>
+                    <span className={styles.emptyIcon}>{tab === 'countered' ? '💬' : '📭'}</span>
+                    <h3>{tab === 'countered' ? 'No counter-offers' : 'No offers sent yet'}</h3>
+                    <p>{tab === 'countered' ? 'When a seller counters your offer, it appears here for you to accept or decline.' : 'Swipe right on items in the feed to send offers.'}</p>
+                </div>
+            ) : (
+                <div className={styles.offerList}>
+                    {displayed.map((offer) => {
+                        const images = typeof offer.listing.images === 'string' ? JSON.parse(offer.listing.images) : [];
+                        const thumbUrl = images[0]?.url || '';
+                        const isCountered = offer.status === 'countered';
+
+                        return (
+                            <div key={offer.id} className={`${styles.offerCard} ${isCountered ? styles.offerCardHighlight : ''}`}>
+                                <div className={styles.offerTop}>
+                                    <div className={styles.offerThumb} style={{ backgroundImage: thumbUrl ? `url(${thumbUrl})` : 'none' }} />
+                                    <div className={styles.offerInfo}>
+                                        <h3>{offer.listing.title}</h3>
+                                        <span className={styles.askingLabel}>
+                                            You offered: {offer.amount} {offer.currency}
+                                        </span>
+                                    </div>
+                                    <div className={styles.offerStatus}>
+                                        <span>{STATUS_ICON[offer.status]} {offer.status}</span>
+                                    </div>
+                                </div>
+
+                                <div className={styles.buyerRow}>
+                                    {offer.seller.image && (
+                                        <Image src={offer.seller.image} alt={offer.seller.name} width={28} height={28} className={styles.buyerAvatar} />
+                                    )}
+                                    <div className={styles.buyerInfo}>
+                                        <strong>{offer.seller.name}</strong>
+                                        <span>Seller • {offer.seller.currentCity}</span>
+                                    </div>
+                                </div>
+
+                                {isCountered && offer.counterAmount && (
+                                    <div className={styles.counterResponse}>
+                                        <div className={styles.counterInfo}>
+                                            <span className={styles.counterLabel}>Seller's counter:</span>
+                                            <span className={styles.counterPrice}>{offer.counterAmount} {offer.currency}</span>
+                                            <span className={styles.counterDiff}>
+                                                {offer.counterAmount > offer.amount
+                                                    ? `+${(offer.counterAmount - offer.amount).toFixed(0)} more than your offer`
+                                                    : `${(offer.amount - offer.counterAmount).toFixed(0)} less than your offer`
+                                                }
+                                            </span>
+                                        </div>
+                                        <div className={styles.counterActions}>
+                                            <button
+                                                className={styles.acceptBtn}
+                                                onClick={() => acceptCounterMutation.mutate(offer.id)}
+                                                disabled={acceptCounterMutation.isPending}
+                                            >
+                                                ✅ Accept {offer.counterAmount} {offer.currency}
+                                            </button>
+                                            <button
+                                                className={styles.declineBtn}
+                                                onClick={() => declineCounterMutation.mutate(offer.id)}
+                                                disabled={declineCounterMutation.isPending}
+                                            >
+                                                ❌ Decline
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {offer.status === 'accepted' && (
+                                    <div className={styles.acceptedBadge}>
+                                        ✅ Deal confirmed! Check your matches.
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+        </>
+    );
+}
+
+// ─── Main Page ────────────────────────────────────────────────
+
+export default function OffersPage() {
+    const [role, setRole] = useState<'selling' | 'buying'>('selling');
+
+    const sellerQuery = trpc.offer.getForSeller.useQuery(undefined, { retry: false, enabled: role === 'selling' });
+    const buyerQuery = trpc.offer.getForBuyer.useQuery(undefined, { retry: false, enabled: role === 'buying' });
+
+    const sellerPending = (sellerQuery.data || []).filter((o) => o.status === 'pending').length;
+    const buyerCountered = (buyerQuery.data || []).filter((o) => o.status === 'countered').length;
+
+    return (
+        <div className={styles.page}>
+            <header className={styles.header}>
+                <h1>💰 Offers</h1>
+                <span className={styles.count}>
+                    {role === 'selling' ? `${sellerPending} pending` : `${buyerCountered} countered`}
+                </span>
+            </header>
+
+            <main className={styles.main}>
+                <div className={styles.roleTabs}>
+                    <button className={`${styles.roleTab} ${role === 'selling' ? styles.roleTabActive : ''}`} onClick={() => setRole('selling')}>
+                        🏷️ Selling
+                        {sellerPending > 0 && <span className={styles.badge}>{sellerPending}</span>}
+                    </button>
+                    <button className={`${styles.roleTab} ${role === 'buying' ? styles.roleTabActive : ''}`} onClick={() => setRole('buying')}>
+                        🛍️ Buying
+                        {buyerCountered > 0 && <span className={styles.badge}>{buyerCountered}</span>}
+                    </button>
+                </div>
+
+                {role === 'selling' ? (
+                    <SellerView offers={sellerQuery.data} refetch={sellerQuery.refetch} />
+                ) : (
+                    <BuyerView offers={buyerQuery.data} refetch={buyerQuery.refetch} />
+                )}
+            </main>
+
+            <Navigation />
+        </div>
+    );
+}

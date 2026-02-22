@@ -1,0 +1,515 @@
+.page {
+    min-height: 100vh;
+    background: var(--bg-primary);
+    padding-bottom: 100px;
+}
+
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: 16px 20px;
+    background: rgba(12, 10, 9, 0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.header h1 {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    color: var(--text-primary);
+}
+
+.main {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+/* ─── Profile Card ──── */
+.profileCard {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    padding: 20px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    margin-bottom: 14px;
+}
+
+.avatarWrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid var(--accent-primary);
+}
+
+.trustBadge {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    border: 2px solid var(--bg-secondary);
+}
+
+.profileInfo {
+    flex: 1;
+}
+
+.profileInfo h2 {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    color: var(--text-primary);
+}
+
+.location {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.bio {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
+/* ─── SwapShield Trust ──── */
+.trustCard {
+    padding: 16px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    margin-bottom: 14px;
+}
+
+.trustHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.trustHeader h3 {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.tierBadge {
+    padding: 3px 12px;
+    border-radius: var(--radius-full);
+    border: 1.5px solid;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.trustTiers {
+    display: flex;
+    gap: 0;
+    position: relative;
+}
+
+.tierStep {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+}
+
+.tierStep::after {
+    content: '';
+    position: absolute;
+    top: 11px;
+    left: 55%;
+    width: 90%;
+    height: 2px;
+    background: var(--bg-tertiary);
+    z-index: 0;
+}
+
+.tierStep:last-child::after {
+    display: none;
+}
+
+.tierDone::after {
+    background: var(--accent-primary) !important;
+}
+
+.tierDot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.55rem;
+    color: white;
+    z-index: 1;
+    background: transparent;
+}
+
+.tierName {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.tierReq {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.tierActive .tierName {
+    color: var(--text-primary);
+}
+
+.upgradeBtn {
+    width: 100%;
+    margin-top: 14px;
+    padding: 10px;
+    border-radius: var(--radius-md);
+    background: var(--accent-primary);
+    color: white;
+    font-weight: 700;
+    font-size: 0.8rem;
+    border: none;
+    cursor: pointer;
+}
+
+/* ─── Stats ──── */
+.statsRow {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 8px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+}
+
+.statValue {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.statLabel {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* ─── Karma ──── */
+.karmaCard {
+    padding: 16px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    margin-bottom: 14px;
+}
+
+.karmaHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.karmaHeader h3 {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.karmaPoints {
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    background: rgba(249, 115, 22, 0.15);
+    color: var(--accent-primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.karmaBar {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--bg-tertiary);
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+
+.karmaFill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    transition: width 0.5s;
+}
+
+.karmaSub {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+}
+
+.karmaLog h4 {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.karmaEntry {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.karmaEntry:last-child {
+    border-bottom: none;
+}
+
+.karmaAction {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.karmaAmount {
+    font-size: 0.75rem;
+    color: #10b981;
+    font-weight: 700;
+}
+
+/* ─── Passport ──── */
+.passportCard {
+    padding: 16px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    margin-bottom: 14px;
+}
+
+.passportCard h3 {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.stamps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.stamp {
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    background: rgba(6, 182, 212, 0.1);
+    border: 1px solid rgba(6, 182, 212, 0.25);
+}
+
+.stampCity {
+    font-size: 0.75rem;
+    color: var(--accent-secondary);
+    font-weight: 600;
+}
+
+/* ─── Swap Buddies ──── */
+.buddiesCard {
+    padding: 16px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    margin-bottom: 14px;
+}
+
+.buddiesCard h3 {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.buddiesSub {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+}
+
+.buddyList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.buddy {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.buddyAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--border-subtle);
+}
+
+.buddyInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.buddyInfo strong {
+    font-size: 0.82rem;
+    color: var(--text-primary);
+}
+
+.buddyInfo span {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.buddyTrust {
+    font-size: 1rem;
+}
+
+/* ─── Preferences ──── */
+.prefsCard {
+    padding: 16px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    margin-bottom: 14px;
+}
+
+.prefsCard h3 {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.prefRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.prefRow:last-child {
+    border-bottom: none;
+}
+
+.prefLabel {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    min-width: 50px;
+}
+
+.prefBadges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.prefBadge {
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-subtle);
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+/* ─── Settings ──── */
+.settingsCard {
+    padding: 16px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    margin-bottom: 14px;
+}
+
+.settingsCard h3 {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.settingRow {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+}
+
+.settingRow:last-child {
+    border-bottom: none;
+}
+
+.settingValue {
+    color: var(--text-muted);
+}
+
+/* ─── Actions ──── */
+.actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.editBtn {
+    flex: 1;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    background: var(--accent-primary);
+    color: white;
+    font-weight: 700;
+    font-size: 0.85rem;
+    border: none;
+    cursor: pointer;
+}
+
+.signOutBtn {
+    flex: 1;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    background: var(--bg-secondary);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.85rem;
+    border: 1px solid var(--border-subtle);
+    cursor: pointer;
+}

@@ -1,0 +1,364 @@
+// Prisma Schema — SwapPack
+// 12 models covering all features + NextAuth
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── NextAuth Models ────────────────────────────────────────
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── Core Models ────────────────────────────────────────────
+
+model User {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  emailVerified  DateTime?
+  name           String
+  password       String?
+  role           String   @default("user") // user | admin
+  blocked        Boolean  @default(false)
+  image          String?
+  bio            String   @default("")
+  gender         String   @default("prefer-not-to-say")
+  currentCity    String   @default("")
+  country        String   @default("")
+  lat            Float    @default(0)
+  lng            Float    @default(0)
+  destination       String   @default("") // next destination city
+  destinationDate   DateTime? // approximate departure date
+  karmaPoints    Int      @default(0)
+  trustTier      String   @default("bronze") // bronze | silver | gold
+  rating         Float    @default(0)
+  totalTrades    Int      @default(0)
+  completedTrades Int     @default(0)
+  verifiedAt     DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Preferences (stored as JSON strings)
+  preferredSizes  String @default("[]")
+  preferredStyles String @default("[]")
+  citiesVisited   String @default("[]")
+  minOfferPercent Int    @default(0) // 0-100: auto-decline offers below this % of asking price (0 = no floor)
+
+  // Relations
+  accounts      Account[]
+  sessions      Session[]
+  listings      Listing[]
+  swipes        Swipe[]
+  matchesAsA    Match[] @relation("MatchUserA")
+  matchesAsB    Match[] @relation("MatchUserB")
+  sentMessages  Message[]
+  reviewsGiven  Review[] @relation("ReviewsGiven")
+  reviewsReceived Review[] @relation("ReviewsReceived")
+  hostedCircles SwapCircle[]
+  circleRsvps   CircleRSVP[]
+  travelPosts   TravelPost[]
+  karmaEntries  KarmaEntry[]
+  buddiesA      SwapBuddy[] @relation("BuddyA")
+  buddiesB      SwapBuddy[] @relation("BuddyB")
+  offersMade    Offer[]     @relation("OffersBuyer")
+  offersReceived Offer[]    @relation("OffersSeller")
+  swapRequests  SwapRequest[]
+}
+
+model Listing {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  description String
+  category    String   // ClothingCategory
+  size        String   // ClothingSize
+  genderTarget String  // GenderTarget
+  condition   String   // Condition
+  brand       String   @default("")
+  colors      String   @default("[]") // JSON array
+  pricingType String   @default("free") // free | fixed | negotiable
+  price       Float?
+  currency    String   @default("USD")
+  city        String
+  country     String
+  lat         Float    @default(0)
+  lng         Float    @default(0)
+  images      String   @default("[]") // JSON array of {id, url, sortOrder}
+  isActive    Boolean  @default(true)
+  dropZoneId  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dropZone    DropZone? @relation(fields: [dropZoneId], references: [id])
+  swipes      Swipe[]
+  matchesAsA  Match[]   @relation("MatchListingA")
+  matchesAsB  Match[]   @relation("MatchListingB")
+  offers      Offer[]
+  linkedPosts TravelPost[]
+  offerItems  OfferItem[]
+}
+
+model Swipe {
+  id        String   @id @default(cuid())
+  swiperId  String
+  listingId String
+  direction String   // LEFT | RIGHT | SUPER
+  offerId   String?  @unique
+  createdAt DateTime @default(now())
+
+  swiper  User    @relation(fields: [swiperId], references: [id], onDelete: Cascade)
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  offer   Offer?  @relation(fields: [offerId], references: [id])
+
+  @@unique([swiperId, listingId])
+}
+
+model Match {
+  id         String   @id @default(cuid())
+  userAId    String
+  userBId    String
+  listingAId String
+  listingBId String
+  status     String   @default("pending") // pending | accepted | completed | expired | disputed
+  agreedPrice Float?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  userA    User    @relation("MatchUserA", fields: [userAId], references: [id])
+  userB    User    @relation("MatchUserB", fields: [userBId], references: [id])
+  listingA Listing @relation("MatchListingA", fields: [listingAId], references: [id])
+  listingB Listing @relation("MatchListingB", fields: [listingBId], references: [id])
+  messages Message[]
+  reviews  Review[]
+  offer    Offer?
+}
+
+model Offer {
+  id            String    @id @default(cuid())
+  buyerId       String
+  sellerId      String
+  listingId     String
+  offerType     String    // OVERBID | MATCH | UNDERBID
+  amount        Float
+  currency      String    @default("USD")
+  status        String    @default("pending") // pending | accepted | declined | expired | countered
+  expiresAt     DateTime
+  sellerScore   Float?    // computed compatibility score
+  distanceKm    Float?    // buyer-to-listing distance
+  counterAmount Float?    // if seller counters
+  acceptedAt    DateTime?
+  declinedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  buyer   User    @relation("OffersBuyer", fields: [buyerId], references: [id])
+  seller  User    @relation("OffersSeller", fields: [sellerId], references: [id])
+  listing Listing @relation(fields: [listingId], references: [id])
+  swipe   Swipe?
+  match   Match?  @relation(fields: [matchId], references: [id])
+  matchId String? @unique
+
+  @@unique([buyerId, listingId, status]) // F2: prevent duplicate pending offers
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  matchId   String
+  senderId  String
+  body      String
+  imageUrl  String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  match  Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  sender User  @relation(fields: [senderId], references: [id])
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  reviewerId String
+  revieweeId String
+  matchId    String
+  rating     Int      // 1-5
+  comment    String   @default("")
+  createdAt  DateTime @default(now())
+
+  reviewer User  @relation("ReviewsGiven", fields: [reviewerId], references: [id])
+  reviewee User  @relation("ReviewsReceived", fields: [revieweeId], references: [id])
+  match    Match @relation(fields: [matchId], references: [id])
+}
+
+// ─── Phase 1 Feature Models ────────────────────────────────
+
+model DropZone {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // hostel | coworking | cafe
+  address     String
+  city        String
+  country     String
+  lat         Float    @default(0)
+  lng         Float    @default(0)
+  imageUrl    String   @default("")
+  activeListings Int   @default(0)
+  hours       String   @default("")
+  description String   @default("")
+  partnerSince DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  listings Listing[]
+}
+
+model SwapCircle {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  city        String
+  country     String
+  venue       String
+  venueType   String   // hostel | coworking | cafe
+  date        DateTime
+  time        String
+  capacity    Int
+  imageUrl    String   @default("")
+  hostUserId  String
+  isFull      Boolean  @default(false)
+  isPast      Boolean  @default(false)
+  tags        String   @default("[]") // JSON array
+  createdAt   DateTime @default(now())
+
+  host  User         @relation(fields: [hostUserId], references: [id])
+  rsvps CircleRSVP[]
+}
+
+model CircleRSVP {
+  id       String   @id @default(cuid())
+  userId   String
+  circleId String
+  createdAt DateTime @default(now())
+
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  circle SwapCircle @relation(fields: [circleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, circleId])
+}
+
+model TravelPost {
+  id              String   @id @default(cuid())
+  userId          String
+  imageUrl        String
+  caption         String
+  linkedListingId String?
+  likes           Int      @default(0)
+  commentCount    Int      @default(0)
+  city            String
+  country         String
+  tags            String   @default("[]") // JSON array
+  createdAt       DateTime @default(now())
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  linkedListing Listing? @relation(fields: [linkedListingId], references: [id])
+}
+
+model KarmaEntry {
+  id          String   @id @default(cuid())
+  userId      String
+  action      String   // KarmaAction
+  points      Int
+  description String
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SwapBuddy {
+  id      String   @id @default(cuid())
+  userAId String
+  userBId String
+  createdAt DateTime @default(now())
+
+  userA User @relation("BuddyA", fields: [userAId], references: [id], onDelete: Cascade)
+  userB User @relation("BuddyB", fields: [userBId], references: [id], onDelete: Cascade)
+
+  @@unique([userAId, userBId])
+}
+
+// ─── TravelSwap Exchange Models ─────────────────────────────
+
+model SwapRequest {
+  id          String    @id @default(cuid())
+  userId      String
+  city        String
+  destination String    @default("")
+  status      String    @default("active") // active | matched | completed | expired | cancelled
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  needs   WishlistItem[]
+  offers  OfferItem[]
+}
+
+model WishlistItem {
+  id            String   @id @default(cuid())
+  swapRequestId String
+  category      String   // ItemCategory: outerwear | tops | bottoms | footwear | swimwear | accessories | gear | books_guides | electronics | toiletries
+  description   String   @default("")
+  sizeRange     String   @default("") // e.g. "M-L" or empty for non-sized items
+  isFlexible    Boolean  @default(true) // accepts similar items
+  createdAt     DateTime @default(now())
+
+  swapRequest SwapRequest @relation(fields: [swapRequestId], references: [id], onDelete: Cascade)
+}
+
+model OfferItem {
+  id            String   @id @default(cuid())
+  swapRequestId String
+  listingId     String?  // optional link to existing listing
+  category      String   // ItemCategory
+  description   String   @default("")
+  sizeRange     String   @default("")
+  createdAt     DateTime @default(now())
+
+  swapRequest SwapRequest @relation(fields: [swapRequestId], references: [id], onDelete: Cascade)
+  listing     Listing?    @relation(fields: [listingId], references: [id])
+}
+

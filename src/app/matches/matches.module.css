@@ -1,0 +1,175 @@
+.page {
+    min-height: 100dvh;
+    padding-bottom: 80px;
+}
+
+.header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-nav);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4);
+}
+
+.title {
+    font-size: 1.25rem;
+}
+
+.count {
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+}
+
+/* ─── List ────────────────────────────────────────────────────── */
+
+.list {
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    max-width: 520px;
+    margin: 0 auto;
+}
+
+/* ─── Match Card ─────────────────────────────────────────────── */
+
+.matchCard {
+    padding: var(--space-4);
+}
+
+.matchTop {
+    display: flex;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+}
+
+.avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-full);
+    border: 2px solid var(--color-primary);
+    flex-shrink: 0;
+}
+
+.matchInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.nameRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+}
+
+.name {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.status {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: capitalize;
+    color: var(--color-text-muted);
+}
+
+.location {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-2);
+}
+
+.lastMessage {
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ─── Match Items ────────────────────────────────────────────── */
+
+.matchItems {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    background: var(--color-bg-elevated);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-4);
+}
+
+.matchItem {
+    flex: 1;
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    min-width: 0;
+}
+
+.itemThumb {
+    width: 44px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+}
+
+.itemInfo {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.itemTitle {
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.itemMeta {
+    font-size: 0.625rem;
+    color: var(--color-text-muted);
+}
+
+.swapIcon {
+    font-size: 1.25rem;
+    color: var(--color-primary);
+    flex-shrink: 0;
+}
+
+/* ─── Actions ────────────────────────────────────────────────── */
+
+.matchActions {
+    display: flex;
+    gap: var(--space-3);
+}
+
+/* ─── Empty ──────────────────────────────────────────────────── */
+
+.empty {
+    text-align: center;
+    padding: var(--space-16) var(--space-4);
+}
+
+.emptyIcon {
+    font-size: 4rem;
+    display: block;
+    margin-bottom: var(--space-4);
+}
+
+.empty h3 {
+    margin-bottom: var(--space-2);
+}
+
+.empty p {
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    margin-bottom: var(--space-6);
+}

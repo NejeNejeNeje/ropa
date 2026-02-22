@@ -1,36 +1,167 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SwapPack 🎒
 
-## Getting Started
+> Trade clothes while traveling — a social marketplace for travelers who swap fashion.
 
-First, run the development server:
+## Quick Start
 
 ```bash
+# 1. Install dependencies
+npm install
+
+# 2. Set up environment
+cp .env.example .env
+# Edit .env with your values (see Environment Variables below)
+
+# 3. Initialize database
+npx prisma db push
+npx prisma generate
+
+# 4. Seed demo data
+npx prisma db seed
+
+# 5. Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) and click **🚀 Demo Login** to explore.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment Variables
 
-## Learn More
+Create a `.env` file in the project root:
 
-To learn more about Next.js, take a look at the following resources:
+```env
+# Database — SQLite for dev, swap for PostgreSQL in production
+DATABASE_URL="file:./dev.db"
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Auth — CHANGE THIS in production
+AUTH_SECRET="your-random-secret-here"
+NEXTAUTH_URL="http://localhost:3000"
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Generating AUTH_SECRET
 
-## Deploy on Vercel
+```bash
+openssl rand -base64 32
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Demo Credentials
+
+| User | Email | Password |
+|------|-------|----------|
+| **Demo User** | `you@swappack.com` | `swappack123` |
+| Maya Chen | `maya@example.com` | `swappack123` |
+| Liam Okafor | `liam@example.com` | `swappack123` |
+| Sofía Rivera | `sofia@example.com` | `swappack123` |
+
+All seed users share the same password: `swappack123`
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Framework** | Next.js 16 (App Router) |
+| **API** | tRPC v11 (type-safe) |
+| **Database** | Prisma v6 + SQLite |
+| **Auth** | NextAuth v5 (Credentials) |
+| **Styling** | CSS Modules + custom design system |
+
+---
+
+## Key Features
+
+- 🔥 **Swipe Feed** — Tinder-like card swiping for clothing listings
+- 💰 **Swipe Auction** — Bid on items when swiping right (underbid/match/overbid)
+- 💬 **Counter-Offers** — Full negotiation loop (seller counters → buyer accepts/declines)
+- 📍 **Drop Zones** — Physical swap locations at hostels, cafés, coworking spaces
+- 🌍 **Swap Circles** — Community swap events
+- ⭐ **Karma System** — Trust scores based on trading history
+- 🛡️ **Rate Limiting** — Max 3 offers per buyer per listing per 24h
+- 📉 **Lowball Filter** — Sellers can auto-decline offers below X% of asking price
+
+---
+
+## Project Structure
+
+```
+src/
+├── app/                    # Next.js pages
+│   ├── feed/              # Swipe feed
+│   ├── offers/            # Seller/Buyer offers dashboard
+│   ├── explore/           # Drop zones + circles
+│   ├── matches/           # Chat with matched traders
+│   ├── profile/           # User profile
+│   └── login/             # Auth (login + register)
+├── components/            # Shared UI components
+├── lib/                   # Auth, Prisma, tRPC setup
+└── server/routers/        # tRPC API routes
+prisma/
+├── schema.prisma          # Database schema
+└── seed.ts                # Demo data seed script
+```
+
+---
+
+## Deployment
+
+### Option 1: Vercel (Recommended)
+
+```bash
+npm i -g vercel
+vercel
+```
+
+Set environment variables in Vercel dashboard:
+- `DATABASE_URL` — Use a hosted DB (PlanetScale, Neon, Supabase)
+- `AUTH_SECRET` — Generate with `openssl rand -base64 32`
+- `NEXTAUTH_URL` — Your production URL
+
+### Option 2: Docker
+
+```bash
+docker build -t swappack .
+docker run -p 3000:3000 swappack
+```
+
+### Option 3: Any Node.js Host
+
+```bash
+npm run build
+npm start
+```
+
+---
+
+## Database
+
+### Switch to PostgreSQL
+
+1. Update `DATABASE_URL` in `.env`:
+   ```env
+   DATABASE_URL="postgresql://user:pass@host:5432/swappack"
+   ```
+
+2. Update `prisma/schema.prisma`:
+   ```prisma
+   datasource db {
+     provider = "postgresql"
+     url      = env("DATABASE_URL")
+   }
+   ```
+
+3. Run migrations:
+   ```bash
+   npx prisma db push
+   npx prisma db seed
+   ```
+
+---
+
+## License
+
+MIT
