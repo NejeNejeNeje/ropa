@@ -51,7 +51,9 @@ export default function LoginPage() {
             if (result?.error) {
                 setError('Invalid email or password');
             } else {
-                router.push('/feed');
+                const session = await fetch('/api/auth/session').then(r => r.json());
+                const role = session?.user?.role;
+                router.push(role === 'admin' ? '/admin' : '/feed');
                 router.refresh();
             }
         } catch (err) {
@@ -73,7 +75,9 @@ export default function LoginPage() {
             setError(`Failed to log in as ${account.name}`);
             setLoggingInAs(null);
         } else {
-            router.push('/feed');
+            const session = await fetch('/api/auth/session').then(r => r.json());
+            const role = session?.user?.role;
+            router.push(role === 'admin' ? '/admin' : '/feed');
             router.refresh();
         }
     };
