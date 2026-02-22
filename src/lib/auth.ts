@@ -47,19 +47,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 token.id = user.id;
                 token.role = (user as Record<string, unknown>).role as string;
             }
+            // Always keep role in the token for middleware access
             return token;
         },
         async session({ session, token }) {
             if (session.user && token.id) {
                 session.user.id = token.id as string;
-                // Always fetch fresh from DB — avoids stale JWT issues
+                // Set role from token first — middleware reads this (can't hit DB at edge)
+                const u = session.user as unknown as Record<string, unknown>;
+                u.role = token.role as string;
+                // Then enrich with fresh DB data
                 const dbUser = await prisma.user.findUnique({
                     where: { id: token.id as string },
                     select: { karmaPoints: true, trustTier: true, role: true },
                 });
                 if (dbUser) {
-                    const u = session.user as unknown as Record<string, unknown>;
-                    u.role = dbUser.role;
+                    u.role = dbUser.role; // DB is source of truth
                     u.karmaPoints = dbUser.karmaPoints;
                     u.trustTier = dbUser.trustTier;
                 }
