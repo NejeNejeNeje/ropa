@@ -51,10 +51,11 @@ export default function LoginPage() {
             if (result?.error) {
                 setError('Invalid email or password');
             } else {
+                // Wait for session cookie to propagate then fetch role
+                await new Promise(r => setTimeout(r, 500));
                 const session = await fetch('/api/auth/session').then(r => r.json());
-                const role = session?.user?.role;
-                // Set lightweight cookie for middleware admin routing
-                document.cookie = `x-ropa-role=${role || 'user'}; path=/; max-age=2592000; SameSite=Lax`;
+                const role = session?.user?.role || 'user';
+                document.cookie = `x-ropa-role=${role}; path=/; max-age=2592000; SameSite=Lax`;
                 router.push(role === 'admin' ? '/admin' : '/feed');
                 router.refresh();
             }
@@ -77,10 +78,9 @@ export default function LoginPage() {
             setError(`Failed to log in as ${account.name}`);
             setLoggingInAs(null);
         } else {
-            const session = await fetch('/api/auth/session').then(r => r.json());
-            const role = session?.user?.role;
-            // Set lightweight cookie for middleware admin routing
-            document.cookie = `x-ropa-role=${role || 'user'}; path=/; max-age=2592000; SameSite=Lax`;
+            // Use known account role directly — no session fetch delay needed
+            const role = account.role || 'user';
+            document.cookie = `x-ropa-role=${role}; path=/; max-age=2592000; SameSite=Lax`;
             router.push(role === 'admin' ? '/admin' : '/feed');
             router.refresh();
         }
