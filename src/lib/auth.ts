@@ -53,18 +53,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         async session({ session, token }) {
             if (session.user && token.id) {
                 session.user.id = token.id as string;
-                // Set role from token first — middleware reads this (can't hit DB at edge)
                 const u = session.user as unknown as Record<string, unknown>;
+                // Always set role from token first — safe for edge/middleware
                 u.role = token.role as string;
-                // Then enrich with fresh DB data
-                const dbUser = await prisma.user.findUnique({
-                    where: { id: token.id as string },
-                    select: { karmaPoints: true, trustTier: true, role: true },
-                });
-                if (dbUser) {
-                    u.role = dbUser.role; // DB is source of truth
-                    u.karmaPoints = dbUser.karmaPoints;
-                    u.trustTier = dbUser.trustTier;
+                // Enrich with fresh DB data when NOT at the edge (DB unavailable at edge)
+                try {
+                    const dbUser = await prisma.user.findUnique({
+                        where: { id: token.id as string },
+                        select: { karmaPoints: true, trustTier: true, role: true },
+                    });
+                    if (dbUser) {
+                        u.role = dbUser.role; // DB is source of truth when available
+                        u.karmaPoints = dbUser.karmaPoints;
+                        u.trustTier = dbUser.trustTier;
+                    }
+                } catch {
+                    // Edge runtime — DB unavailable, role already set from token above
                 }
             }
             return session;

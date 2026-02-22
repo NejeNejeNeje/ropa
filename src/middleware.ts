@@ -1,20 +1,14 @@
+import { auth } from '@/lib/auth';
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import { getToken } from 'next-auth/jwt';
 
 // Routes only for regular users (not admins)
 const USER_ROUTES = ['/feed', '/explore', '/matches', '/offers', '/profile', '/circles', '/community', '/dropzones', '/travelswap', '/listing'];
 
-export async function middleware(req: NextRequest) {
+export default auth((req) => {
     const { pathname } = req.nextUrl;
-
-    // Read JWT token directly — works at the edge without DB
-    const token = await getToken({
-        req,
-        secret: process.env.AUTH_SECRET,
-    });
-
-    const role = token?.role as string | undefined;
+    // req.auth is the decoded token payload (set by jwt callback) — no DB call
+    const token = req.auth as { user?: { role?: string } } | null;
+    const role = token?.user?.role;
     const isLoggedIn = !!token;
 
     // Admin trying to access any user-facing route → redirect to /admin
@@ -22,7 +16,7 @@ export async function middleware(req: NextRequest) {
         return NextResponse.redirect(new URL('/admin', req.url));
     }
 
-    // Regular user trying to access /admin → redirect to /feed
+    // Regular logged-in user trying to access /admin → redirect to /feed
     if (isLoggedIn && role !== 'admin' && pathname.startsWith('/admin')) {
         return NextResponse.redirect(new URL('/feed', req.url));
     }
@@ -33,7 +27,7 @@ export async function middleware(req: NextRequest) {
     }
 
     return NextResponse.next();
-}
+});
 
 export const config = {
     matcher: [
