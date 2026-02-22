@@ -1,27 +1,24 @@
-import { auth } from '@/lib/auth';
+import { middlewareAuth } from '@/lib/auth-edge';
 import { NextResponse } from 'next/server';
 
-// Routes only for regular users (not admins)
 const USER_ROUTES = ['/feed', '/explore', '/matches', '/offers', '/profile', '/circles', '/community', '/dropzones', '/travelswap', '/listing'];
 
-export default auth((req) => {
+export default middlewareAuth((req) => {
     const { pathname } = req.nextUrl;
-    // req.auth is the decoded token payload (set by jwt callback) — no DB call
-    const token = req.auth as { user?: { role?: string } } | null;
-    const role = token?.user?.role;
-    const isLoggedIn = !!token;
+    const role = (req.auth?.user as { role?: string } | undefined)?.role;
+    const isLoggedIn = !!req.auth;
 
-    // Admin trying to access any user-facing route → redirect to /admin
+    // Admin → always redirect to /admin from any user route
     if (role === 'admin' && USER_ROUTES.some((r) => pathname.startsWith(r))) {
         return NextResponse.redirect(new URL('/admin', req.url));
     }
 
-    // Regular logged-in user trying to access /admin → redirect to /feed
+    // Regular user → block /admin
     if (isLoggedIn && role !== 'admin' && pathname.startsWith('/admin')) {
         return NextResponse.redirect(new URL('/feed', req.url));
     }
 
-    // Unauthenticated user trying to access /admin → redirect to /login
+    // Unauthenticated → redirect /admin to /login
     if (!isLoggedIn && pathname.startsWith('/admin')) {
         return NextResponse.redirect(new URL('/login', req.url));
     }
