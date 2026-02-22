@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import styles from '../admin.module.css';
+import ListingToggle from './ListingToggle';
 
 export default async function AdminListingsPage() {
     const listings = await prisma.listing.findMany({
@@ -31,7 +32,7 @@ export default async function AdminListingsPage() {
                             <th>Price</th>
                             <th>Condition</th>
                             <th>City</th>
-                            <th>Status</th>
+                            <th>Active</th>
                             <th>Listed</th>
                             <th>Actions</th>
                         </tr>
@@ -54,14 +55,13 @@ export default async function AdminListingsPage() {
                                 <td>{l.condition || '—'}</td>
                                 <td>{l.city || '—'}</td>
                                 <td>
-                                    <span className={`${styles.badge} ${l.status === 'active' ? styles.badgeGreen :
-                                            l.status === 'removed' ? styles.badgeRed :
-                                                l.status === 'swapped' ? styles.badgeBlue : styles.badgeGray
-                                        }`}>{l.status}</span>
+                                    <span className={`${styles.badge} ${l.isActive ? styles.badgeGreen : styles.badgeRed}`}>
+                                        {l.isActive ? 'Active' : 'Inactive'}
+                                    </span>
                                 </td>
                                 <td>{new Date(l.createdAt).toLocaleDateString()}</td>
                                 <td>
-                                    <ListingStatusToggle listingId={l.id} status={l.status} />
+                                    <ListingToggle listingId={l.id} isActive={l.isActive} />
                                 </td>
                             </tr>
                         ))}
@@ -70,29 +70,4 @@ export default async function AdminListingsPage() {
             </div>
         </div>
     );
-}
-
-// Inline client component for status toggle
-function ListingStatusToggle({ listingId, status }: { listingId: string; status: string }) {
-    if (status === 'active') {
-        return (
-            <form action={`/api/admin/listings/${listingId}/status`} method="POST">
-                <input type="hidden" name="status" value="removed" />
-                <button type="submit" className={`${styles.actionBtn} ${styles.actionBtnDanger}`}>
-                    Remove
-                </button>
-            </form>
-        );
-    }
-    if (status === 'removed') {
-        return (
-            <form action={`/api/admin/listings/${listingId}/status`} method="POST">
-                <input type="hidden" name="status" value="active" />
-                <button type="submit" className={`${styles.actionBtn} ${styles.actionBtnSuccess}`}>
-                    Restore
-                </button>
-            </form>
-        );
-    }
-    return <span className={styles.badgeGray} style={{ fontSize: '0.7rem', padding: '2px 6px' }}>{status}</span>;
 }

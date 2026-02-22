@@ -12,14 +12,12 @@ export async function POST(
     }
 
     const { id } = await params;
-    const body = await req.json().catch(() => null);
-    const formData = await req.formData().catch(() => null);
-    const status = body?.status ?? formData?.get('status') ?? 'removed';
+    const body = await req.json().catch(() => ({}));
 
     const listing = await prisma.listing.update({
         where: { id },
-        data: { status: status as string },
+        data: { isActive: body.isActive ?? false },
     });
 
-    return NextResponse.json({ status: listing.status });
+    return NextResponse.json({ isActive: listing.isActive });
 }

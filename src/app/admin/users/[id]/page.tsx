@@ -114,7 +114,7 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
                                         <td className={styles.tdPrimary}>{l.title}</td>
                                         <td>{l.category}</td>
                                         <td>{l.price ? `€${l.price}` : 'Free'}</td>
-                                        <td><span className={`${styles.badge} ${l.status === 'active' ? styles.badgeGreen : styles.badgeGray}`}>{l.status}</span></td>
+                                        <td><span className={`${styles.badge} ${l.isActive ? styles.badgeGreen : styles.badgeGray}`}>{l.isActive ? 'Active' : 'Inactive'}</span></td>
                                         <td>{new Date(l.createdAt).toLocaleDateString()}</td>
                                     </tr>
                                 ))}
@@ -138,7 +138,7 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
                                         <td className={styles.tdPrimary}>{o.listing.title}</td>
                                         <td>{o.amount ? `€${o.amount}` : 'Swap'}</td>
                                         <td><span className={`${styles.badge} ${o.status === 'accepted' ? styles.badgeGreen :
-                                                o.status === 'declined' ? styles.badgeRed : styles.badgeGray
+                                            o.status === 'declined' ? styles.badgeRed : styles.badgeGray
                                             }`}>{o.status}</span></td>
                                         <td>{new Date(o.createdAt).toLocaleDateString()}</td>
                                     </tr>
