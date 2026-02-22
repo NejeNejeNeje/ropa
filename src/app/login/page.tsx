@@ -53,6 +53,8 @@ export default function LoginPage() {
             } else {
                 const session = await fetch('/api/auth/session').then(r => r.json());
                 const role = session?.user?.role;
+                // Set lightweight cookie for middleware admin routing
+                document.cookie = `x-ropa-role=${role || 'user'}; path=/; max-age=2592000; SameSite=Lax`;
                 router.push(role === 'admin' ? '/admin' : '/feed');
                 router.refresh();
             }
@@ -77,6 +79,8 @@ export default function LoginPage() {
         } else {
             const session = await fetch('/api/auth/session').then(r => r.json());
             const role = session?.user?.role;
+            // Set lightweight cookie for middleware admin routing
+            document.cookie = `x-ropa-role=${role || 'user'}; path=/; max-age=2592000; SameSite=Lax`;
             router.push(role === 'admin' ? '/admin' : '/feed');
             router.refresh();
         }

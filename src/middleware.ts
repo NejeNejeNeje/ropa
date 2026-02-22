@@ -1,30 +1,27 @@
-import { auth } from '@/lib/auth';
 import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 const USER_ROUTES = ['/feed', '/explore', '/matches', '/offers', '/profile', '/circles', '/community', '/dropzones', '/travelswap', '/listing'];
 
-export default auth((req) => {
+/**
+ * Lightweight middleware — reads the admin role cookie set by the login API.
+ * We avoid importing auth/Prisma entirely to stay under Vercel's 1MB edge limit.
+ * The actual auth guard is in `/admin/layout.tsx` (server-side, full Prisma access).
+ * This middleware only handles the UX redirect for admins landing on user pages.
+ */
+export function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
-    const role = (req.auth?.user as { role?: string } | undefined)?.role;
-    const isLoggedIn = !!req.auth;
 
-    // Admin → redirect to /admin from any user route
-    if (role === 'admin' && USER_ROUTES.some((r) => pathname.startsWith(r))) {
+    // Check for admin role flag — set as a plain cookie on login
+    const adminRole = req.cookies.get('x-ropa-role')?.value;
+
+    // Admin on user routes → redirect to /admin
+    if (adminRole === 'admin' && USER_ROUTES.some((r) => pathname.startsWith(r))) {
         return NextResponse.redirect(new URL('/admin', req.url));
     }
 
-    // Regular user → block /admin, go to /feed
-    if (isLoggedIn && role !== 'admin' && pathname.startsWith('/admin')) {
-        return NextResponse.redirect(new URL('/feed', req.url));
-    }
-
-    // Unauthenticated → redirect /admin to /login
-    if (!isLoggedIn && pathname.startsWith('/admin')) {
-        return NextResponse.redirect(new URL('/login', req.url));
-    }
-
     return NextResponse.next();
-});
+}
 
 export const config = {
     matcher: [
@@ -38,6 +35,5 @@ export const config = {
         '/dropzones/:path*',
         '/travelswap/:path*',
         '/listing/:path*',
-        '/admin/:path*',
     ],
 };
