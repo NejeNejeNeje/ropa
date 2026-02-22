@@ -1,6 +1,23 @@
+import Link from 'next/link';
+import { prisma } from '@/lib/prisma';
+import styles from '../admin.module.css';
 
+export default async function AdminOffersPage() {
+    const offers = await prisma.offer.findMany({
+        orderBy: { createdAt: 'desc' },
+        include: {
+            buyer: { select: { id: true, name: true } },
+            seller: { select: { id: true, name: true } },
+            listing: { select: { id: true, title: true, category: true } },
+        },
+    });
 
-
+    return (
+        <div>
+            <div className={styles.pageHeader}>
+                <h1 className={styles.pageTitle}>Offers</h1>
+                <p className={styles.pageDesc}>{offers.length} total offers across all users</p>
+            </div>
 
             <div className={styles.tableWrap}>
                 <div className={styles.tableToolbar}>
@@ -58,10 +75,3 @@
         </div>
     );
 }
-
-
-
-
-
-
-
