@@ -55,9 +55,8 @@ export default function LoginPage() {
                 await new Promise(r => setTimeout(r, 500));
                 const session = await fetch('/api/auth/session').then(r => r.json());
                 const role = session?.user?.role || 'user';
-                document.cookie = `x-ropa-role=${role}; path=/; max-age=2592000; SameSite=Lax`;
-                router.push(role === 'admin' ? '/admin' : '/feed');
-                router.refresh();
+                // Use full page redirect — ensures server layouts see fresh session cookie
+                window.location.href = role === 'admin' ? '/admin' : '/feed';
             }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -80,9 +79,8 @@ export default function LoginPage() {
         } else {
             // Use known account role directly — no session fetch delay needed
             const role = account.role || 'user';
-            document.cookie = `x-ropa-role=${role}; path=/; max-age=2592000; SameSite=Lax`;
-            router.push(role === 'admin' ? '/admin' : '/feed');
-            router.refresh();
+            // Full page redirect — ensures server layouts see fresh session cookie
+            window.location.href = role === 'admin' ? '/admin' : '/feed';
         }
     };
 
