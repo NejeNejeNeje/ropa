@@ -16,8 +16,12 @@ export default async function UserRoutesLayout({ children }: { children: React.R
     const session = await auth();
     const role = (session?.user as { role?: string } | undefined)?.role;
 
+    // Debug log — visible in Vercel Function logs
+    console.log('[feed/layout] session user:', session?.user?.email, 'role:', role);
+
     // Admin has no business on user-facing pages — send to admin console
     if (session?.user && role === 'admin') {
+        console.log('[feed/layout] REDIRECTING admin to /admin');
         redirect('/admin');
     }
 
