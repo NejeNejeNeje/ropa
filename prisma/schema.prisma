@@ -161,6 +161,16 @@ model Match {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  // Meetup coordination
+  meetupVenue      String?   // e.g. "Selina Palomino", "Central Café"
+  meetupAddress    String?   // street / landmark text
+  meetupCity       String?   // city name (pre-filled from listing city)
+  meetupLat        Float?    // for deep-link map URL
+  meetupLng        Float?    // for deep-link map URL
+  meetupDate       DateTime? // agreed date + time for the swap
+  meetupStatus     String?   // proposed | confirmed | cancelled
+  meetupProposedBy String?   // userId who proposed
+
   userA    User    @relation("MatchUserA", fields: [userAId], references: [id])
   userB    User    @relation("MatchUserB", fields: [userBId], references: [id])
   listingA Listing @relation("MatchListingA", fields: [listingAId], references: [id])
@@ -169,6 +179,7 @@ model Match {
   reviews  Review[]
   offer    Offer?
 }
+
 
 model Offer {
   id            String    @id @default(cuid())
