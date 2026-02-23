@@ -86,7 +86,7 @@ export default function CommunityPage() {
 
                             {linked && linkedImages && linkedImages.length > 0 && (
                                 <div className={styles.linkedListing}>
-                                    <div className={styles.linkedImage} style={{ backgroundImage: `url(${linkedImages[0].url})` }} />
+                                    <div className={styles.linkedImage} style={{ backgroundImage: `url(${linkedImages[0]?.url ?? ''})` }} />
                                     <div className={styles.linkedInfo}>
                                         <span className={styles.linkedLabel}>🔗 Linked listing</span>
                                         <strong>{linked.title as string}</strong>

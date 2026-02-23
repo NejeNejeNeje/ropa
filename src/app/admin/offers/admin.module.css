@@ -280,3 +280,68 @@ tbody td {
     color: #f87171;
     margin: 0 0 0.75rem;
 }
+
+/* ── Aliases used by detail pages ──────────────────────────────────── */
+
+/* backBtn: used by admin/[section]/[id] pages */
+.backBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #9ca3af;
+    font-size: 0.875rem;
+    text-decoration: none;
+    margin-bottom: 1.5rem;
+    transition: color 0.15s;
+}
+
+.backBtn:hover {
+    color: #f9fafb;
+}
+
+/* detailCardTitle: card section headers inside detail cards */
+.detailCardTitle {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.875rem;
+}
+
+/* detailRow: key/value pair row inside a detail card */
+.detailRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    gap: 0.5rem;
+}
+
+.detailRow:last-child {
+    border-bottom: none;
+}
+
+/* detailKey: left-side label of a row */
+.detailKey {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #6b7280;
+    white-space: nowrap;
+}
+
+/* detailVal: right-side value of a row */
+.detailVal {
+    font-size: 0.84rem;
+    color: #d1d5db;
+    text-align: right;
+}
+
+/* dangerTitle: title inside danger zone blocks */
+.dangerTitle {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #f87171;
+    margin: 0 0 0.75rem;
+}
