@@ -2,6 +2,16 @@
 
 > Trade clothes while traveling — a social marketplace for travelers who swap fashion.
 
+## 📚 Handoff Documentation
+
+The complete project handoff package is available in the `docs/` directory:
+
+1. [User Guide](docs/USER_GUIDE.md) — App usage, core flows (Swipe, Chat, Meetups), and the Karma system.
+2. [Business Strategy](docs/BUSINESS_STRATEGY.md) — Monetization levers, B2B Drop Zone partnerships, and Go-To-Market strategy.
+3. [Technical Handoff](docs/TECHNICAL_HANDOFF.md) — Architecture, Prisma schema, environment setup, and deployment.
+
+---
+
 ## Quick Start
 
 ```bash
