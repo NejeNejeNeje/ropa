@@ -44,8 +44,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                 </nav>
 
                 <div className={styles.sidebarFooter}>
-                    <Link href="/feed" className={styles.backLink}>
-                        ← Back to App
+                    <Link href="/" className={styles.backLink}>
+                        ← Back to Site
                     </Link>
                 </div>
             </aside>
