@@ -65,6 +65,9 @@ export default async function AdminSwapCirclesPage() {
                                     </span>
                                 </td>
                                 <td>{new Date(c.createdAt).toLocaleDateString()}</td>
+                                <td>
+                                    <Link href={`/admin/swap-circles/${c.id}`} className={styles.actionBtn}>View →</Link>
+                                </td>
                             </tr>
                         ))}
                     </tbody>

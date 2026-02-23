@@ -62,11 +62,14 @@ export default async function AdminOffersPage() {
                                 </td>
                                 <td>
                                     <span className={`${styles.badge} ${o.status === 'accepted' ? styles.badgeGreen :
-                                            o.status === 'declined' ? styles.badgeRed :
-                                                o.status === 'countered' ? styles.badgeBlue : styles.badgeGray
+                                        o.status === 'declined' ? styles.badgeRed :
+                                            o.status === 'countered' ? styles.badgeBlue : styles.badgeGray
                                         }`}>{o.status}</span>
                                 </td>
                                 <td>{new Date(o.createdAt).toLocaleDateString()}</td>
+                                <td>
+                                    <Link href={`/admin/offers/${o.id}`} className={styles.actionBtn}>View →</Link>
+                                </td>
                             </tr>
                         ))}
                     </tbody>
