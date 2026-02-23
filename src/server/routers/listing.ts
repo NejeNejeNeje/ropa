@@ -78,6 +78,18 @@ export const listingRouter = router({
         if (input.category) where.category = input.category;
         if (input.city) where.city = input.city;
 
+        // I7: Exclude listings already swiped by this user
+        const sessionUserId = (ctx.session?.user as { id?: string } | null | undefined)?.id;
+        if (sessionUserId) {
+            const swipedIds = await ctx.prisma.swipe.findMany({
+                where: { swiperId: sessionUserId },
+                select: { listingId: true },
+            });
+            if (swipedIds.length > 0) {
+                where.id = { notIn: swipedIds.map((s) => s.listingId) };
+            }
+        }
+
         const listings = await ctx.prisma.listing.findMany({
             where,
             include: { user: true, dropZone: true },
@@ -94,6 +106,7 @@ export const listingRouter = router({
 
         return { listings, nextCursor };
     }),
+
 
     getByDropZone: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
         return ctx.prisma.listing.findMany({

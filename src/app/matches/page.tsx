@@ -130,7 +130,7 @@ export default function MatchesPage() {
                                 )}
 
                                 <div className={styles.matchActions}>
-                                    <button className="btn btn-primary" style={{ flex: 1 }}>💬 Chat</button>
+                                    <Link href={`/chat/${match.id}`} className="btn btn-primary" style={{ flex: 1, textAlign: 'center' }}>💬 Chat</Link>
 
                                     {/* Meetup button — only for accepted matches */}
                                     {isAccepted && (

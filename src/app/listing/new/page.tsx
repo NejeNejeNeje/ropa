@@ -1,11 +1,17 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import Navigation from '@/components/Navigation';
+import { trpc } from '@/lib/trpc-client';
 import { ClothingCategory, ClothingSize, GenderTarget, Condition, PricingType, CATEGORY_LABELS, CONDITION_LABELS, SIZE_ORDER } from '@/data/types';
 import styles from './new-listing.module.css';
 
 export default function NewListingPage() {
+    const router = useRouter();
+    const { data: session } = useSession();
+
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [category, setCategory] = useState<ClothingCategory>('tops');
@@ -15,33 +21,37 @@ export default function NewListingPage() {
     const [brand, setBrand] = useState('');
     const [pricingType, setPricingType] = useState<PricingType>('fixed');
     const [price, setPrice] = useState('');
-    const [submitted, setSubmitted] = useState(false);
+    const [city, setCity] = useState((session?.user as { currentCity?: string } | null)?.currentCity || '');
+    const [country, setCountry] = useState((session?.user as { country?: string } | null)?.country || '');
+    const [error, setError] = useState('');
+
+    const createMutation = trpc.listing.create.useMutation({
+        onSuccess: () => router.push('/feed'),
+        onError: (err) => setError(err.message),
+    });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        setSubmitted(true);
+        setError('');
+        if (!city.trim() || !country.trim()) {
+            setError('City and country are required so travelers can find you.');
+            return;
+        }
+        createMutation.mutate({
+            title,
+            description,
+            category,
+            size,
+            genderTarget,
+            condition,
+            brand: brand || undefined,
+            pricingType,
+            price: pricingType !== 'free' && price ? parseFloat(price) : null,
+            city: city.trim(),
+            country: country.trim(),
+            images: [],          // image upload — coming soon
+        });
     };
-
-    if (submitted) {
-        return (
-            <div className={styles.page}>
-                <main className={styles.success}>
-                    <span className={styles.successIcon}>✅</span>
-                    <h2>Listed Successfully!</h2>
-                    <p>Your <strong>{title}</strong> is now visible to nearby travelers.</p>
-                    <div className={styles.successActions}>
-                        <button className="btn btn-primary" onClick={() => setSubmitted(false)}>
-                            List Another Item
-                        </button>
-                        <a href="/feed" className="btn btn-secondary">
-                            Back to Feed
-                        </a>
-                    </div>
-                </main>
-                <Navigation />
-            </div>
-        );
-    }
 
     return (
         <div className={styles.page}>
@@ -51,12 +61,12 @@ export default function NewListingPage() {
 
             <main className={styles.content}>
                 <form onSubmit={handleSubmit} className={styles.form}>
-                    {/* Photo upload area */}
+                    {/* Photo upload area — informational until storage is wired */}
                     <div className={styles.photoArea}>
                         <div className={styles.photoSlot}>
                             <span className={styles.photoIcon}>📷</span>
                             <span className={styles.photoLabel}>Add Photos</span>
-                            <span className={styles.photoHint}>Tap to upload (required)</span>
+                            <span className={styles.photoHint}>Image upload coming soon</span>
                         </div>
                     </div>
 
@@ -86,6 +96,31 @@ export default function NewListingPage() {
                             maxLength={500}
                         />
                         <span className={styles.charCount}>{description.length}/500</span>
+                    </div>
+
+                    {/* Location */}
+                    <div className={styles.field}>
+                        <label className={styles.label}>Your Location *</label>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <input
+                                type="text"
+                                className="input"
+                                placeholder="City (e.g. Palomino)"
+                                value={city}
+                                onChange={(e) => setCity(e.target.value)}
+                                required
+                                style={{ flex: 1 }}
+                            />
+                            <input
+                                type="text"
+                                className="input"
+                                placeholder="Country (e.g. Colombia)"
+                                value={country}
+                                onChange={(e) => setCountry(e.target.value)}
+                                required
+                                style={{ flex: 1 }}
+                            />
+                        </div>
                     </div>
 
                     {/* Category */}
@@ -191,14 +226,22 @@ export default function NewListingPage() {
                                 value={price}
                                 onChange={(e) => setPrice(e.target.value)}
                                 min="1"
-                                max="999"
+                                max="9999"
                             />
                         )}
                     </div>
 
+                    {error && (
+                        <p style={{ color: '#f87171', fontSize: '0.85rem', margin: '0 0 0.5rem' }}>{error}</p>
+                    )}
+
                     {/* Submit */}
-                    <button type="submit" className={`btn btn-primary btn-lg ${styles.submitBtn}`}>
-                        🎒 List Item
+                    <button
+                        type="submit"
+                        className={`btn btn-primary btn-lg ${styles.submitBtn}`}
+                        disabled={createMutation.isPending}
+                    >
+                        {createMutation.isPending ? 'Listing…' : '🎒 List Item'}
                     </button>
                 </form>
             </main>
