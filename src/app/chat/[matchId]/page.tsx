@@ -5,7 +5,9 @@ import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Navigation from '@/components/Navigation';
+import MeetupWidget from '@/components/MeetupWidget';
 import { trpc } from '@/lib/trpc-client';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import styles from './chat.module.css';
 
 export default function ChatPage() {
@@ -33,6 +35,8 @@ export default function ChatPage() {
     const other = (match?.userB as Record<string, unknown> | undefined);
     const otherName = (other?.name || other?.displayName || 'Swap partner') as string;
     const otherAvatar = (other?.image || other?.avatarUrl || '') as string;
+
+    const { supported: pushSupported, subscribed: pushSubscribed, loading: pushLoading, subscribe: pushSubscribe } = usePushNotifications();
 
     const sendMutation = trpc.message.send.useMutation({
         onSuccess: () => { refetch(); setBody(''); },
@@ -95,6 +99,17 @@ export default function ChatPage() {
                 </div>
             </header>
 
+            {/* Push notification prompt */}
+            {pushSupported && !pushSubscribed && (
+                <div style={{ padding: '8px 16px', background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>🔔 Get notified when you get a message</span>
+                    <button onClick={pushSubscribe} disabled={pushLoading}
+                        style={{ background: 'var(--accent-gold)', color: '#000', border: 'none', borderRadius: 20, padding: '5px 12px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                        Enable
+                    </button>
+                </div>
+            )}
+
             <main className={styles.messages}>
                 {messages.length === 0 && (
                     <div className={styles.emptyChat}>
@@ -126,6 +141,21 @@ export default function ChatPage() {
                 })}
                 <div ref={bottomRef} />
             </main>
+
+            {/* Meetup scheduling widget */}
+            <MeetupWidget
+                matchId={matchId}
+                currentUserId={currentUserId}
+                existingMeetup={match?.meetupVenue ? {
+                    venue: match.meetupVenue as string,
+                    address: match.meetupAddress as string,
+                    city: match.meetupCity as string,
+                    date: String(match.meetupDate),
+                    status: (match.meetupStatus as string) ?? 'proposed',
+                    proposedBy: (match.meetupProposedBy as string) ?? '',
+                } : null}
+                onUpdate={() => { void 0; /* match refetches via getAll poll */ }}
+            />
 
             <div className={styles.inputBar}>
                 <textarea

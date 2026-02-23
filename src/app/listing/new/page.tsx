@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Navigation from '@/components/Navigation';
@@ -24,6 +24,26 @@ export default function NewListingPage() {
     const [city, setCity] = useState((session?.user as { currentCity?: string } | null)?.currentCity || '');
     const [country, setCountry] = useState((session?.user as { country?: string } | null)?.country || '');
     const [error, setError] = useState('');
+    const [imageUrl, setImageUrl] = useState('');
+    const [uploading, setUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const uploadImage = async (file: File) => {
+        setUploading(true);
+        try {
+            const res = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
+                method: 'POST',
+                body: file,
+                headers: { 'content-type': file.type },
+            });
+            const blob = await res.json() as { url: string };
+            setImageUrl(blob.url);
+        } catch {
+            setError('Image upload failed. You can still list without a photo.');
+        } finally {
+            setUploading(false);
+        }
+    };
 
     const createMutation = trpc.listing.create.useMutation({
         onSuccess: () => router.push('/feed'),
@@ -49,7 +69,7 @@ export default function NewListingPage() {
             price: pricingType !== 'free' && price ? parseFloat(price) : null,
             city: city.trim(),
             country: country.trim(),
-            images: [],          // image upload — coming soon
+            images: imageUrl ? [{ id: '', url: imageUrl, sortOrder: 0 }] : [],
         });
     };
 
@@ -61,12 +81,29 @@ export default function NewListingPage() {
 
             <main className={styles.content}>
                 <form onSubmit={handleSubmit} className={styles.form}>
-                    {/* Photo upload area — informational until storage is wired */}
+                    {/* Photo upload */}
                     <div className={styles.photoArea}>
-                        <div className={styles.photoSlot}>
-                            <span className={styles.photoIcon}>📷</span>
-                            <span className={styles.photoLabel}>Add Photos</span>
-                            <span className={styles.photoHint}>Image upload coming soon</span>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            style={{ display: 'none' }}
+                            onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImage(f); }}
+                        />
+                        <div
+                            className={styles.photoSlot}
+                            onClick={() => fileInputRef.current?.click()}
+                            style={imageUrl ? { backgroundImage: `url(${imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
+                        >
+                            {!imageUrl && !uploading && (
+                                <>
+                                    <span className={styles.photoIcon}>📷</span>
+                                    <span className={styles.photoLabel}>Add a Photo</span>
+                                    <span className={styles.photoHint}>Tap to upload</span>
+                                </>
+                            )}
+                            {uploading && <span className={styles.photoHint}>⏳ Uploading…</span>}
+                            {imageUrl && !uploading && <span className={styles.photoIcon}>✅</span>}
                         </div>
                     </div>
 

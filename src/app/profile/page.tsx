@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import Image from 'next/image';
 import Navigation from '@/components/Navigation';
 import styles from './profile.module.css';
@@ -196,7 +197,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div className={styles.actions}>
-                    <button className={styles.editBtn}>✏️ Edit Profile</button>
+                    <Link href="/profile/edit" className={styles.editBtn}>✏️ Edit Profile</Link>
                     <button className={styles.signOutBtn} onClick={() => signOut({ callbackUrl: '/' })}>Sign Out</button>
                 </div>
             </main>

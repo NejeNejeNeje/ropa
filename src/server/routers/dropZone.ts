@@ -4,14 +4,16 @@ import { z } from 'zod';
 export const dropZoneRouter = router({
     getAll: publicProcedure.query(async ({ ctx }) => {
         return ctx.prisma.dropZone.findMany({
-            orderBy: { activeListings: 'desc' },
+            include: { _count: { select: { listings: { where: { isActive: true } } } } },
+            orderBy: { createdAt: 'desc' },
         });
     }),
 
     getByCity: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
         return ctx.prisma.dropZone.findMany({
             where: { city: input },
-            orderBy: { activeListings: 'desc' },
+            include: { _count: { select: { listings: { where: { isActive: true } } } } },
+            orderBy: { createdAt: 'desc' },
         });
     }),
 
@@ -26,16 +28,12 @@ export const dropZoneRouter = router({
         dropZoneId: z.string(),
         listingId: z.string(),
     })).mutation(async ({ ctx, input }) => {
-        // Link listing to drop zone
+        // Link listing to drop zone (count is now computed, no manual increment needed)
         await ctx.prisma.listing.update({
             where: { id: input.listingId, userId: ctx.userId },
             data: { dropZoneId: input.dropZoneId },
         });
-        // Increment active listings count
-        await ctx.prisma.dropZone.update({
-            where: { id: input.dropZoneId },
-            data: { activeListings: { increment: 1 } },
-        });
         return { success: true };
     }),
 });
+

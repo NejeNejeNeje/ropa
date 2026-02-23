@@ -79,6 +79,7 @@ model User {
   preferredStyles String @default("[]")
   citiesVisited   String @default("[]")
   minOfferPercent Int    @default(0) // 0-100: auto-decline offers below this % of asking price (0 = no floor)
+  pushSubscription String? // Web Push subscription JSON
 
   // Relations
   accounts      Account[]

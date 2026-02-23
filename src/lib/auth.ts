@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import GoogleProvider from 'next-auth/providers/google';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import { compare } from 'bcryptjs';
 import { prisma } from './prisma';
@@ -13,6 +14,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         signIn: '/login',
     },
     providers: [
+        // B2: Google Sign-In — activates when GOOGLE_CLIENT_ID is set in env
+        ...(process.env.GOOGLE_CLIENT_ID ? [GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID!,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+        })] : []),
         CredentialsProvider({
             name: 'credentials',
             credentials: {

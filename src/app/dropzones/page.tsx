@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import Navigation from '@/components/Navigation';
 import styles from './dropzones.module.css';
 import { DROP_ZONES } from '@/data/mockData';
@@ -50,32 +51,34 @@ export default function DropZonesPage() {
                     {filtered.map((dz) => {
                         const typeLabel = getTypeLabel(dz.type);
                         return (
-                            <div key={dz.id} className={styles.zoneCard}>
-                                <div className={styles.zoneImage} style={{ backgroundImage: `url(${dz.imageUrl})` }}>
-                                    <span className={styles.zoneBadge}>{typeLabel.emoji} {typeLabel.label}</span>
+                            <Link key={dz.id} href={`/dropzones/${dz.id}`} style={{ textDecoration: 'none', display: 'block' }}>
+                                <div className={styles.zoneCard}>
+                                    <div className={styles.zoneImage} style={{ backgroundImage: `url(${dz.imageUrl})` }}>
+                                        <span className={styles.zoneBadge}>{typeLabel.emoji} {typeLabel.label}</span>
+                                    </div>
+                                    <div className={styles.zoneBody}>
+                                        <div className={styles.zoneTop}>
+                                            <h3>{dz.name}</h3>
+                                            <span className={styles.listingCount}>{dz.activeListings} items</span>
+                                        </div>
+                                        <p className={styles.zoneAddress}>📍 {dz.address}</p>
+                                        <p className={styles.zoneDesc}>{dz.description}</p>
+                                        <div className={styles.zoneMeta}>
+                                            <span>🕐 {dz.hours}</span>
+                                            <span>Partner since {new Date(dz.partnerSince).toLocaleDateString('en', { month: 'short', year: 'numeric' })}</span>
+                                        </div>
+                                        <div className={styles.zoneActions}>
+                                            <button
+                                                className={styles.scanBtn}
+                                                onClick={(e) => { e.preventDefault(); setScanningId(dz.id); setTimeout(() => setScanningId(null), 2000); }}
+                                            >
+                                                {scanningId === dz.id ? '✅ Ready to scan!' : '📱 Scan QR Code'}
+                                            </button>
+                                            <button className={styles.dirBtn} onClick={(e) => e.preventDefault()}>🗺️ Directions</button>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className={styles.zoneBody}>
-                                    <div className={styles.zoneTop}>
-                                        <h3>{dz.name}</h3>
-                                        <span className={styles.listingCount}>{dz.activeListings} items</span>
-                                    </div>
-                                    <p className={styles.zoneAddress}>📍 {dz.address}</p>
-                                    <p className={styles.zoneDesc}>{dz.description}</p>
-                                    <div className={styles.zoneMeta}>
-                                        <span>🕐 {dz.hours}</span>
-                                        <span>Partner since {new Date(dz.partnerSince).toLocaleDateString('en', { month: 'short', year: 'numeric' })}</span>
-                                    </div>
-                                    <div className={styles.zoneActions}>
-                                        <button
-                                            className={styles.scanBtn}
-                                            onClick={() => { setScanningId(dz.id); setTimeout(() => setScanningId(null), 2000); }}
-                                        >
-                                            {scanningId === dz.id ? '✅ Ready to scan!' : '📱 Scan QR Code'}
-                                        </button>
-                                        <button className={styles.dirBtn}>🗺️ Directions</button>
-                                    </div>
-                                </div>
-                            </div>
+                            </Link>
                         );
                     })}
                 </div>

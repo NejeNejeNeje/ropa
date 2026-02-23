@@ -3,12 +3,17 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Navigation from '@/components/Navigation';
+import ShareSheet from '@/components/ShareSheet';
+import PostComposer from '@/components/PostComposer';
 import styles from './community.module.css';
 import { TRAVEL_POSTS } from '@/data/mockData';
 import { trpc } from '@/lib/trpc-client';
 
 export default function CommunityPage() {
     const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
+    const [sharePost, setSharePost] = useState<{ id: string; imageUrl: string; caption: string; city: string; country: string; user?: unknown } | null>(null);
+    const [showComposer, setShowComposer] = useState(false);
+    const [posted, setPosted] = useState(false);
 
     const { data: feedData } = trpc.community.getFeed.useQuery({}, { retry: false });
     const likeMutation = trpc.community.toggleLike.useMutation();
@@ -28,7 +33,7 @@ export default function CommunityPage() {
         <div className={styles.page}>
             <header className={styles.header}>
                 <h1>✨ Travel Feed</h1>
-                <button className={styles.newPostBtn}>📸 Share</button>
+                <button className={styles.newPostBtn} onClick={() => setShowComposer(true)}>📸 Share</button>
             </header>
 
             <main className={styles.main}>
@@ -66,7 +71,7 @@ export default function CommunityPage() {
                                     {liked ? '❤️' : '🤍'} {post.likes + (liked ? 1 : 0)}
                                 </button>
                                 <button className={styles.commentBtn}>💬 {post.commentCount}</button>
-                                <button className={styles.shareBtn}>🔗</button>
+                                <button className={styles.shareBtn} onClick={() => setSharePost(post)}>🔗</button>
                             </div>
 
                             <div className={styles.postCaption}>
@@ -93,6 +98,42 @@ export default function CommunityPage() {
                     );
                 })}
             </main>
+
+            {sharePost && (
+                <ShareSheet
+                    post={{
+                        id: sharePost.id,
+                        imageUrl: sharePost.imageUrl,
+                        caption: sharePost.caption,
+                        city: sharePost.city,
+                        country: sharePost.country,
+                        user: sharePost.user as Record<string, unknown>,
+                    }}
+                    onClose={() => setSharePost(null)}
+                />
+            )}
+
+            {showComposer && (
+                <PostComposer
+                    onClose={() => setShowComposer(false)}
+                    onSuccess={() => {
+                        setShowComposer(false);
+                        setPosted(true);
+                        setTimeout(() => setPosted(false), 3000);
+                    }}
+                />
+            )}
+
+            {posted && (
+                <div style={{
+                    position: 'fixed', bottom: 90, left: '50%', transform: 'translateX(-50%)',
+                    background: '#22c55e', color: '#fff', padding: '10px 20px',
+                    borderRadius: '20px', fontWeight: 700, fontSize: '0.9rem', zIndex: 200,
+                    whiteSpace: 'nowrap',
+                }}>
+                    ✅ Posted! +10 karma
+                </div>
+            )}
 
             <Navigation />
         </div>

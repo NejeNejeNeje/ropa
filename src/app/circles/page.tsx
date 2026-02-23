@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import Navigation from '@/components/Navigation';
 import styles from './circles.module.css';
 import { SWAP_CIRCLES, getUser } from '@/data/mockData';
@@ -61,62 +62,64 @@ export default function CirclesPage() {
                         const tags = typeof sc.tags === 'string' ? JSON.parse(sc.tags) : (sc.tags || []);
 
                         return (
-                            <div key={sc.id} className={styles.card}>
-                                <div className={styles.cardImage} style={{ backgroundImage: `url(${sc.imageUrl})` }}>
-                                    {sc.isPast && <span className={styles.pastBadge}>Completed</span>}
-                                    {sc.isFull && !sc.isPast && <span className={styles.fullBadge}>Full</span>}
-                                </div>
-                                <div className={styles.cardBody}>
-                                    <div className={styles.cardDateRow}>
-                                        <div className={styles.dateBlock}>
-                                            <span className={styles.dateDay}>{new Date(sc.date).getDate()}</span>
-                                            <span className={styles.dateMonth}>{new Date(sc.date).toLocaleString('en', { month: 'short' })}</span>
-                                        </div>
-                                        <div className={styles.cardTitleBlock}>
-                                            <h3>{sc.title}</h3>
-                                            <span className={styles.cardLocation}>📍 {sc.venue}, {sc.city}</span>
-                                            <span className={styles.cardTime}>🕐 {sc.time}</span>
-                                        </div>
+                            <Link key={sc.id} href={`/circles/${sc.id}`} style={{ textDecoration: 'none', display: 'block' }}>
+                                <div className={styles.card}>
+                                    <div className={styles.cardImage} style={{ backgroundImage: `url(${sc.imageUrl})` }}>
+                                        {sc.isPast && <span className={styles.pastBadge}>Completed</span>}
+                                        {sc.isFull && !sc.isPast && <span className={styles.fullBadge}>Full</span>}
                                     </div>
-                                    <p className={styles.cardDesc}>{sc.description}</p>
+                                    <div className={styles.cardBody}>
+                                        <div className={styles.cardDateRow}>
+                                            <div className={styles.dateBlock}>
+                                                <span className={styles.dateDay}>{new Date(sc.date).getDate()}</span>
+                                                <span className={styles.dateMonth}>{new Date(sc.date).toLocaleString('en', { month: 'short' })}</span>
+                                            </div>
+                                            <div className={styles.cardTitleBlock}>
+                                                <h3>{sc.title}</h3>
+                                                <span className={styles.cardLocation}>📍 {sc.venue}, {sc.city}</span>
+                                                <span className={styles.cardTime}>🕐 {sc.time}</span>
+                                            </div>
+                                        </div>
+                                        <p className={styles.cardDesc}>{sc.description}</p>
 
-                                    <div className={styles.tags}>
-                                        {tags.map((tag: string) => (
-                                            <span key={tag} className={styles.tag}>#{tag}</span>
-                                        ))}
-                                    </div>
-
-                                    <div className={styles.capacityRow}>
-                                        <div className={styles.attendees}>
-                                            {avatars.slice(0, 3).map((av: string, i: number) => (
-                                                av ? <Image key={i} src={av} alt="attendee" width={24} height={24} className={styles.attendeeAvatar} style={{ marginLeft: i > 0 ? '-8px' : 0 }} /> : null
+                                        <div className={styles.tags}>
+                                            {tags.map((tag: string) => (
+                                                <span key={tag} className={styles.tag}>#{tag}</span>
                                             ))}
-                                            <span className={styles.attendeeCount}>+{Math.max(0, rsvpCount - 3)} going</span>
                                         </div>
-                                        <div className={styles.capacityBar}>
-                                            <div className={styles.capacityFill} style={{ width: `${capacityPercent}%`, background: capacityPercent >= 100 ? '#ef4444' : 'var(--accent-primary)' }} />
+
+                                        <div className={styles.capacityRow}>
+                                            <div className={styles.attendees}>
+                                                {avatars.slice(0, 3).map((av: string, i: number) => (
+                                                    av ? <Image key={i} src={av} alt="attendee" width={24} height={24} className={styles.attendeeAvatar} style={{ marginLeft: i > 0 ? '-8px' : 0 }} /> : null
+                                                ))}
+                                                <span className={styles.attendeeCount}>+{Math.max(0, rsvpCount - 3)} going</span>
+                                            </div>
+                                            <div className={styles.capacityBar}>
+                                                <div className={styles.capacityFill} style={{ width: `${capacityPercent}%`, background: capacityPercent >= 100 ? '#ef4444' : 'var(--accent-primary)' }} />
+                                            </div>
+                                            <span className={styles.capacityText}>{rsvpCount}/{sc.capacity}</span>
                                         </div>
-                                        <span className={styles.capacityText}>{rsvpCount}/{sc.capacity}</span>
+
+                                        {host && (
+                                            <div className={styles.hostRow}>
+                                                <Image src={host.avatarUrl} alt={host.displayName} width={20} height={20} className={styles.hostAvatar} />
+                                                <span>Hosted by <strong>{host.displayName}</strong></span>
+                                            </div>
+                                        )}
+
+                                        {!sc.isPast && (
+                                            <button
+                                                className={`${styles.rsvpBtn} ${isRsvp ? styles.rsvpActive : ''} ${sc.isFull && !isRsvp ? styles.rsvpDisabled : ''}`}
+                                                onClick={(e) => { e.preventDefault(); !sc.isFull && handleRSVP(sc.id); }}
+                                                disabled={sc.isFull && !isRsvp}
+                                            >
+                                                {isRsvp ? "✅ You're going!" : sc.isFull ? 'Waitlist' : '🎉 RSVP Now'}
+                                            </button>
+                                        )}
                                     </div>
-
-                                    {host && (
-                                        <div className={styles.hostRow}>
-                                            <Image src={host.avatarUrl} alt={host.displayName} width={20} height={20} className={styles.hostAvatar} />
-                                            <span>Hosted by <strong>{host.displayName}</strong></span>
-                                        </div>
-                                    )}
-
-                                    {!sc.isPast && (
-                                        <button
-                                            className={`${styles.rsvpBtn} ${isRsvp ? styles.rsvpActive : ''} ${sc.isFull && !isRsvp ? styles.rsvpDisabled : ''}`}
-                                            onClick={() => !sc.isFull && handleRSVP(sc.id)}
-                                            disabled={sc.isFull && !isRsvp}
-                                        >
-                                            {isRsvp ? "✅ You're going!" : sc.isFull ? 'Waitlist' : '🎉 RSVP Now'}
-                                        </button>
-                                    )}
                                 </div>
-                            </div>
+                            </Link>
                         );
                     })}
                 </div>
