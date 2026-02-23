@@ -60,10 +60,31 @@ export const matchRouter = router({
     }),
 
     getMessages: protectedProcedure.input(z.string()).query(async ({ ctx, input }) => {
+        // CHAT-4: Verify caller is a member of this match
+        const match = await ctx.prisma.match.findUnique({
+            where: { id: input },
+            select: { userAId: true, userBId: true },
+        });
+        if (!match || (match.userAId !== ctx.userId && match.userBId !== ctx.userId)) {
+            throw new Error('Forbidden');
+        }
         return ctx.prisma.message.findMany({
             where: { matchId: input },
             include: { sender: true },
             orderBy: { createdAt: 'asc' },
+        });
+    }),
+
+    // CHAT-3: Count unread messages for badge in navigation
+    getUnreadCount: protectedProcedure.query(async ({ ctx }) => {
+        return ctx.prisma.message.count({
+            where: {
+                match: {
+                    OR: [{ userAId: ctx.userId }, { userBId: ctx.userId }],
+                },
+                senderId: { not: ctx.userId },
+                isRead: false,
+            },
         });
     }),
 });

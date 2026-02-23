@@ -26,8 +26,18 @@
 
 .headerInfo {
     display: flex;
-    flex-direction: column;
-    gap: 1px;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.headerAvatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--color-primary);
+    flex-shrink: 0;
+    object-fit: cover;
 }
 
 .partnerName {
@@ -81,11 +91,28 @@
 .bubbleMe {
     align-self: flex-end;
     align-items: flex-end;
+    flex-direction: row-reverse;
 }
 
 .bubbleThem {
     align-self: flex-start;
     align-items: flex-start;
+    flex-direction: row;
+}
+
+.senderAvatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    margin-top: auto;
+}
+
+.bubbleContent {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .bubbleText {
