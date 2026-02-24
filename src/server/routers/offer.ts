@@ -31,9 +31,9 @@ function styleOverlap(a: string, b: string): number {
 export const offerRouter = router({
     // Buyer creates an offer on a listing
     create: protectedProcedure.input(z.object({
-        listingId: z.string(),
+        listingId: z.string().max(100),
         amount: z.number().positive(),
-        currency: z.string().default('USD'),
+        currency: z.string().max(10).default('USD'),
     })).mutation(async ({ ctx, input }) => {
         const listing = await ctx.prisma.listing.findUniqueOrThrow({
             where: { id: input.listingId },

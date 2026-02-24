@@ -4,21 +4,22 @@ import { z } from 'zod';
 export const travelSwapRouter = router({
     // Create a new swap request with needs and offers
     create: protectedProcedure.input(z.object({
-        city: z.string().min(1),
-        destination: z.string().optional(),
+        city: z.string().min(1).max(100),
+        destination: z.string().max(100).optional(),
         needs: z.array(z.object({
-            category: z.string(),
-            description: z.string().optional(),
-            sizeRange: z.string().optional(),
+            category: z.string().max(50),
+            description: z.string().max(500).optional(),
+            sizeRange: z.string().max(30).optional(),
             isFlexible: z.boolean().optional(),
-        })).min(1),
+        })).min(1).max(20),
         offers: z.array(z.object({
-            category: z.string(),
-            description: z.string().optional(),
-            sizeRange: z.string().optional(),
-            listingId: z.string().optional(),
-        })).min(1),
+            category: z.string().max(50),
+            description: z.string().max(500).optional(),
+            sizeRange: z.string().max(30).optional(),
+            listingId: z.string().max(100).optional(),
+        })).min(1).max(20),
         expiresInDays: z.number().min(1).max(30).optional(),
+
     })).mutation(async ({ ctx, input }) => {
         // Expire any existing active requests for this user in this city
         await ctx.prisma.swapRequest.updateMany({

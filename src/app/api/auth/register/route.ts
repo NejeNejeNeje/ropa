@@ -2,6 +2,11 @@ import { prisma } from '@/lib/prisma';
 import { hash } from 'bcryptjs';
 import { NextResponse } from 'next/server';
 
+// Simple in-memory rate limiter for registration (per email, 5 attempts/hour)
+const regAttempts = new Map<string, { count: number; resetAt: number }>();
+const REG_LIMIT = 5;
+const REG_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+
 export async function POST(req: Request) {
     try {
         const { email, password, name } = await req.json();
@@ -17,6 +22,20 @@ export async function POST(req: Request) {
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
         }
+
+        // Rate limiting
+        const now = Date.now();
+        const key = (email as string).toLowerCase().trim();
+        const entry = regAttempts.get(key);
+        if (entry && now < entry.resetAt) {
+            if (entry.count >= REG_LIMIT) {
+                return NextResponse.json({ error: 'Too many registration attempts. Try again later.' }, { status: 429 });
+            }
+            entry.count++;
+        } else {
+            regAttempts.set(key, { count: 1, resetAt: now + REG_WINDOW_MS });
+        }
+
 
         const existing = await prisma.user.findUnique({ where: { email } });
         if (existing) {

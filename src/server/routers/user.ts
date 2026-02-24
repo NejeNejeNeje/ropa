@@ -25,12 +25,12 @@ export const userRouter = router({
     }),
 
     updateProfile: protectedProcedure.input(z.object({
-        name: z.string().optional(),
-        bio: z.string().optional(),
-        currentCity: z.string().optional(),
-        country: z.string().optional(),
-        preferredSizes: z.array(z.string()).optional(),
-        preferredStyles: z.array(z.string()).optional(),
+        name: z.string().max(100).optional(),
+        bio: z.string().max(1000).optional(),
+        currentCity: z.string().max(100).optional(),
+        country: z.string().max(100).optional(),
+        preferredSizes: z.array(z.string().max(30)).max(20).optional(),
+        preferredStyles: z.array(z.string().max(50)).max(20).optional(),
     })).mutation(async ({ ctx, input }) => {
         const data: Record<string, unknown> = {};
         if (input.name) data.name = input.name;

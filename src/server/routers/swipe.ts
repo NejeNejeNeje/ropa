@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 export const swipeRouter = router({
     create: protectedProcedure.input(z.object({
-        listingId: z.string(),
+        listingId: z.string().max(100),
         direction: z.enum(['LEFT', 'RIGHT', 'SUPER']),
     })).mutation(async ({ ctx, input }) => {
         // Create swipe

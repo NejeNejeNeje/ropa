@@ -4,9 +4,9 @@ import { sendPushToUser } from '@/lib/push';
 
 export const messageRouter = router({
     send: protectedProcedure.input(z.object({
-        matchId: z.string(),
-        body: z.string().min(1),
-        imageUrl: z.string().optional(),
+        matchId: z.string().max(100),
+        body: z.string().min(1).max(5000),
+        imageUrl: z.string().max(2048).optional(),
     })).mutation(async ({ ctx, input }) => {
         const message = await ctx.prisma.message.create({
             data: {
