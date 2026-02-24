@@ -102,7 +102,7 @@ export default async function SwapCircleDetailPage({ params }: { params: Promise
                     <div className={styles.tableToolbar}>
                         <span className={styles.tableTitle}>RSVPs ({circle.rsvps.length})</span>
                     </div>
-                    <table>
+                    <table className={styles.dataTable}>
                         <thead>
                             <tr>
                                 <th>#</th>

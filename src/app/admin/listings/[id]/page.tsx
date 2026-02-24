@@ -156,7 +156,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                         <div className={styles.tableToolbar}>
                             <span className={styles.tableTitle}>Offers ({listing._count.offers})</span>
                         </div>
-                        <table>
+                        <table className={styles.dataTable}>
                             <thead>
                                 <tr>
                                     <th>Buyer</th>

@@ -22,7 +22,7 @@ export default async function AdminListingsPage() {
                 <div className={styles.tableToolbar}>
                     <span className={styles.tableTitle}>All Listings</span>
                 </div>
-                <table>
+                <table className={styles.dataTable}>
                     <thead>
                         <tr>
                             <th>Title</th>

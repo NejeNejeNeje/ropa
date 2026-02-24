@@ -24,7 +24,7 @@ export default async function AdminKarmaPage() {
                 <div className={styles.tableToolbar}>
                     <span className={styles.tableTitle}>All Karma Events</span>
                 </div>
-                <table>
+                <table className={styles.dataTable}>
                     <thead>
                         <tr>
                             <th>User</th>

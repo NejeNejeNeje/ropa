@@ -22,7 +22,7 @@ export default async function AdminSwapCirclesPage() {
                 <div className={styles.tableToolbar}>
                     <span className={styles.tableTitle}>All Swap Circles</span>
                 </div>
-                <table>
+                <table className={styles.dataTable}>
                     <thead>
                         <tr>
                             <th>Title</th>

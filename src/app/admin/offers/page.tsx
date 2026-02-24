@@ -23,7 +23,7 @@ export default async function AdminOffersPage() {
                 <div className={styles.tableToolbar}>
                     <span className={styles.tableTitle}>All Offers</span>
                 </div>
-                <table>
+                <table className={styles.dataTable}>
                     <thead>
                         <tr>
                             <th>Listing</th>

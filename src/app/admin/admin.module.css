@@ -77,13 +77,13 @@
     color: #f9fafb;
 }
 
-table {
+.dataTable {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.875rem;
 }
 
-thead th {
+.dataTable thead th {
     background: #111827;
     color: #6b7280;
     font-size: 0.7rem;
@@ -94,20 +94,21 @@ thead th {
     text-align: left;
 }
 
-tbody tr {
+.dataTable tbody tr {
     border-bottom: 1px solid #374151;
     transition: background 0.15s;
 }
 
-tbody tr:hover {
+.dataTable tbody tr:hover {
     background: rgba(255, 255, 255, 0.03);
 }
 
-tbody td {
+.dataTable tbody td {
     padding: 0.875rem 1.25rem;
     color: #d1d5db;
     vertical-align: middle;
 }
+
 
 .tdPrimary {
     color: #f9fafb !important;

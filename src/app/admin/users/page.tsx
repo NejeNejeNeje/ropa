@@ -32,7 +32,7 @@ export default async function AdminUsersPage() {
                 <div className={styles.tableToolbar}>
                     <span className={styles.tableTitle}>All Users</span>
                 </div>
-                <table>
+                <table className={styles.dataTable}>
                     <thead>
                         <tr>
                             <th>Name</th>

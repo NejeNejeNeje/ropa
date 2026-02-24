@@ -71,7 +71,7 @@ export default async function AdminOverview() {
                     <span className={styles.tableTitle}>Recent Users</span>
                     <a href="/admin/users" className={styles.actionBtn}>View All →</a>
                 </div>
-                <table>
+                <table className={styles.dataTable}>
                     <thead>
                         <tr>
                             <th>Name</th>

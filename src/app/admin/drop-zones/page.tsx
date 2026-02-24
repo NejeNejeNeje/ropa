@@ -17,7 +17,7 @@ export default async function AdminDropZonesPage() {
                 <div className={styles.tableToolbar}>
                     <span className={styles.tableTitle}>All Drop Zones</span>
                 </div>
-                <table>
+                <table className={styles.dataTable}>
                     <thead>
                         <tr>
                             <th>Name</th>

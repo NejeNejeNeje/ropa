@@ -87,7 +87,7 @@ export default async function DropZoneDetailPage({ params }: { params: Promise<{
                     <div className={styles.tableToolbar}>
                         <span className={styles.tableTitle}>Listings at this Drop Zone</span>
                     </div>
-                    <table>
+                    <table className={styles.dataTable}>
                         <thead>
                             <tr>
                                 <th>Title</th>

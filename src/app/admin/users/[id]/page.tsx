@@ -103,7 +103,7 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
                         <div className={styles.tableToolbar}>
                             <span className={styles.tableTitle}>Listings ({user._count.listings})</span>
                         </div>
-                        <table>
+                        <table className={styles.dataTable}>
                             <thead>
                                 <tr><th>Title</th><th>Category</th><th>Price</th><th>Status</th><th>Date</th></tr>
                             </thead>
@@ -127,7 +127,7 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
                         <div className={styles.tableToolbar}>
                             <span className={styles.tableTitle}>Offers Made ({user._count.offersMade})</span>
                         </div>
-                        <table>
+                        <table className={styles.dataTable}>
                             <thead>
                                 <tr><th>Listing</th><th>Amount</th><th>Status</th><th>Date</th></tr>
                             </thead>
