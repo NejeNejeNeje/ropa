@@ -158,6 +158,14 @@ export default function LoginPage() {
                     </button>
                 </p>
 
+                {!isRegister && (
+                    <p style={{ textAlign: 'center', marginTop: '0.25rem' }}>
+                        <a href="/forgot-password" style={{ color: '#9ca3af', fontSize: '0.8rem', textDecoration: 'none' }}>
+                            Forgot password?
+                        </a>
+                    </p>
+                )}
+
                 {/* ─── Test Accounts Panel ─── */}
                 <div className={styles.testSection}>
                     <div className={styles.testHeader}>
@@ -194,6 +202,11 @@ export default function LoginPage() {
                             </button>
                         ))}
                     </div>
+                </div>
+
+                <div style={{ textAlign: 'center', marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'center', gap: '1.5rem', fontSize: '0.75rem' }}>
+                    <a href="/terms" style={{ color: '#6b7280', textDecoration: 'none' }}>Terms of Service</a>
+                    <a href="/privacy" style={{ color: '#6b7280', textDecoration: 'none' }}>Privacy Policy</a>
                 </div>
             </div>
         </div>

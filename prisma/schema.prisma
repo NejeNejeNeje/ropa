@@ -100,7 +100,9 @@ model User {
   offersMade    Offer[]     @relation("OffersBuyer")
   offersReceived Offer[]    @relation("OffersSeller")
   swapRequests  SwapRequest[]
+  passwordReset PasswordReset?
 }
+
 
 model Listing {
   id          String   @id @default(cuid())
@@ -374,3 +376,14 @@ model OfferItem {
   listing     Listing?    @relation(fields: [listingId], references: [id])
 }
 
+// ─── Password Reset ─────────────────────────────────────────
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
