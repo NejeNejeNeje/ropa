@@ -23,12 +23,12 @@ export const communityRouter = router({
     }),
 
     createPost: protectedProcedure.input(z.object({
-        imageUrl: z.string(),
-        caption: z.string(),
-        linkedListingId: z.string().optional(),
-        city: z.string(),
-        country: z.string(),
-        tags: z.array(z.string()).optional(),
+        imageUrl: z.string().max(2048),
+        caption: z.string().max(2000),
+        linkedListingId: z.string().max(100).optional(),
+        city: z.string().max(100),
+        country: z.string().max(100),
+        tags: z.array(z.string().max(50)).max(10).optional(),
     })).mutation(async ({ ctx, input }) => {
         const post = await ctx.prisma.travelPost.create({
             data: {

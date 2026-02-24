@@ -3,22 +3,23 @@ import { z } from 'zod';
 
 export const listingRouter = router({
     create: protectedProcedure.input(z.object({
-        title: z.string().min(2),
-        description: z.string(),
-        category: z.string(),
-        size: z.string(),
-        genderTarget: z.string(),
-        condition: z.string(),
-        brand: z.string().optional(),
-        colors: z.array(z.string()).optional(),
-        pricingType: z.string(),
+        title: z.string().min(2).max(100),
+        description: z.string().max(2000),
+        category: z.string().max(50),
+        size: z.string().max(20),
+        genderTarget: z.string().max(20),
+        condition: z.string().max(50),
+        brand: z.string().max(100).optional(),
+        colors: z.array(z.string().max(30)).optional(),
+        pricingType: z.string().max(20),
         price: z.number().nullable().optional(),
-        currency: z.string().optional(),
-        city: z.string(),
-        country: z.string(),
-        images: z.array(z.object({ id: z.string(), url: z.string(), sortOrder: z.number() })),
-        dropZoneId: z.string().optional(),
+        currency: z.string().max(10).optional(),
+        city: z.string().max(100),
+        country: z.string().max(100),
+        images: z.array(z.object({ id: z.string().max(100), url: z.string().max(2048), sortOrder: z.number() })),
+        dropZoneId: z.string().max(100).optional(),
     })).mutation(async ({ ctx, input }) => {
+
         const listing = await ctx.prisma.listing.create({
             data: {
                 userId: ctx.userId,
