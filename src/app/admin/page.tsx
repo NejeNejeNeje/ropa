@@ -112,7 +112,7 @@ export default async function AdminOverview() {
                     </thead>
                     <tbody>
                         {recentUsers.map((u) => (
-                            <tr key={u.id} className={styles.clickableRow} onClick={() => { }}>
+                            <tr key={u.id} className={styles.clickableRow}>
                                 <td className={styles.tdPrimary}>
                                     <Link href={`/admin/users/${u.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{u.name}</Link>
                                 </td>
