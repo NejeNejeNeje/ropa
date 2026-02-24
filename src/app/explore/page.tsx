@@ -85,6 +85,15 @@ export default function ExplorePage() {
                     </div>
                 </section>
 
+                {/* TravelSwap — accessible from Explore, no longer in main nav */}
+                <section className={styles.section}>
+                    <div className={styles.sectionHeader}>
+                        <h2>🔄 Travel Requests</h2>
+                        <Link href="/travelswap" className={styles.seeAll}>Open →</Link>
+                    </div>
+                    <p className={styles.sectionSub}>Need gear at your destination? Post what you need and what you can offer.</p>
+                </section>
+
                 {/* Travel Feed */}
                 <section className={styles.section}>
                     <div className={styles.sectionHeader}>

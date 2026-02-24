@@ -176,19 +176,24 @@ export default function FeedPage() {
                     </div>
                 ) : (
                     <div className={styles.empty}>
-                        <span className={styles.emptyIcon}>🌎</span>
-                        <h3>No more clothes nearby!</h3>
-                        <p>Check back later or adjust your filters to see more.</p>
+                        <span className={styles.emptyIcon}>📦</span>
+                        <h3>No listings nearby yet!</h3>
+                        <p>Be the first to share something in your city — or adjust your filters to broaden the search.</p>
+                        <a href="/listing/new" className="btn btn-primary" style={{ marginBottom: '0.5rem' }}>
+                            ➕ List an Item
+                        </a>
                         <button
-                            className="btn btn-primary"
+                            className="btn"
+                            style={{ background: 'transparent', color: 'var(--color-text-secondary)', fontSize: '0.8rem' }}
                             onClick={() => {
                                 setFilters(DEFAULT_FILTERS);
                                 setSwipedIds(new Set());
                             }}
                         >
-                            Reset & Refresh
+                            Reset Filters & Refresh
                         </button>
                     </div>
+
                 )}
             </main>
 

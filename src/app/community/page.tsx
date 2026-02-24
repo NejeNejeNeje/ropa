@@ -70,9 +70,9 @@ export default function CommunityPage() {
                                 <button className={`${styles.likeBtn} ${liked ? styles.liked : ''}`} onClick={() => toggleLike(post.id)}>
                                     {liked ? '❤️' : '🤍'} {post.likes + (liked ? 1 : 0)}
                                 </button>
-                                <button className={styles.commentBtn}>💬 {post.commentCount}</button>
-                                <button className={styles.shareBtn} onClick={() => setSharePost(post)}>🔗</button>
+                                <button className={styles.shareBtn} onClick={() => setSharePost(post)}>🔗 Share</button>
                             </div>
+
 
                             <div className={styles.postCaption}>
                                 <p><strong>{userName}</strong> {post.caption}</p>

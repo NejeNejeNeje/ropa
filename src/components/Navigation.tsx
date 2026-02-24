@@ -8,12 +8,13 @@ import styles from './Navigation.module.css';
 
 const NAV_ITEMS = [
     { href: '/feed', label: 'Feed', icon: '🔥' },
-    { href: '/explore', label: 'Explore', icon: '🌍', alsoMatch: ['/dropzones', '/circles', '/community'] },
+    { href: '/explore', label: 'Explore', icon: '🌍', alsoMatch: ['/dropzones', '/circles', '/community', '/travelswap'] },
     { href: '/listing/new', label: 'Sell', icon: '➕' },
-    { href: '/travelswap', label: 'Swap', icon: '🔄' },
+    { href: '/offers', label: 'Offers', icon: '📨' },
     { href: '/matches', label: 'Matches', icon: '💬', showUnread: true },
     { href: '/profile', label: 'Profile', icon: '👤' },
 ];
+
 
 export default function Navigation() {
     const pathname = usePathname();
