@@ -61,7 +61,10 @@ export default async function AdminListingsPage() {
                                 </td>
                                 <td>{new Date(l.createdAt).toLocaleDateString()}</td>
                                 <td>
-                                    <ListingToggle listingId={l.id} isActive={l.isActive} />
+                                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                                        <Link href={`/admin/listings/${l.id}`} className={styles.actionBtn} style={{ fontSize: '0.72rem' }}>View →</Link>
+                                        <ListingToggle listingId={l.id} isActive={l.isActive} />
+                                    </div>
                                 </td>
                             </tr>
                         ))}

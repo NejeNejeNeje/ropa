@@ -3,16 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { auth } from '@/lib/auth';
 import styles from './admin.module.css';
-
-const NAV_ITEMS = [
-    { href: '/admin', label: 'Overview', icon: '◈' },
-    { href: '/admin/users', label: 'Users', icon: '👥' },
-    { href: '/admin/listings', label: 'Listings', icon: '🏷️' },
-    { href: '/admin/offers', label: 'Offers', icon: '🤝' },
-    { href: '/admin/swap-circles', label: 'Swap Circles', icon: '⭕' },
-    { href: '/admin/drop-zones', label: 'Drop Zones', icon: '📍' },
-    { href: '/admin/karma', label: 'Karma Ledger', icon: '⭐' },
-];
+import AdminNav from './AdminNav';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
     const session = await auth();
@@ -34,14 +25,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                     </div>
                 </div>
 
-                <nav className={styles.sidebarNav}>
-                    {NAV_ITEMS.map((item) => (
-                        <Link key={item.href} href={item.href} className={styles.navItem}>
-                            <span className={styles.navIcon}>{item.icon}</span>
-                            {item.label}
-                        </Link>
-                    ))}
-                </nav>
+                <AdminNav />
 
                 <div className={styles.sidebarFooter}>
                     <Link href="/" className={styles.backLink}>
