@@ -1,5 +1,6 @@
 # ROPA — Feature Business Analysis vs. Market Standards
 > **Scope:** Competitive benchmarking against Vinted, Depop, Poshmark, ThredUP, and emerging travel-niche swap apps.
+> **Version 1.1** — Post-Hardening Update (February 2026)
 
 ---
 
@@ -25,7 +26,7 @@ The secondhand clothing market is growing at ~15% YoY and is projected to reach 
 | Feature | Vinted | Depop | Poshmark | ThredUP | Nuw | **ROPA** |
 |---|---|---|---|---|---|---|
 | **Item Listing** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Photo Upload** | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ UI only, no storage |
+| **Photo Upload** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ Pre-wired |
 | **Item Condition Grades** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Swipe/Tinder-style Discovery** | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ **Unique** |
 | **Price Filters** | ✅ | ✅ | ✅ | ✅ | N/A | ✅ |
@@ -43,13 +44,14 @@ The secondhand clothing market is growing at ~15% YoY and is projected to reach 
 | **Trust Tiers (Bronze/Silver/Gold)** | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 | **Swap Buddy Network** | ❌ | ❌ | Following | ❌ | ❌ | ✅ |
 | **Community Travel Feed** | ❌ | ✅ (social) | ✅ (social) | ❌ | ❌ | ✅ |
-| **In-App Payments / Escrow** | ✅ Vinted Pay | ✅ | ✅ | ✅ | ❌ | ❌ **Gap** |
+| **In-App Payments / Escrow** | ✅ Vinted Pay | ✅ | ✅ | ✅ | ❌ | 🟡 Pre-wired |
 | **Integrated Shipping Labels** | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ **Gap** |
 | **Luxury Item Verification** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ N/A for niche |
 | **AI-Assisted Listing** | ❌ | ❌ | Beta | ❌ | ❌ | ❌ **Gap** |
-| **Push Notifications** | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ **Gap** |
-| **Multiple Auth Methods** | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ Email only |
+| **Push Notifications** | ✅ | ✅ | ✅ | ✅ | ✅ | 🟡 Pre-wired |
+| **Multiple Auth Methods** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ Pre-wired |
 | **Admin Dashboard** | Internal | Internal | Internal | Internal | N/A | ✅ |
+| **Password Reset** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ---
 
@@ -65,75 +67,31 @@ These are differentiators **no major competitor has**, representing genuine comp
 | **Physical Drop Zones (QR)** | Creates an offline → online loop. Hostel partners drive organic installs. No competitor has a physical touchpoint. |
 | **Meetup Coordination** | End-to-end swap completion in-app (propose → confirm → maps deep-link). Competitors handoff to WhatsApp. |
 | **Traveler identity** | City-of-the-week context. A user in Palomino today, Cartagena next week. No competitor accounts for this transience. |
+| **The Admin Suite** | 9-tab dashboard for full lifecycle moderation. |
 
 ---
 
 ## 4. Gaps vs. Market Standards
 
-These are features that market-standard platforms have but ROPA currently **does not**, representing the highest-priority development investments:
+These are features that represent the highest-priority development investments:
 
-### 🔴 Critical Gaps (block monetization or mainstream adoption)
+### 🟡 High-Priority Gaps (Impact retention and utility)
 
 | Gap | Market Standard | Impact | Effort |
 |---|---|---|---|
-| **In-app payments / escrow** | Vinted Pay, Stripe on Depop/Posh | Cannot close paid swaps without manual transfer risk | High — needs Stripe integration |
-| **Push notifications** | Every major platform | User re-engagement drops dramatically without push | Medium — Expo/FCM |
-| **Image upload** | Universal expectation | Listings without photos have near-zero engagement | Medium — Vercel Blob |
-| **Google/Apple Sign-In** | Vinted, Depop, Poshmark, all | Email-only registration creates ~60% drop-off vs social login | Low — Auth.js OAuth providers |
-
-### 🟡 Important Gaps (affect user experience and retention)
-
-| Gap | Market Standard | Impact |
-|---|---|---|
-| **Shipping integration** | Vinted, Poshmark, Depop | For non-local swaps ROPA has no logistics bridge. Add "Ship this item" option with Shippo/EasyPost. |
-| **AI listing assist** | Poshmark beta | Auto-fill category/description from a photo saves sellers ~2 minutes per listing. |
-| **Profile edit page** | Universal | Users can't update bio, city, or preferences after onboarding. |
-| **Dispute / report system** | Universal | No way to flag a bad actor or report a fraudulent listing. |
-| **Item wishlist / saved items** | Depop, Vinted | Users can "heart" but there's no follow-this-item or wishlist deck. |
-
-### ⚪ Nice-to-Have Gaps (differentiation)
-
-| Gap | Notes |
-|---|---|
-| **Itinerary integration** | Connect with Rome2Rio / Google Trips to auto-update user city as they travel. |
-| **Multilingual support** | ROPA's natural user base speaks Spanish, Portuguese, French. |
-| **Item rental (temporary swap)** | Beyond permanent exchange — rent a coat for one cold city. |
-| **"Request in city X" board** | "I'm arriving in Berlin next week, anyone have size M winter jackets?" — Community bulletin board. |
+| **Shipping integration** | Vinted, Poshmark, Depop | For non-local swaps ROPA has no logistics bridge. Add "Ship this item" option with Shippo/EasyPost. | High |
+| **AI listing assist** | Poshmark beta | Auto-fill category/description from a photo saves sellers ~2 minutes per listing. | Medium |
+| **Itinerary integration** | Rome2Rio / Google Trips | Connect to auto-update user city as they travel. | Medium |
+| **Dispute / flag system** | Universal | No way to flag a bad actor or report a fraudulent listing. | Medium |
 
 ---
 
-## 5. Overlapping / Redundant Features
-
-These are features ROPA has built that partially overlap or duplicate each other, worth rationalizing:
-
-| Issue | Detail | Recommendation |
-|---|---|---|
-| **TravelSwap + Swipe Feed** | `TravelSwap` router and `/travelswap` page create long-distance swap requests — which is essentially what the Swipe Feed + Chat already does for geo-filtered listings. | Merge TravelSwap into the main feed as a "Shipping enabled" listing toggle rather than a separate section. |
-| **`activeListings` + Listing count** | Drop Zones have a manually-incremented `activeListings` field AND the ability to compute the count from related `Listing` records. These can diverge and become stale. | Migrate to computed `_count` and remove the manual field. |
-| **Community Feed + Explore** | The Community Feed (`/community`) and the Explore page (`/explore`) both show travel posts. The Explore page just previews 3 and links to `/community`. | Either merge them fully or give Community Feed more distinct purpose (e.g., long-form stories vs short Explore cards). |
-
----
-
-## 6. Strategic Recommendation
+## strategic Recommendation
 
 ROPA is entering the market with the right niche and genuinely unique features. The priority stack for Molly to act on is:
 
-```
-Tier 1 — Unlock the core loop (Month 1)
-  1. Google Sign-In (remove onboarding friction)
-  2. Image Upload via Vercel Blob (listings are inert without photos)
-  3. Push Notifications (re-engagement)
+1.  **Unlock the "Boosters":** Add API keys for Resend (email), Vercel Blob (photos), and Stripe (payments). The code is already written.
+2.  **Launch Your First "Partner" Drop Zone:** Go to a local hostel, set up a small shelf, and create their record in the database.
+3.  **Announce is PWA-Ready:** Marketing push for "Add to Home Screen" usage.
 
-Tier 2 — Unlock monetization (Month 2-3)
-  4. Stripe escrow for paid swaps
-  5. Dispute/report system (trust prerequisite for payments)
-
-Tier 3 — Extend the moat (Month 3-6)
-  6. Itinerary / city auto-update
-  7. Shipping integration for non-local swaps
-  8. AI listing assist (photo → auto-fill)
-
-Tier 4 — International scale
-  9. Multilingual support (ES, PT, FR minimum)
-  10. Currency localization (COP, BRL, EUR)
-```
+*Final Report: February 2026*

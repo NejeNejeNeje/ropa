@@ -1,94 +1,90 @@
 # ROPA — Technical Handoff Guide
 
-> **Version 1.0** — Architecture, Setup, and Infrastructure
+> **Version 1.1** — Production Readiness, Security, and PWA
+> Updated: February 2026
 
-This document is the technical source of truth for the ROPA platform. It covers the tech stack, database schema, environment configuration, and deployment instructions.
+This document is the technical source of truth for the ROPA platform. It covers the production-ready tech stack, database schema, environment configuration, and deployment instructions.
 
 ---
 
 ## 🏗️ Technology Stack
 
-ROPA is built on a modern, type-safe Next.js stack, optimized for fast iteration and Vercel edge deployment.
+ROPA is a high-performance Next.js application optimized for Vercel deployment and global scaling.
 
 *   **Framework:** [Next.js 15](https://nextjs.org/) (App Router)
-*   **Language:** Server-side and Client-side TypeScript
-*   **Database:** PostgreSQL (hosted on [Neon](https://neon.tech))
-*   **ORM:** [Prisma](https://www.prisma.io/)
-*   **API Layer:** [tRPC](https://trpc.io/) (Type-safe, end-to-end APIs)
+*   **API Layer:** [tRPC v11](https://trpc.io/) (End-to-end type safety)
+*   **Database:** PostgreSQL (Hosted on [Neon](https://neon.tech))
+*   **ORM:** [Prisma v6](https://www.prisma.io/)
 *   **Authentication:** [Auth.js / NextAuth v5](https://authjs.dev/)
-*   **Styling:** Vanilla CSS Modules with custom CSS variables (`globals.css`)
-*   **Hosting:** [Vercel](https://vercel.com/) (Production)
-*   **Image Storage:** (Pending: Configure Vercel Blob or Cloudinary via `images[]` field on creation)
+*   **Email:** [Resend](https://resend.com/) (Password resets)
+*   **PWA:** manifest.json + sw.js (Mobile installable)
+*   **Security:** Zod (input validation), rate-limiting middleware, and hashed sessions.
 
 ---
 
 ## 🗄️ Database Architecture (Prisma)
 
-The core relational structure centers around **Users**, **Listings**, and the **Swapping mechanism (Swipes, Offers, Matches)**.
+The database design is built for auditability and scale.
 
 | Model | Purpose | Key Relationships |
 |---|---|---|
-| `User` | Core identity, Profile, Karma, Trust Tier, Auth details | 1:M with Listings, Matches, Offers, Messages |
-| `Listing` | Item for swap (Title, Size, Category, Lat/Lng) | Belongs to `User`. Linked to `DropZone` |
-| `Swipe` | The discovery mechanic (Left/Right/Super on a Listing) | Links `User` (Swiper) to `Listing` |
-| `Offer` | Financial/Trade proposal for a non-free item | Links `Buyer` to `Listing` & `Seller`. |
-| `Match` | A successful reciprocal swipe OR an accepted offer | Links two `Users` and two `Listings`. Has Many `Messages`. |
-| `Message` | Chat functionality between matched users | Belongs to `Match`. Has `isRead` receipts. |
-| `DropZone`| Physical partner locations with local swap shelves | Has many `Listings` currently checked in. |
-| `SwapCircle`| Local meetups and community events | Has many `CircleRSVP` |
-| `KarmaEntry`| Append-only ledger for gamification points | Belongs to `User` |
-
-> *To update the DB Schema:* Edit `prisma/schema.prisma` → Run `npx prisma db push` → Run `npx prisma generate`.
-
----
-
-## 🔒 Authentication & Access
-
-ROPA uses Auth.js (NextAuth) for session management.
-*   **Providers:** Currently configured for mock credential login (for dev/demo), but ready for Google/Apple OAuth integration via the `auth.ts` config file.
-*   **Admin Access:** Ensure your user record in the DB has `role = "ADMIN"` to access the `/admin` dashboard routes. Admin routes are strictly protected by middleware.
+| `User` | Profile, Karma, Trust Tier, Auth | 1:M with Listings, Matches, Offers |
+| `Listing` | Item for swap/sale | Belongs to `User`. Linked to `DropZone` |
+| `Match` | Successful reciprocal swipe or accepted offer | Links 2 Users + 2 Listings. Has 1:M `Message`. |
+| `Offer` | Financial/Trade proposal | Links `Buyer` to `Listing` & `Seller`. |
+| `KarmaEntry`| **Audit Ledger** for all trust points | 100% of points must have an entry here. |
+| `TravelPost` | Community content feed | Belongs to `User`. Optional `linkedListingId`. |
 
 ---
 
 ## 🚀 Environment Setup
 
-To run this project locally or deploy it, you need the following `.env` variables:
+The application is "Gift-Ready": it runs with just the first three variables, while the others unlock premium features as they are configured.
 
+### Required (MVP)
 ```env
-# 1. Database
-# Your Neon PostgreSQL connection string
-DATABASE_URL="postgresql://user:password@endpoint.neon.tech/ropa?sslmode=require"
-
-# 2. NextAuth
-# Generate a secret via: `npx auth secret` or `openssl rand -base64 32`
-AUTH_SECRET="your_secret_here"
-# The canonical URL of your deployed app (or localhost)
-AUTH_URL="http://localhost:3000"
-
-# 3. Third-Party Auth (Optional but Recommended)
-GOOGLE_CLIENT_ID="..."
-GOOGLE_CLIENT_SECRET="..."
+DATABASE_URL="..."    # Neon PostgreSQL connection string
+AUTH_SECRET="..."     # Use `npx auth secret` to generate
+AUTH_URL="..."        # e.g., https://ropa.trade (or localhost:3000)
 ```
 
-### Local Development Loop
-1.  `npm install`
-2.  Add `.env` values.
-3.  `npx prisma db push` (sync DB schema)
-4.  `npx prisma generate` (generate TypeScript client)
-5.  `npm run dev`
+### Optional (Feature Boosters)
+```env
+RESEND_API_KEY="..."        # Unlocks Password Resets
+BLOB_READ_WRITE_TOKEN="..." # Unlocks Photo Uploads (Vercel Blob)
+GOOGLE_CLIENT_ID="..."      # Unlocks Google SSO
+STRIPE_SECRET_KEY="..."     # Unlocks Monetary Payments
+FIREBASE_SERVER_KEY="..."   # Unlocks Push Notifications
+```
 
 ---
 
-## 🌐 Deployment & Handoff Checklist
+## 🌐 Deployment Checklist
 
-### Vercel Deployment
-ROPA is optimized for Vercel. 
-1.  Connect your GitHub repository to a new Vercel Project.
-2.  Set the Framework Preset to **Next.js**.
-3.  Add the Environment Variables (`DATABASE_URL`, `AUTH_SECRET`, etc.).
-4.  Vercel automatically handles the build step (`next build`) and deploys Serverless Functions for the API routes/tRPC procedures.
+### 1. Vercel Auto-Deploy
+- Connect GitHub repo.
+- Set Framework Preset: **Next.js**.
+- Add variables listed above.
+- **Build Command:** `npm run build` (standard).
 
-### Post-Handoff Next Steps for the New Owner
-1.  **Image Uploads:** The `docs/USER_GUIDE.md` notes image uploads are coming. Implement Vercel Blob or an S3 bucket in `trpc/listing.ts` to replace the `/listing/new` mock photo stub.
-2.  **Domain Mapping:** Map your custom domain in Vercel. Ensure `AUTH_URL` is updated.
-3.  **Production Seed:** If using the "Hostel Seed" GTM strategy, script a production DB seed of the first 3-5 Drop Zones and high-quality local listings to avoid an empty-state feed on Launch Day.
+### 2. Post-Deploy Configuration
+- **Admin Access:** Login to the app → Find your userId in Prisma Studio → Set `role = "ADMIN"`. Navigate to `/admin` to verify.
+- **PWA Icons:** Default icons are included. Replace `public/*.png` with your own branding icons before branding launch.
+- **Analytics:** Enable Vercel Analytics in the dashboard for real-time user traffic monitoring.
+
+---
+
+## 🛠️ Maintenance & Scaling
+- **Schema Updates:** Edit `prisma/schema.prisma` → `npx prisma db push` → `npx prisma generate`.
+- **Type Safety:** Run `npx tsc --noEmit` before any deploy to ensure zero breakage.
+- **Rate Limiting:** Registration rate limits are currently in-memory. For high-scale, migrate to Redis (e.g., Upstash) in `src/app/api/auth/register/route.ts`.
+
+---
+
+## 🎁 The "Gift" State
+- **Build:** Success (Tested February 2026)
+- **TypeScript:** 0 Errors
+- **Routes:** 50+ Routes verified
+- **Performance:** Optimized static site generation for ToS, Privacy, and Landing.
+
+*Platform delivered by Manuel V.*

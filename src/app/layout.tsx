@@ -11,6 +11,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.AUTH_URL || "http://localhost:3000"),
   title: "ROPA — Trade Clothes While Traveling",
   description: "Swipe to discover clothes from fellow travelers, match on styles you love, and swap — keeping your luggage light and your wardrobe fresh. Join 12K+ travelers on ROPA.",
   keywords: ["travel", "clothes swap", "ropa", "sustainable fashion", "backpacking", "travelers"],

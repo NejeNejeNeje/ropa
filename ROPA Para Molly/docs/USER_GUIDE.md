@@ -1,55 +1,61 @@
-# ROPA — User Guide
-> **Version 1.0** — Swap clothes, connect with travelers, and pack lighter.
+# ROPA — Owner's User Guide
 
-ROPA is designed to solve a simple backpacker problem: **changing climates, limited space, and fashion fatigue.** Instead of throwing clothes away or buying new ones in every city, ROPA lets you swap with travelers near you.
-
----
-
-## 🧭 Core Flows
-
-### 1. The Swipe Feed (`/feed`)
-The heart of ROPA. Here you discover clothes from travelers in your current city.
-*   **Like (Right Swipe / ♥️):** If you like an item, swipe right. If it's a "Free" item and they swipe back on your profile, it's a Match!
-*   **Offer (for Paid items):** If the item has a price, swiping right opens the **Offer Sheet**. You can match the price, underbid (📉), or overbid (🔥). The seller has 24h to accept.
-*   **Super Like (⭐):** Immediately signals high interest.
-*   **Filter:** Tap the ⚙️ icon to filter by Category, Size, Gender, Condition, and Price.
-
-### 2. Matching & Chat (`/matches` & `/chat/[id]`)
-*   **Matches Tab:** See all pending offers and accepted matches.
-*   **Chat:** Once matched, the chat opens. It features live polling, read receipts (✓✓), and real-time messaging.
-*   **Meetup Coordination:** Use the chat to coordinate. Once agreed, tap **📍 Set Meetup** to drop a pin. This generates smart links to Google Maps/Apple Maps for both parties.
-*   **Completion:** After the swap, tap `Complete` on the match card. Both users earn +20 Karma points and are added as official **Swap Buddies**.
-
-### 3. Creating a Listing (`/listing/new`)
-Got something to trade? 
-1.  Tap the `+ Sell` icon.
-2.  Add a title, condition, and category.
-3.  Choose your pricing: **Free** (🎁), **Fixed** (💰), or **Negotiable** (🤝).
-4.  Your city and country are auto-filled so travelers nearby can find you.
-
-### 4. Explore (`/explore`)
-Beyond 1-on-1 swaps, ROPA connects you to the broader travel community:
-*   **📍 Drop Zones:** Partner hostels and coworking spaces with physical "Swap Shelves". Browse what's currently there before you visit.
-*   **🔄 Swap Circles:** Group swap events happening in your city. RSVP to secure your spot.
-*   **🌍 Community Feed:** Travel stories and styling inspiration from the network.
+Welcome, Molly! This guide explains how to operate your new platform from the "Captain's Chair."
 
 ---
 
-## 🛡️ Trust & Safety (SwapShield)
+## 1. Entering the Admin Dashboard
 
-Swapping with strangers requires trust. ROPA uses **SwapShield**:
-*   **Verification:** Profiles are tied to verified sign-ins.
-*   **Trust Tiers:** Users start at Bronze 🟤, move to Silver ⚪ after 5 completed trades, and Gold 🟡 after 20.
-*   **Ratings:** Every completed swap allows a rating, building your public reputation.
+The `/admin` dashboard is the hidden heart of ROPA. It is strictly protected.
+
+1.  **Grant yourself access:** 
+    - Log in to ROPA with your own account.
+    - Open the database (via Prisma Studio or Neon Console).
+    - Find your user record and change `role` to `"ADMIN"`.
+2.  **Navigate:** Go to `ropa.trade/admin`. You will see a sidebar with 9 active sections.
 
 ---
 
-## ☯️ Karma Points
+## 2. Platform Moderation
 
-ROPA rewards generous travelers. You earn Karma for actions that benefit the community:
-*   +10 pts: Listing an item for Free
-*   +5 pts: Accepting an offer
-*   +20 pts: Successfully completing a swap
-*   +50 pts: Dropping an item in a Drop Zone (Scanning the QR code)
+### Managing Users
+- **The Ledger:** Every user's "Karma" determines their Trust Tier (Bronze, Silver, Gold).
+- **The Shield:** If a user is reported or misbehaving, you can click **"Block User"** in their detail profile to instantly kick them from the platform.
 
-Karma points unlock specific app perks, including priority listing visibility and exclusive invites to VIP Swap Circles.
+### Content Moderation
+- **Listings:** If an item is inappropriate, you can deactivate it from the Listings tab. It will disappear from the feed instantly.
+- **Community:** Use the Community tab to review photos posted by travelers. Use the **"Delete Post"** button to remove anything that violates guidelines.
+
+### Dispute Resolution
+- **Offers & Matches:** If two users can't agree on a swap or price, you can view their match details to see their agreed price and message history to help mediate.
+
+---
+
+## 3. Growing the Ecosystem
+
+### Drop Zones (Partnerships)
+Drop Zones are hostels, cafes, or shops that host a swap shelf.
+- **To add a new one:** Use Prisma Studio to create a `DropZone` record.
+- **The QR Loop:** Users at that hostel scan the QR code to "Check In" their clothes to your shelf.
+
+### Swap Circles (Events)
+These are local meetups.
+- **Active Moderation:** You can "Complete" a circle after it happens, or "Cancel" it if the host drops out.
+- **RSVPs:** You can monitor how many people are coming to each event in real-time.
+
+---
+
+## 4. The Tech Roadmap (Next Steps)
+
+Ropa is ready for users, but here is what we recommend as your first "Upgrades":
+
+1.  **Activate "The Boosters":** Add your API keys for **Stripe** (monetary swaps), **Resend** (password emails), and **Vercel Blob** (photo uploads).
+2.  **Launch Your First "Partner" Drop Zone:** Go to a local hostel, set up a small shelf, and create their record in the database.
+3.  **Announce is PWA-Ready:** Tell your users they can "Add to Home Screen" on their iPhones/Androids for an app-like experience.
+
+---
+
+## 5. Getting Help
+The `docs/` folder contains a file called `AI_CONTEXT.md`. If you ever hire a new developer or use an AI assistant, **show them that file first.** It gives them the "Neural Map" of everything we built.
+
+Enjoy building the future of sustainable travel fashion! 👗🌎
