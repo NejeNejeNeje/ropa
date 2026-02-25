@@ -24,9 +24,10 @@ npm install
 
 # 2. Set environment variables
 cp .env.example .env
-# Edit .env with your DATABASE_URL (PostgreSQL) and AUTH_SECRET
+# ROPA uses a local SQLite database by default so it runs instantly!
+# Just add an AUTH_SECRET in .env (you can generate one with `npx auth secret`)
 
-# 3. Initialize database
+# 3. Initialize the internal database
 npx prisma db push
 npx prisma generate
 
@@ -57,7 +58,7 @@ Open [http://localhost:3000](http://localhost:3000) and use the **🚀 Quick Log
 |---|---|
 | **Framework** | Next.js 15 (App Router) |
 | **API** | tRPC v11 (Strict Type-safety) |
-| **Database** | PostgreSQL (Prisma ORM) |
+| **Database** | **SQLite (Internal)** for local / **PostgreSQL** for Production |
 | **Auth** | Auth.js v5 (NextAuth) |
 | **PWA** | Manifest + Custom Service Worker |
 | **Messaging** | Resend (Password Resets) |
@@ -65,13 +66,14 @@ Open [http://localhost:3000](http://localhost:3000) and use the **🚀 Quick Log
 
 ---
 
-## 🚀 Deployment
+## 🚀 Production Deployment (Cloud Database)
 
-The `main` branch is configured for zero-config deployment to Vercel.
+ROPA ships with an internal SQLite database so you can test it on your computer immediately. Before launching on Vercel, you must migrate it to a cloud database (PostgreSQL):
 
-1. Connect GitHub repo to a Vercel Project.
-2. Set `DATABASE_URL`, `AUTH_SECRET`, and `AUTH_URL`.
-3. Add "Feature Booster" keys (Stripe, Resend, Vercel Blob) when ready to scale.
+1. **Update the Engine:** Open `prisma/schema.prisma` and change `provider = "sqlite"` to `provider = "postgresql"`.
+2. **Create Cloud DB:** Create a free serverless Postgres database on [Neon.tech](https://neon.tech).
+3. **Deploy:** Connect your GitHub repo to a Vercel project and set your `DATABASE_URL` (from Neon), `AUTH_SECRET`, and `AUTH_URL`.
+4. **Boosters:** Add "Feature Booster" keys (Stripe, Resend, Vercel Blob) when ready to scale.
 
 ---
 

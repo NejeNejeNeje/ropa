@@ -33,7 +33,7 @@ When asked to build a new feature or perform an audit, you must utilize the "Cer
 ### 1. The Stack
 - **Framework:** Next.js 15 (App Router with Server Components)
 - **API:** tRPC v11 (Strict Type-safety, no REST except for Webhooks/Meetup logic)
-- **Database:** PostgreSQL on Neon Serverless (interacted via Prisma ORM)
+- **Database:** Ships with local SQLite (`dev.db`) for immediate handoff testing, but requires PostgreSQL (Neon) for production scaling.
 - **Auth:** Auth.js v5 (NextAuth) — currently Credentials, pre-wired for Google SSO.
 - **Styling:** Vanilla CSS Modules with Custom Design Tokens (`globals.css`)
 - **PWA:** Fully configured with `manifest.json` and service worker for mobile install.
@@ -59,8 +59,12 @@ When asked to build a new feature or perform an audit, you must utilize the "Cer
 - **Admin APIs:** Under `/api/admin/*`, using standard Next.js Route Handlers (REST), heavily protected by role checks.
 
 ### 5. Environment & "Boosters"
-The app runs locally and continuously deploys to Vercel via the `main` branch. 
-It requires MVP variables: `DATABASE_URL` (Neon), `AUTH_SECRET` (32-byte string), and `AUTH_URL`.
+The app ships with an internal SQLite database (`DATABASE_URL="file:./dev.db"`) so it runs instantly on the owner's machine.
+**To migrate to production on Vercel:**
+1. Open `prisma/schema.prisma` and change `provider = "sqlite"` to `"postgresql"`.
+2. Provide a Neon PostgreSQL connection string as the `DATABASE_URL` in the Vercel env settings.
+
+It requires MVP variables: `DATABASE_URL`, `AUTH_SECRET` (32-byte string), and `AUTH_URL`.
 It possesses pre-written code that activates *automatically* when specific API keys are added to Vercel:
 - `RESEND_API_KEY` → Activates password reset emails.
 - `BLOB_READ_WRITE_TOKEN` → Activates image uploads via Vercel Blob. (Without this, the app defaults to a "Photoless MVP" state where users can publish text-only listings).

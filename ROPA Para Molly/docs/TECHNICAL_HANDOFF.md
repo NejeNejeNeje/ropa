@@ -13,7 +13,7 @@ ROPA is a high-performance Next.js application optimized for Vercel deployment a
 
 *   **Framework:** [Next.js 15](https://nextjs.org/) (App Router)
 *   **API Layer:** [tRPC v11](https://trpc.io/) (End-to-end type safety)
-*   **Database:** PostgreSQL (Hosted on [Neon](https://neon.tech))
+*   **Database:** Local SQLite (`dev.db`) for initial handoff / PostgreSQL (Neon) for production scaling
 *   **ORM:** [Prisma v6](https://www.prisma.io/)
 *   **Authentication:** [Auth.js / NextAuth v5](https://authjs.dev/)
 *   **Email:** [Resend](https://resend.com/) (Password resets)
@@ -41,11 +41,11 @@ The database design is built for auditability and scale.
 
 The application is "Gift-Ready": it runs with just the first three variables, while the others unlock premium features as they are configured.
 
-### Required (MVP)
+### Required (MVP Setup)
 ```env
-DATABASE_URL="..."    # Neon PostgreSQL connection string
-AUTH_SECRET="..."     # Use `npx auth secret` to generate
-AUTH_URL="..."        # e.g., https://ropa.trade (or localhost:3000)
+DATABASE_URL="file:./dev.db"  # Built-in SQLite local file for testing
+AUTH_SECRET="..."             # Use `npx auth secret` to generate
+AUTH_URL="http://localhost:3000" # Canonical URL
 ```
 
 ### Optional (Feature Boosters)
@@ -61,10 +61,16 @@ FIREBASE_SERVER_KEY="..."   # Unlocks Push Notifications
 
 ## 🌐 Deployment Checklist
 
-### 1. Vercel Auto-Deploy
+### 1. Cloud Database Migration (Pre-Deploy)
+The codebase runs on an internal SQLite database for instant local setup. Before deploying to Vercel, you must switch to a production cloud database:
+1. Open `prisma/schema.prisma` and change `provider = "sqlite"` to `provider = "postgresql"`.
+2. Create a free PostgreSQL database on [Neon.tech](https://neon.tech).
+3. Copy the Neon connection string — this will become your production `DATABASE_URL`.
+
+### 2. Vercel Auto-Deploy
 - Connect GitHub repo.
 - Set Framework Preset: **Next.js**.
-- Add variables listed above.
+- Add your variables (using the new Neon `DATABASE_URL`).
 - **Build Command:** `npm run build` (standard).
 
 ### 2. Post-Deploy Configuration
