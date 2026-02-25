@@ -63,7 +63,7 @@ The app runs locally and continuously deploys to Vercel via the `main` branch.
 It requires MVP variables: `DATABASE_URL` (Neon), `AUTH_SECRET` (32-byte string), and `AUTH_URL`.
 It possesses pre-written code that activates *automatically* when specific API keys are added to Vercel:
 - `RESEND_API_KEY` → Activates password reset emails.
-- `BLOB_READ_WRITE_TOKEN` → Activates image uploads via Vercel Blob.
+- `BLOB_READ_WRITE_TOKEN` → Activates image uploads via Vercel Blob. (Without this, the app defaults to a "Photoless MVP" state where users can publish text-only listings).
 - `STRIPE_SECRET_KEY` → Activates monetary payment escrow.
 - `GOOGLE_CLIENT_ID` → Activates 1-click Google authentication.
 

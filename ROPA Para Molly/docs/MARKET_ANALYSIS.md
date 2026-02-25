@@ -80,6 +80,7 @@ These are features that represent the highest-priority development investments:
 | Gap | Market Standard | Impact | Effort |
 |---|---|---|---|
 | **Shipping integration** | Vinted, Poshmark, Depop | For non-local swaps ROPA has no logistics bridge. Add "Ship this item" option with Shippo/EasyPost. | High |
+| **Image upload (Photoless MVP)** | Universal expectation | **Listings are currently allowed to be posted without photos** for MVP launch. This lowers friction but reduces engagement until Vercel Blob is activated. | Medium |
 | **AI listing assist** | Poshmark beta | Auto-fill category/description from a photo saves sellers ~2 minutes per listing. | Medium |
 | **Itinerary integration** | Rome2Rio / Google Trips | Connect to auto-update user city as they travel. | Medium |
 | **Dispute / flag system** | Universal | No way to flag a bad actor or report a fraudulent listing. | Medium |

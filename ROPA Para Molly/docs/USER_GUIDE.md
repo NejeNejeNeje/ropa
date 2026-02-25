@@ -49,7 +49,8 @@ These are local meetups.
 
 Ropa is ready for users, but here is what we recommend as your first "Upgrades":
 
-1.  **Activate "The Boosters":** Add your API keys for **Stripe** (monetary swaps), **Resend** (password emails), and **Vercel Blob** (photo uploads).
+1.  **Activate "The Boosters":** Add your API keys for **Stripe** (monetary swaps) and **Resend** (password emails).
+    - *Note on Photos:* Currently, the app allows users to post listings **without photos** so you can launch immediately. When you are ready for image uploads, add your **Vercel Blob** token to instantly activate that feature.
 2.  **Launch Your First "Partner" Drop Zone:** Go to a local hostel, set up a small shelf, and create their record in the database.
 3.  **Announce is PWA-Ready:** Tell your users they can "Add to Home Screen" on their iPhones/Androids for an app-like experience.
 
