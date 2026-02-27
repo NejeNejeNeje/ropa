@@ -57,24 +57,31 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             return token;
         },
         async session({ session, token }) {
-            if (session.user && token.id) {
-                session.user.id = token.id as string;
+            if (session.user && token) {
+                session.user.id = (token.id as string) || (token.sub as string);
                 const u = session.user as unknown as Record<string, unknown>;
-                // Always set role from token first — safe for edge/middleware
-                u.role = token.role as string;
-                // Enrich with fresh DB data when NOT at the edge (DB unavailable at edge)
-                try {
-                    const dbUser = await prisma.user.findUnique({
-                        where: { id: token.id as string },
-                        select: { karmaPoints: true, trustTier: true, role: true },
-                    });
-                    if (dbUser) {
-                        u.role = dbUser.role; // DB is source of truth when available
-                        u.karmaPoints = dbUser.karmaPoints;
-                        u.trustTier = dbUser.trustTier;
+
+                // Set role from token first — safest for Edge/Middleware
+                if (token.role) {
+                    u.role = token.role as string;
+                }
+
+                // Enrich with fresh DB data if available
+                if (session.user.id) {
+                    try {
+                        const dbUser = await prisma.user.findUnique({
+                            where: { id: session.user.id },
+                            select: { karmaPoints: true, trustTier: true, role: true },
+                        });
+                        if (dbUser) {
+                            u.role = dbUser.role;
+                            u.karmaPoints = dbUser.karmaPoints;
+                            u.trustTier = dbUser.trustTier;
+                        }
+                    } catch (err) {
+                        console.error('Session DB enrichment failed:', err);
+                        // Fallback to token data already set
                     }
-                } catch {
-                    // Edge runtime — DB unavailable, role already set from token above
                 }
             }
             return session;

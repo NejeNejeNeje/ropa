@@ -483,6 +483,30 @@
     color: var(--text-muted);
 }
 
+.headerRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.logoutHeaderBtn {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    padding: 6px 12px;
+    border-radius: var(--radius-md);
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.logoutHeaderBtn:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
 /* ─── Actions ──── */
 .actions {
     display: flex;
@@ -500,16 +524,6 @@
     font-size: 0.85rem;
     border: none;
     cursor: pointer;
-}
-
-.signOutBtn {
-    flex: 1;
-    padding: 12px;
-    border-radius: var(--radius-md);
-    background: var(--bg-secondary);
-    color: var(--text-muted);
-    font-weight: 600;
-    font-size: 0.85rem;
-    border: 1px solid var(--border-subtle);
-    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
 }

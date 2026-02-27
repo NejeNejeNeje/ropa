@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { Loader2 } from 'lucide-react';
 import styles from './login.module.css';
 
 const TEST_ACCOUNTS = [
@@ -123,7 +124,7 @@ export default function LoginPage() {
                     {error && <p className={styles.error}>{error}</p>}
 
                     <button type="submit" className={styles.submitBtn} disabled={loading}>
-                        {loading ? '...' : isRegister ? 'Create Account' : 'Sign In'}
+                        {loading ? <Loader2 className="spinner" size={18} /> : isRegister ? 'Create Account' : 'Sign In'}
                     </button>
                 </form>
 
@@ -197,7 +198,7 @@ export default function LoginPage() {
                                 </div>
                                 <span className={styles.testCity}>📍 {account.city}</span>
                                 {loggingInAs === account.email && (
-                                    <div className={styles.testLoading}>Signing in...</div>
+                                    <div className={styles.testLoading}><Loader2 className="spinner" size={14} /></div>
                                 )}
                             </button>
                         ))}

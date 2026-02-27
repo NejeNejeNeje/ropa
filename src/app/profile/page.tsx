@@ -53,7 +53,10 @@ export default function ProfilePage() {
     return (
         <div className={styles.page}>
             <header className={styles.header}>
-                <h1>👤 Profile</h1>
+                <div className={styles.headerRow}>
+                    <h1>👤 Profile</h1>
+                    <button className={styles.logoutHeaderBtn} onClick={() => signOut({ callbackUrl: '/' })}>Logout</button>
+                </div>
             </header>
 
             <main className={styles.main}>
@@ -198,7 +201,6 @@ export default function ProfilePage() {
 
                 <div className={styles.actions}>
                     <Link href="/profile/edit" className={styles.editBtn}>✏️ Edit Profile</Link>
-                    <button className={styles.signOutBtn} onClick={() => signOut({ callbackUrl: '/' })}>Sign Out</button>
                 </div>
             </main>
 

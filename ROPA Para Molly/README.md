@@ -1,18 +1,20 @@
-# SwapPack 🎒
-
+# ROPA 🎒
 > Trade clothes while traveling — a social marketplace for travelers who swap fashion.
 
 ## 📚 Handoff Documentation
 
 The complete project handoff package is available in the `docs/` directory:
 
-1. [User Guide](docs/USER_GUIDE.md) — App usage, core flows (Swipe, Chat, Meetups), and the Karma system.
-2. [Business Strategy](docs/BUSINESS_STRATEGY.md) — Monetization levers, B2B Drop Zone partnerships, and Go-To-Market strategy.
-3. [Technical Handoff](docs/TECHNICAL_HANDOFF.md) — Architecture, Prisma schema, environment setup, and deployment.
+1. [🎁 Gift Letter](docs/GIFT_LETTER.md) — A personal note about what you're receiving.
+2. [🛠️ IT Setup Guide](docs/SETUP_GUIDE_IT.md) — **Start here if you're the technical friend.** Step-by-step setup for every account and service.
+3. [📱 User Guide](docs/USER_GUIDE.md) — App usage, core flows (Swipe, Chat, Meetups), and the Karma system.
+4. [📊 Business Strategy](docs/BUSINESS_STRATEGY.md) — Monetization levers, B2B Drop Zone partnerships, and Go-To-Market strategy.
+5. [📈 Market Analysis](docs/MARKET_ANALYSIS.md) — Market size, competitive landscape, and growth opportunity.
+6. [🔧 Technical Handoff](docs/TECHNICAL_HANDOFF.md) — Architecture, database schema, environment setup, and deployment.
 
 ---
 
-## Quick Start
+## Quick Start (Local Testing)
 
 ```bash
 # 1. Install dependencies
@@ -20,16 +22,9 @@ npm install
 
 # 2. Set up environment
 cp .env.example .env
-# Edit .env with your values (see Environment Variables below)
+# Edit .env with your values (minimum: AUTH_SECRET)
 
-# 3. Initialize database
-npx prisma db push
-npx prisma generate
-
-# 4. Seed demo data
-npx prisma db seed
-
-# 5. Run development server
+# 3. Run locally (uses built-in SQLite database)
 npm run dev
 ```
 
@@ -37,53 +32,21 @@ Open [http://localhost:3000](http://localhost:3000) and click **🚀 Demo Login*
 
 ---
 
-## Environment Variables
-
-Create a `.env` file in the project root:
-
-```env
-# Database — SQLite for dev, swap for PostgreSQL in production
-DATABASE_URL="file:./dev.db"
-
-# Auth — CHANGE THIS in production
-AUTH_SECRET="your-random-secret-here"
-NEXTAUTH_URL="http://localhost:3000"
-```
-
-### Generating AUTH_SECRET
-
-```bash
-openssl rand -base64 32
-```
-
----
-
-## Demo Credentials
-
-| User | Email | Password |
-|------|-------|----------|
-| **Demo User** | `you@swappack.com` | `swappack123` |
-| Maya Chen | `maya@example.com` | `swappack123` |
-| Liam Okafor | `liam@example.com` | `swappack123` |
-| Sofía Rivera | `sofia@example.com` | `swappack123` |
-
-All seed users share the same password: `swappack123`
-
----
-
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| **Framework** | Next.js 16 (App Router) |
-| **API** | tRPC v11 (type-safe) |
-| **Database** | Prisma v6 + SQLite |
-| **Auth** | NextAuth v5 (Credentials) |
-| **Styling** | CSS Modules + custom design system |
+| **Framework** | Next.js 15 (App Router) |
+| **API** | tRPC v11 (type-safe, end-to-end) |
+| **Database** | Prisma v6 + SQLite (dev) / PostgreSQL (production) |
+| **Auth** | Auth.js / NextAuth v5 |
+| **Styling** | CSS Modules + custom design token system |
+| **Hosting** | Vercel (production) |
 
 ---
 
 ## Key Features
+
 
 - 🔥 **Swipe Feed** — Tinder-like card swiping for clothing listings
 - 💰 **Swipe Auction** — Bid on items when swiping right (underbid/match/overbid)

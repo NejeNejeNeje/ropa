@@ -29,6 +29,7 @@ async function main() {
 
     // ─── Users ───
     const password = await hash('ropa2026', 12);
+    const mayaPassword = await hash('swappack123', 12);
     const testPassword = await hash('test1234', 12);
     const adminPassword = await hash('admin1234', 12);
 
@@ -84,7 +85,10 @@ async function main() {
         const u = await prisma.user.upsert({
             where: { email: data.email },
             update: {},
-            create: { ...data, password },
+            create: {
+                ...data,
+                password: data.email === 'maya@example.com' ? mayaPassword : password
+            },
         });
         users.push(u);
     }

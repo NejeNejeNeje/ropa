@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Navigation from '@/components/Navigation';
 import MeetupSheet from '@/components/MeetupSheet';
+import ReviewModal from '@/components/ReviewModal';
 import { MATCHES } from '@/data/mockData';
 import { trpc } from '@/lib/trpc-client';
 import styles from './matches.module.css';
@@ -49,7 +50,20 @@ export default function MatchesPage() {
     const currentUserId = (session?.user as { id?: string } | undefined)?.id ?? '';
 
     const { data: liveMatches, refetch } = trpc.match.getAll.useQuery(undefined, { retry: false });
-    const completeMutation = trpc.match.complete.useMutation({ onSuccess: () => refetch() });
+
+    // Review state — triggered after a swap is marked complete
+    const [reviewTarget, setReviewTarget] = useState<{ matchId: string; otherUserName: string } | null>(null);
+
+    const completeMutation = trpc.match.complete.useMutation({
+        onSuccess: (_data, matchId) => {
+            refetch();
+            // Find the other user's name to show in the review modal
+            const match = matches.find(m => m.id === matchId);
+            const otherName = ((match?.userB as Record<string, unknown>)?.displayName ||
+                (match?.userB as Record<string, unknown>)?.name || 'your swap partner') as string;
+            setReviewTarget({ matchId, otherUserName: otherName });
+        },
+    });
 
     const matches = (liveMatches || MATCHES) as unknown as MatchWithMeetup[];
 
@@ -173,6 +187,16 @@ export default function MatchesPage() {
                     prefillCity={sheetState.prefillCity}
                     onClose={() => setSheetState(null)}
                     onUpdated={() => { refetch(); setSheetState(null); }}
+                />
+            )}
+
+            {/* Review modal — appears after completing a swap */}
+            {reviewTarget && (
+                <ReviewModal
+                    matchId={reviewTarget.matchId}
+                    otherUserName={reviewTarget.otherUserName}
+                    onClose={() => setReviewTarget(null)}
+                    onSuccess={() => { refetch(); setReviewTarget(null); }}
                 />
             )}
         </div>

@@ -6,6 +6,7 @@ import styles from './explore.module.css';
 import { DROP_ZONES, SWAP_CIRCLES, TRAVEL_POSTS } from '@/data/mockData';
 import { DROP_ZONE_TYPE_LABELS, DropZoneType } from '@/data/types';
 import { trpc } from '@/lib/trpc-client';
+import { motion } from 'framer-motion';
 
 const getTypeLabel = (type: string) => DROP_ZONE_TYPE_LABELS[type as DropZoneType] || { emoji: '📍', label: type };
 
@@ -24,9 +25,28 @@ export default function ExplorePage() {
                 <h1>🌍 Explore</h1>
             </header>
 
-            <main className={styles.main}>
+            <motion.main
+                className={styles.main}
+                initial="hidden"
+                animate="visible"
+                variants={{
+                    hidden: { opacity: 0 },
+                    visible: {
+                        opacity: 1,
+                        transition: {
+                            staggerChildren: 0.15
+                        }
+                    }
+                }}
+            >
                 {/* Drop Zones */}
-                <section className={styles.section}>
+                <motion.section
+                    className={styles.section}
+                    variants={{
+                        hidden: { opacity: 0, y: 20 },
+                        visible: { opacity: 1, y: 0, transition: { type: 'spring', damping: 20, stiffness: 100 } }
+                    }}
+                >
                     <div className={styles.sectionHeader}>
                         <h2>📍 Drop Zones</h2>
                         <Link href="/dropzones" className={styles.seeAll}>See all →</Link>
@@ -48,10 +68,16 @@ export default function ExplorePage() {
                             );
                         })}
                     </div>
-                </section>
+                </motion.section>
 
                 {/* Swap Circles */}
-                <section className={styles.section}>
+                <motion.section
+                    className={styles.section}
+                    variants={{
+                        hidden: { opacity: 0, y: 20 },
+                        visible: { opacity: 1, y: 0, transition: { type: 'spring', damping: 20, stiffness: 100 } }
+                    }}
+                >
                     <div className={styles.sectionHeader}>
                         <h2>🔄 Swap Circles</h2>
                         <Link href="/circles" className={styles.seeAll}>See all →</Link>
@@ -83,19 +109,31 @@ export default function ExplorePage() {
                             );
                         })}
                     </div>
-                </section>
+                </motion.section>
 
                 {/* TravelSwap — accessible from Explore, no longer in main nav */}
-                <section className={styles.section}>
+                <motion.section
+                    className={styles.section}
+                    variants={{
+                        hidden: { opacity: 0, y: 20 },
+                        visible: { opacity: 1, y: 0, transition: { type: 'spring', damping: 20, stiffness: 100 } }
+                    }}
+                >
                     <div className={styles.sectionHeader}>
                         <h2>🔄 Travel Requests</h2>
                         <Link href="/travelswap" className={styles.seeAll}>Open →</Link>
                     </div>
                     <p className={styles.sectionSub}>Need gear at your destination? Post what you need and what you can offer.</p>
-                </section>
+                </motion.section>
 
                 {/* Travel Feed */}
-                <section className={styles.section}>
+                <motion.section
+                    className={styles.section}
+                    variants={{
+                        hidden: { opacity: 0, y: 20 },
+                        visible: { opacity: 1, y: 0, transition: { type: 'spring', damping: 20, stiffness: 100 } }
+                    }}
+                >
                     <div className={styles.sectionHeader}>
                         <h2>✨ Travel Feed</h2>
                         <Link href="/community" className={styles.seeAll}>See all →</Link>
@@ -113,8 +151,8 @@ export default function ExplorePage() {
                             </Link>
                         ))}
                     </div>
-                </section>
-            </main>
+                </motion.section>
+            </motion.main>
 
             <Navigation />
         </div>

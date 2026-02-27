@@ -3,17 +3,24 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { Flame, Compass, PlusCircle, Tag, MessageCircle, User, type LucideIcon } from 'lucide-react';
 import { trpc } from '@/lib/trpc-client';
 import styles from './Navigation.module.css';
 
-const NAV_ITEMS = [
-    { href: '/feed', label: 'Feed', icon: '🔥' },
-    { href: '/explore', label: 'Explore', icon: '🌍', alsoMatch: ['/dropzones', '/circles', '/community', '/travelswap'] },
-    { href: '/listing/new', label: 'Sell', icon: '➕' },
-    { href: '/offers', label: 'Offers', icon: '📨' },
-    { href: '/matches', label: 'Matches', icon: '💬', showUnread: true },
-    { href: '/profile', label: 'Profile', icon: '👤' },
-];
+const NAV_ITEMS: {
+    href: string;
+    label: string;
+    Icon: LucideIcon;
+    alsoMatch?: string[];
+    showUnread?: boolean;
+}[] = [
+        { href: '/feed', label: 'Feed', Icon: Flame },
+        { href: '/explore', label: 'Explore', Icon: Compass, alsoMatch: ['/dropzones', '/circles', '/community', '/travelswap'] },
+        { href: '/listing/new', label: 'Sell', Icon: PlusCircle },
+        { href: '/offers', label: 'Offers', Icon: Tag },
+        { href: '/matches', label: 'Matches', Icon: MessageCircle, showUnread: true },
+        { href: '/profile', label: 'Profile', Icon: User },
+    ];
 
 
 export default function Navigation() {
@@ -32,7 +39,7 @@ export default function Navigation() {
         <nav className={`${styles.nav} glass-strong`} aria-label="Main navigation">
             {NAV_ITEMS.map((item) => {
                 const isActive = pathname.startsWith(item.href) ||
-                    ('alsoMatch' in item && item.alsoMatch?.some((m) => pathname.startsWith(m)));
+                    (item.alsoMatch?.some((m) => pathname.startsWith(m)));
                 const hasUnread = item.showUnread && unreadCount > 0;
 
                 return (
@@ -42,16 +49,22 @@ export default function Navigation() {
                         className={`${styles.navItem} ${isActive ? styles.active : ''}`}
                         aria-current={isActive ? 'page' : undefined}
                     >
-                        <span className={styles.iconWrap}>
-                            <span className={styles.icon}>{item.icon}</span>
-                            {hasUnread && (
-                                <span className={styles.unreadBadge} aria-label={`${unreadCount} unread`}>
-                                    {unreadCount > 9 ? '9+' : unreadCount}
-                                </span>
-                            )}
-                        </span>
-                        <span className={styles.label}>{item.label}</span>
-                        {isActive && <span className={styles.indicator} />}
+                        <div className={styles.navItemInner}>
+                            <span className={styles.iconWrap}>
+                                <item.Icon
+                                    size={24}
+                                    strokeWidth={isActive ? 2.5 : 2}
+                                    className={styles.icon}
+                                />
+                                {hasUnread && (
+                                    <span className={styles.unreadBadge} aria-label={`${unreadCount} unread`}>
+                                        {unreadCount > 9 ? '9+' : unreadCount}
+                                    </span>
+                                )}
+                            </span>
+                            <span className={styles.label}>{item.label}</span>
+                            {isActive && <span className={styles.indicator} />}
+                        </div>
                     </Link>
                 );
             })}

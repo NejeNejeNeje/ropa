@@ -208,8 +208,13 @@ git push origin main         # Triggers auto-deploy to Vercel
 
 | ID | Area | Status | Notes |
 |---|---|---|---|
-| C2 | Image Upload | ❌ Not implemented | Schema and UI ready. Needs Vercel Blob wiring. |
-| I1 | Profile Edit | ❌ Not implemented | Button visible at `/profile`. No route exists. |
-| I5 | Detail pages | ❌ Not implemented | `/circles/[id]` and `/dropzones/[id]` user-facing pages missing. |
-| N1 | Community Likes | ❌ Stub | Like/comment buttons in `/community` have no handlers. |
-| N2 | TravelSwap Form | ❌ Stub | Form visible but no tRPC call on submit. |
+| C2 | Image Upload | ✅ Pre-wired | API at `/api/upload` complete. Needs `BLOB_READ_WRITE_TOKEN` to activate. |
+| I1 | Profile Edit | ✅ Done | `/profile/edit` fully implemented with `user.updateProfile`. |
+| I5 | Detail pages | ✅ Done | `/circles/[id]` and `/dropzones/[id]` both exist. |
+| N1 | Community Likes | ✅ Done | `community.toggleLike` is wired and firing. |
+| N2 | TravelSwap Form | ✅ Done | `travelSwap.create` called correctly on submit. |
+| R1 | Review System | ✅ Done | `match.createReview` + `ReviewModal` wired after swap completion. |
+| P1 | DB Swipe Index | ✅ Done | `@@index([swiperId])` added to Swipe model for feed performance. |
+| RT | Rate Limiter | ⚠️ In-memory | Works in dev. For production scale, migrate to Upstash Redis. |
+| PN | Push Notifications | 🟡 Pre-wired | Service worker + subscription stored. Needs `FIREBASE_SERVER_KEY` + send triggers. |
+
