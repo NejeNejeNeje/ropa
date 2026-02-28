@@ -83,10 +83,12 @@ When you become an **Admin**, you'll see a special dashboard at `/admin` with 9 
 ## 🧪 How to Try the App Right Now (No Technical Setup Needed)
 
 1. Open your browser and go to **https://ropa-trade.vercel.app**
-2. On the login screen, you'll see **"Quick Login"** buttons — these are test accounts
-3. Click **"Test User 1"** to enter as a regular traveler
-4. Explore: swipe in the feed, check out matches, visit the profile
-5. To try the Admin view: log in with `admin@ropa.trade` / `admin1234`
+2. On the login screen, enter one of these test accounts:
+   - **Regular user**: `test1@ropa.trade` / password: `test1234`
+   - **Admin**: `admin@ropa.trade` / password: `admin1234`
+   - **Demo account**: `you@ropa.trade` / password: `ropa2026`
+3. Explore: swipe in the feed, check out matches, visit the profile
+4. To try the Admin view: log in with `admin@ropa.trade` / `admin1234`
 
 **What you'll see in the feed:** Clothing items with photos, city, size, and price. Swipe right on items from two different accounts to see how a Match is created.
 
@@ -115,7 +117,7 @@ When the app is live, create an account with your real email. Then ask your IT p
 
 ### Step 3: Activate the "Boosters"
 When you're ready to scale, these features are activated with one key each:
-- 📧 **Password reset emails** (Resend) — Free, 5 minutes
+- 📧 **Transactional emails** (Resend) — Free, 5 minutes — welcome, password reset, offer notifications, swap confirmations
 - 📸 **Photos on listings** (Vercel Blob) — Free, activates automatically
 - 💳 **Real payments** (Stripe) — Needs bank account
 - 🔑 **Google login** (Google) — Optional but recommended
@@ -130,7 +132,7 @@ When you're ready to scale, these features are activated with one key each:
 ## 📞 If Something Goes Wrong
 
 1. **Ask your IT person** — they have the complete guide (the "Technical Takeover" document)
-2. **Use the AI assistant** — there's a file in `3 - For AI Assistants/` specially designed to be uploaded to ChatGPT or Claude so it can help you with any question about the app
+2. **Use the AI assistant** — there's a file called `AI Assistant - Upload to ChatGPT.md` in your gift folder. Upload it to Gemini or ChatGPT and it can help you with any question about the app
 
 ---
 

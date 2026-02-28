@@ -24,7 +24,7 @@ SQLite (local dev) / PostgreSQL via Neon (production)
 ```
 
 **Auth:** Auth.js v5 (NextAuth) — Credentials provider + Google SSO pre-wired.  
-**Email:** Resend (password resets).  
+**Email:** Resend (7 branded templates: welcome, password reset, offer notifications, escrow release).  
 **File storage:** Vercel Blob (listing photos).  
 **Payments:** Stripe pre-wired via `/api/checkout`.  
 **Push notifications:** Firebase (service worker + `/api/push/subscribe`).  
@@ -65,12 +65,7 @@ Open http://localhost:3000 — use the **Quick Login** panel to test. The app sh
    ```
    postgresql://user:password@ep-....aws.neon.tech/neondb?sslmode=require
    ```
-4. **In the project folder**, update `prisma/schema.prisma` line 9:
-   ```diff
-   - provider = "sqlite"
-   + provider = "postgresql"
-   ```
-5. Push the schema to Neon:
+4. push the schema to Neon:
    ```bash
    DATABASE_URL="<neon-connection-string>" npx prisma db push
    ```
@@ -102,7 +97,8 @@ Open http://localhost:3000 — use the **Quick Login** panel to test. The app sh
 
 | Variable | Value | Unlock |
 |----------|-------|--------|
-| `RESEND_API_KEY` | `re_...` | Password reset emails |
+| `RESEND_API_KEY` | `re_...` | Transactional emails (welcome, password reset, offer updates, swap confirmations) |
+| `EMAIL_FROM` | `ROPA <noreply@yourdomain.com>` | Email sender address |
 | `BLOB_READ_WRITE_TOKEN` | Auto-set by Vercel Blob | Listing photo uploads |
 
 **Optional — premium features:**
@@ -145,10 +141,12 @@ After setting admin, navigate to `/admin` — she'll see the full 9-tab dashboar
 
 ## Part 5: Activating Optional Services
 
-### 5.1 Email Resets — Resend
+### 5.1 Email Service — Resend
 1. [resend.com](https://resend.com) → Create API Key → name: `ropa-production`
 2. Key starts with `re_` → add to Vercel as `RESEND_API_KEY`
-3. ⚠️ To send from a custom domain (e.g. `hello@getropa.com`), verify it in Resend's Domains tab
+3. Also add `EMAIL_FROM` = `ROPA <noreply@yourdomain.com>` (or your custom domain)
+4. This activates 7 email types: welcome, password reset, offer received/accepted/countered/declined, escrow released
+5. ⚠️ To send from a custom domain (e.g. `hello@getropa.com`), verify it in Resend's Domains tab
 
 ### 5.2 Photo Uploads — Vercel Blob
 1. Vercel Dashboard → **Storage** tab → **Create Store** → **Blob** → name: `ropa-images`

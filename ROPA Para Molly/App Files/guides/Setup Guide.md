@@ -70,18 +70,13 @@ In your terminal, navigate to the ROPA project folder and run:
 # Install dependencies (only needed once)
 npm install
 
-# Switch the database to PostgreSQL
-# Open prisma/schema.prisma and change line 9 from:
-#   provider = "sqlite"
-# to:
-#   provider = "postgresql"
-# Then save the file.
-
 # Push the schema to your Neon database
 DATABASE_URL="<your-neon-connection-string>" npx prisma db push
 
 # This should print: "Your database is now in sync with your Prisma schema. ✅"
 ```
+
+> 💡 **Note:** The schema is already configured for PostgreSQL. No changes needed to `prisma/schema.prisma`.
 
 ---
 
@@ -158,7 +153,7 @@ After the app is live and you've created your account:
 
 ## 📧 STEP 4 — Email: Resend (Recommended)
 
-Without this, users can't reset their passwords. It takes 5 minutes to set up.
+Without this, users won't receive transactional emails (welcome messages, password resets, offer notifications, swap confirmations). It takes 5 minutes to set up.
 
 1. Go to **[resend.com](https://resend.com)** → Sign up (free tier: 100 emails/day)
 2. After login → **"API Keys"** → **"Create API Key"**
@@ -168,6 +163,7 @@ Without this, users can't reset their passwords. It takes 5 minutes to set up.
    | Variable | Value |
    |---|---|
    | `RESEND_API_KEY` | `re_your_key_here` |
+   | `EMAIL_FROM` | `ROPA <noreply@yourdomain.com>` |
 
 > ⚠️ **Important:** Resend requires you to verify your sending domain for production. For testing, you can send from their shared domain. See [resend.com/docs](https://resend.com/docs) → "Domains" for setup.
 
@@ -247,7 +243,8 @@ Required (app will not work without these):
   ✅  AUTH_URL            — Your Vercel URL
 
 Recommended (important features):
-  ⬜  RESEND_API_KEY       — Password resets
+   ⬜  RESEND_API_KEY       — Transactional emails (welcome, password reset, offers, swaps)
+   ⬜  EMAIL_FROM           — Sender address (e.g. "ROPA <noreply@yourdomain.com>")
   ⬜  BLOB_READ_WRITE_TOKEN — Photo uploads (auto-set by Vercel Blob)
 
 Optional (premium features):
@@ -276,7 +273,7 @@ To use `getropa.com` or similar:
 |---|---|---|
 | "Internal server error" on login | `AUTH_SECRET` missing or `AUTH_URL` wrong | Check both env vars in Vercel |
 | Can't upload photos | `BLOB_READ_WRITE_TOKEN` not set | Set up Vercel Blob (Step 5) |
-| Password reset emails not arriving | `RESEND_API_KEY` missing | Set up Resend (Step 4) |
+| Password reset emails not arriving | `RESEND_API_KEY` missing or domain not verified | Set up Resend (Step 4) and add `EMAIL_FROM` |
 | DB connection errors | Wrong `DATABASE_URL` or schema not pushed | Re-run `npx prisma db push` |
 | `/admin` redirects me away | Your user doesn't have `role = "admin"` | Use Prisma Studio (Step 3) |
 

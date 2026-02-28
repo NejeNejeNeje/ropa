@@ -11,7 +11,7 @@ The `/admin` dashboard is the hidden heart of ROPA. It is strictly protected.
 1.  **Grant yourself access:** 
     - Log in to ROPA with your own account.
     - Open the database (via Prisma Studio or Neon Console).
-    - Find your user record and change `role` to `"ADMIN"`.
+    - Find your user record and change `role` to `"admin"`.
 2.  **Navigate:** Go to `ropa.trade/admin`. You will see a sidebar with 9 active sections.
 
 ---
@@ -49,7 +49,7 @@ These are local meetups.
 
 Ropa is ready for users, but here is what we recommend as your first "Upgrades":
 
-1.  **Activate "The Boosters":** Add your API keys for **Stripe** (monetary swaps) and **Resend** (password emails).
+1.  **Activate "The Boosters":** Add your API keys for **Stripe** (monetary swaps), **Resend** (welcome emails, password resets, offer notifications, swap confirmations), and **Vercel Blob** (photo uploads).
     - *Note on Photos:* Currently, the app allows users to post listings **without photos** so you can launch immediately. When you are ready for image uploads, add your **Vercel Blob** token to instantly activate that feature.
 2.  **Launch Your First "Partner" Drop Zone:** Go to a local hostel, set up a small shelf, and create their record in the database.
 3.  **Announce is PWA-Ready:** Tell your users they can "Add to Home Screen" on their iPhones/Androids for an app-like experience.
@@ -57,6 +57,6 @@ Ropa is ready for users, but here is what we recommend as your first "Upgrades":
 ---
 
 ## 5. Getting Help
-The `docs/` folder contains a file called `AI_CONTEXT.md`. If you ever hire a new developer or use an AI assistant, **show them that file first.** It gives them the "Neural Map" of everything we built.
+The `AI Assistant - Upload to ChatGPT.md` file in your gift folder is designed to be uploaded to Gemini, ChatGPT, Claude, or used inside Antigravity. It gives any AI complete knowledge of your entire app. Upload it and ask anything!
 
 Enjoy building the future of sustainable travel fashion! 👗🌎
