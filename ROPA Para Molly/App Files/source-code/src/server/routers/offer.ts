@@ -1,6 +1,7 @@
 import { router, protectedProcedure } from '@/lib/trpc';
 import { z } from 'zod';
 import { recalcTrustTier } from '@/lib/karma';
+import { sendEmail, emailTemplates } from '@/lib/email';
 
 // Haversine distance in km
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -140,6 +141,16 @@ export const offerRouter = router({
             }
         }
 
+        // Notify seller about new offer (fire-and-forget)
+        if (!autoDeclined) {
+            const baseUrl = process.env.AUTH_URL || 'https://ropa-trade.vercel.app';
+            const { subject, html } = emailTemplates.offerReceived(
+                listing.user.name, buyer.name, listing.title,
+                input.amount, input.currency, `${baseUrl}/offers`
+            );
+            sendEmail({ to: listing.user.email, subject, html }).catch(() => { });
+        }
+
         return { ...offer, autoDeclined };
     }),
 
@@ -239,15 +250,35 @@ export const offerRouter = router({
             return { offer, match };
         });
 
+        // Notify buyer that their offer was accepted
+        const buyer = await ctx.prisma.user.findUnique({ where: { id: offer.buyerId }, select: { name: true, email: true } });
+        if (buyer) {
+            const baseUrl = process.env.AUTH_URL || 'https://ropa-trade.vercel.app';
+            const { subject, html } = emailTemplates.offerAccepted(
+                buyer.name, offer.listing.title, offer.amount, offer.currency, `${baseUrl}/matches`
+            );
+            sendEmail({ to: buyer.email, subject, html }).catch(() => { });
+        }
+
         return result;
     }),
 
     // Seller declines
     decline: protectedProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
-        return ctx.prisma.offer.update({
+        const declined = await ctx.prisma.offer.update({
             where: { id: input, sellerId: ctx.userId },
             data: { status: 'declined', declinedAt: new Date(), escrowStatus: 'refunded' },
+            include: { buyer: true, listing: true },
         });
+
+        // Notify buyer that their offer was declined
+        const baseUrl = process.env.AUTH_URL || 'https://ropa-trade.vercel.app';
+        const { subject, html } = emailTemplates.offerDeclined(
+            declined.buyer.name, declined.listing.title, `${baseUrl}/feed`
+        );
+        sendEmail({ to: declined.buyer.email, subject, html }).catch(() => { });
+
+        return declined;
     }),
 
     // Seller counters
@@ -255,10 +286,21 @@ export const offerRouter = router({
         offerId: z.string(),
         counterAmount: z.number().positive(),
     })).mutation(async ({ ctx, input }) => {
-        return ctx.prisma.offer.update({
+        const updated = await ctx.prisma.offer.update({
             where: { id: input.offerId, sellerId: ctx.userId },
             data: { status: 'countered', counterAmount: input.counterAmount },
+            include: { buyer: true, listing: true },
         });
+
+        // Notify buyer about counter-offer
+        const baseUrl = process.env.AUTH_URL || 'https://ropa-trade.vercel.app';
+        const { subject, html } = emailTemplates.offerCountered(
+            updated.buyer.name, updated.listing.title,
+            input.counterAmount, updated.currency, `${baseUrl}/offers`
+        );
+        sendEmail({ to: updated.buyer.email, subject, html }).catch(() => { });
+
+        return updated;
     }),
 
     // Buyer accepts seller's counter-offer → creates Match at counter price
