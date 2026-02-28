@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { hash } from 'bcryptjs';
 import { NextResponse } from 'next/server';
 import { recalcTrustTier } from '@/lib/karma';
+import { sendEmail, emailTemplates } from '@/lib/email';
 
 // Simple in-memory rate limiter for registration (per email, 5 attempts/hour)
 const regAttempts = new Map<string, { count: number; resetAt: number }>();
@@ -67,6 +68,11 @@ export async function POST(req: Request) {
             data: { karmaPoints: 50 },
         });
         await recalcTrustTier(prisma, user.id);
+
+        // Fire-and-forget welcome email
+        const loginUrl = `${process.env.AUTH_URL || 'https://ropa-trade.vercel.app'}/login`;
+        const { subject, html } = emailTemplates.welcome(name, loginUrl);
+        sendEmail({ to: email, subject, html }).catch(() => { });
 
         return NextResponse.json({ success: true });
     } catch {

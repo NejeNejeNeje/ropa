@@ -1,6 +1,7 @@
 import { router, protectedProcedure } from '@/lib/trpc';
 import { z } from 'zod';
 import { recalcTrustTier } from '@/lib/karma';
+import { sendEmail, emailTemplates } from '@/lib/email';
 
 export const matchRouter = router({
     getAll: protectedProcedure.query(async ({ ctx }) => {
@@ -184,7 +185,7 @@ export const matchRouter = router({
     confirmDelivery: protectedProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
         const match = await ctx.prisma.match.findUniqueOrThrow({
             where: { id: input },
-            include: { offer: true },
+            include: { offer: true, listingA: { select: { title: true } } },
         });
 
         // Verify caller is a participant
@@ -259,6 +260,22 @@ export const matchRouter = router({
                 await ctx.prisma.swapBuddy.create({
                     data: { userAId: match.userAId, userBId: match.userBId },
                 });
+            }
+
+            // Notify both parties about escrow release
+            const [userA, userB] = await Promise.all([
+                ctx.prisma.user.findUnique({ where: { id: match.userAId }, select: { name: true, email: true } }),
+                ctx.prisma.user.findUnique({ where: { id: match.userBId }, select: { name: true, email: true } }),
+            ]);
+            const amount = match.offer?.amount ?? 0;
+            const currency = match.offer?.currency ?? 'USD';
+            if (userA) {
+                const { subject, html } = emailTemplates.escrowReleased(userA.name, match.listingA.title, amount, currency);
+                sendEmail({ to: userA.email, subject, html }).catch(() => { });
+            }
+            if (userB) {
+                const { subject, html } = emailTemplates.escrowReleased(userB.name, match.listingA.title, amount, currency);
+                sendEmail({ to: userB.email, subject, html }).catch(() => { });
             }
 
             return { confirmed: true, bothConfirmed: true, status: 'completed' };
