@@ -113,16 +113,24 @@ A complete technical and quality audit of the entire app — every feature teste
 
 ## Your AI Assistant — Your 24/7 Helper
 
-The file `AI Assistant - Upload to ChatGPT.md` is your secret weapon. When you upload it to any AI (Gemini, ChatGPT, Claude), the AI instantly knows *everything* about your app — every feature, every admin button, every business model detail, every technical detail.
+The file `AI Assistant - Upload to ChatGPT.md` is your secret weapon. It works in **two phases**:
 
-**But it does more than answer questions.** It also contains a step-by-step guide to download a free tool called **Antigravity** from Google. With Antigravity, you can change anything about your app just by talking to an AI in plain English. No coding. No terminal. You say what you want and click "Allow."
+### Phase 1: Explore (No Downloads Needed!)
+Upload the file to any AI chat and start asking questions about your app. The AI instantly knows *everything* — every feature, every admin button, every business detail. It will guide you through testing the live app and understanding how everything works.
 
-**How to use it:**
-1. Go to gemini.google.com (or chat.openai.com or claude.ai)
+**How to start:**
+1. Go to **gemini.google.com** (or chat.openai.com or claude.ai)
 2. Start a new conversation
 3. Upload the file `AI Assistant - Upload to ChatGPT.md` as an attachment
 4. Say: **"I'm Molly, the owner of ROPA. Help me get started."**
-5. The AI will walk you through everything
+5. The AI will walk you through testing the live app, trying the admin dashboard, and understanding your business
+
+### Phase 2: Make Changes (Your Permanent Tool!)
+When you're ready to change something — colors, text, features — the AI will walk you through downloading a free tool called **Antigravity** from Google. With Antigravity, you talk to an AI in plain English and it edits your app for you. No coding. No terminal. You just describe what you want and click "Allow."
+
+**Once you set up Antigravity, you'll use it forever.** It becomes your main tool for managing ROPA — making changes, fixing things, and pushing updates to the live website.
+
+> 💡 **Start with Phase 1.** Get comfortable with your app first, then move to Phase 2 when you're ready to make it yours.
 
 ---
 
