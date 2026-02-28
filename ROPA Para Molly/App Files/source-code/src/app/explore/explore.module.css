@@ -1,0 +1,251 @@
+.page {
+    min-height: 100vh;
+    background: var(--bg-primary);
+    padding-bottom: 100px;
+}
+
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: 16px 20px;
+    background: rgba(12, 10, 9, 0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.header h1 {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    color: var(--text-primary);
+}
+
+.main {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 8px 0;
+}
+
+.section {
+    padding: 20px 16px;
+}
+
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.sectionHeader h2 {
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    color: var(--text-primary);
+}
+
+.seeAll {
+    font-size: 0.8rem;
+    color: var(--accent-primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.sectionSub {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+}
+
+/* ─── Horizontal Scroll (Drop Zones) ──── */
+.horizontalScroll {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+}
+
+.horizontalScroll::-webkit-scrollbar {
+    display: none;
+}
+
+.previewCard {
+    flex: 0 0 200px;
+    scroll-snap-align: start;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    text-decoration: none;
+    transition: transform 0.2s;
+}
+
+.previewCard:hover {
+    transform: translateY(-2px);
+}
+
+.previewImage {
+    width: 100%;
+    height: 110px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.typeBadge {
+    position: absolute;
+    bottom: 6px;
+    left: 6px;
+    padding: 3px 8px;
+    border-radius: var(--radius-full);
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    font-size: 0.65rem;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.previewInfo {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.previewInfo strong {
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.previewInfo span {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+/* ─── Circle Cards ──── */
+.circlesList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.circleCard {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    transition: transform 0.2s;
+}
+
+.circleCard:hover {
+    transform: translateY(-2px);
+}
+
+.circleDate {
+    flex: 0 0 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px;
+    border-radius: var(--radius-md);
+    background: rgba(249, 115, 22, 0.15);
+    border: 1px solid rgba(249, 115, 22, 0.3);
+}
+
+.circleDay {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+    line-height: 1;
+}
+
+.circleMonth {
+    font-size: 0.65rem;
+    color: var(--accent-primary);
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.circleInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.circleInfo strong {
+    font-size: 0.85rem;
+    color: var(--text-primary);
+}
+
+.circleInfo span {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.rsvpBadge {
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    background: var(--accent-primary);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.fullBadge {
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+/* ─── Feed Preview Grid ──── */
+.feedPreview {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.feedCard {
+    aspect-ratio: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+.feedImage {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.3s;
+}
+
+.feedCard:hover .feedImage {
+    transform: scale(1.05);
+}
+
+.feedOverlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 6px;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    display: flex;
+    gap: 8px;
+    font-size: 0.6rem;
+    color: white;
+}

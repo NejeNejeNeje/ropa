@@ -1,0 +1,92 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+    backdrop-filter: blur(8px);
+}
+
+.confettiContainer {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.confetti {
+    position: absolute;
+    top: -10%;
+    border-radius: 2px;
+    animation: confetti-fall linear forwards;
+    transform: rotate(var(--rotation, 0deg));
+}
+
+.card {
+    position: relative;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-8) var(--space-6);
+    max-width: 360px;
+    width: 100%;
+    text-align: center;
+}
+
+.matchIcon {
+    font-size: 3.5rem;
+    margin-bottom: var(--space-4);
+}
+
+.title {
+    font-size: 1.75rem;
+    margin-bottom: var(--space-2);
+}
+
+.subtitle {
+    color: var(--color-text-secondary);
+    font-size: 0.9375rem;
+    margin-bottom: var(--space-6);
+}
+
+.items {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+}
+
+.itemPreview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.itemImage {
+    width: 100px;
+    height: 130px;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--color-primary);
+    box-shadow: 0 0 20px var(--color-primary-glow);
+}
+
+.itemLabel {
+    font-size: 0.75rem;
+    font-weight: 600;
+    max-width: 100px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    align-items: center;
+}

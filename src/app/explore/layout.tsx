@@ -6,6 +6,7 @@ export const dynamic = 'force-dynamic';
 export default async function UserRoutesLayout({ children }: { children: React.ReactNode }) {
     const session = await auth();
     const role = (session?.user as { role?: string } | undefined)?.role;
-    if (session?.user && role === 'admin') redirect('/admin');
+    if (!session?.user) redirect('/login');
+    if (role === 'admin') redirect('/admin');
     return <>{children}</>;
 }

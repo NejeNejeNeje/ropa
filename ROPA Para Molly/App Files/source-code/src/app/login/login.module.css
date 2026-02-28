@@ -1,0 +1,302 @@
+/* ─── Login Page ─────────────────────────────────── */
+
+.page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg);
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    max-width: 440px;
+    text-align: center;
+}
+
+.logo {
+    font-size: 3.5rem;
+    margin-bottom: 8px;
+    animation: float 3s ease-in-out infinite;
+}
+
+.title {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    color: var(--color-text);
+    margin-bottom: 4px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    margin-bottom: 32px;
+}
+
+/* ─── Form ─── */
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.input {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+.input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-glow);
+}
+
+.input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.error {
+    color: var(--color-error);
+    font-size: 0.8rem;
+    text-align: left;
+    padding: 0 4px;
+}
+
+.submitBtn {
+    width: 100%;
+    padding: 14px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    color: white;
+    font-weight: 700;
+    font-size: 0.95rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px var(--color-primary-glow);
+}
+
+.submitBtn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px var(--color-primary-glow);
+}
+
+.submitBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.toggle {
+    margin-top: 4px;
+    margin-bottom: 0;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.toggle button {
+    background: none;
+    border: none;
+    color: var(--color-primary);
+    cursor: pointer;
+    font-weight: 600;
+    margin-left: 4px;
+    font-size: 0.8rem;
+}
+
+/* ─── Test Accounts Section ─── */
+
+.testSection {
+    margin-top: 32px;
+    padding-top: 0;
+}
+
+.testHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.testDivider {
+    flex: 1;
+    height: 1px;
+    background: var(--color-border);
+}
+
+.testLabel {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.testGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.testCard {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+}
+
+.testCard:hover {
+    border-color: var(--color-primary);
+    background: var(--color-bg-card);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.testCard:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.testCardAdmin {
+    border-color: rgba(233, 180, 76, 0.3);
+    background: linear-gradient(135deg, var(--color-bg-elevated), rgba(233, 180, 76, 0.05));
+}
+
+.testCardAdmin:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 16px var(--color-primary-glow);
+}
+
+.testCardTop {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.testAvatar {
+    font-size: 1.4rem;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    background: var(--color-bg-card);
+    flex-shrink: 0;
+}
+
+.testInfo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.testName {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--color-text);
+}
+
+.adminBadge {
+    font-size: 0.6rem;
+    font-weight: 800;
+    color: var(--color-primary);
+    background: var(--color-primary-glow);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    letter-spacing: 1px;
+}
+
+.testCredentials {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-left: 42px;
+}
+
+.testEmail {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.testPassword {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    background: var(--color-bg-card);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.testCity {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    padding-left: 42px;
+}
+
+.testLoading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-glass);
+    backdrop-filter: blur(4px);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    border-radius: var(--radius-md);
+    animation: pulse 1s ease-in-out infinite;
+}
+
+/* ─── Animations ─── */
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+}

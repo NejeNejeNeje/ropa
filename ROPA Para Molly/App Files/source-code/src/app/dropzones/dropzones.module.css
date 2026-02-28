@@ -1,0 +1,229 @@
+.page {
+    min-height: 100vh;
+    background: var(--bg-primary);
+    padding-bottom: 100px;
+}
+
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: 16px 20px;
+    background: rgba(12, 10, 9, 0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header h1 {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    color: var(--text-primary);
+}
+
+.count {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.main {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+.cityFilter {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    margin-bottom: 16px;
+}
+
+.cityFilter::-webkit-scrollbar {
+    display: none;
+}
+
+.cityChip {
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.cityChipActive {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+    color: white;
+}
+
+.infoBar {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 12px 14px;
+    background: rgba(249, 115, 22, 0.08);
+    border: 1px solid rgba(249, 115, 22, 0.2);
+    border-radius: var(--radius-lg);
+    margin-bottom: 20px;
+}
+
+.infoBar p {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.zoneList {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.zoneCard {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+}
+
+.zoneImage {
+    height: 140px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.zoneBadge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    font-size: 0.7rem;
+    color: white;
+    font-weight: 600;
+}
+
+.zoneBody {
+    padding: 14px;
+}
+
+.zoneTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.zoneTop h3 {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.listingCount {
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    background: rgba(249, 115, 22, 0.15);
+    color: var(--accent-primary);
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.zoneAddress {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.zoneDesc {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+.zoneMeta {
+    display: flex;
+    gap: 16px;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+}
+
+.zoneActions {
+    display: flex;
+    gap: 8px;
+}
+
+.scanBtn {
+    flex: 1;
+    padding: 10px;
+    border-radius: var(--radius-md);
+    background: var(--accent-primary);
+    color: white;
+    font-weight: 700;
+    font-size: 0.8rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.scanBtn:hover {
+    filter: brightness(1.1);
+}
+
+.dirBtn {
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.8rem;
+    border: 1px solid var(--border-subtle);
+    cursor: pointer;
+}
+
+.empty {
+    text-align: center;
+    padding: 48px 20px;
+}
+
+.emptyIcon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.empty h3 {
+    font-family: var(--font-heading);
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.empty p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+}
+
+.suggestBtn {
+    padding: 10px 24px;
+    border-radius: var(--radius-full);
+    background: var(--accent-primary);
+    color: white;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+}

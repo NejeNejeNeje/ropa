@@ -47,5 +47,12 @@ next-env.d.ts
 
 /src/generated/prisma
 
+# firebase
+.firebase/
+
 # AI agent internals — never commit
 .agent/
+
+# Build artifacts
+*.zip
+Gemini_Generated_Image_*
