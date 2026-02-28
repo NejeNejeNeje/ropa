@@ -54,7 +54,7 @@ export default function ProfilePage() {
             <header className={styles.header}>
                 <div className={styles.headerRow}>
                     <h1>👤 Profile</h1>
-                    <button className={styles.logoutHeaderBtn} onClick={() => signOut({ callbackUrl: '/' })}>Logout</button>
+                    <button className={styles.logoutHeaderBtn} onClick={() => signOut({ callbackUrl: window.location.origin + '/' })}>Logout</button>
                 </div>
             </header>
 

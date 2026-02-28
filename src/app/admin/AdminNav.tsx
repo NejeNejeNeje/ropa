@@ -41,7 +41,7 @@ export default function AdminNav() {
 
             <button
                 className={styles.logoutBtn}
-                onClick={() => signOut({ callbackUrl: '/' })}
+                onClick={() => signOut({ callbackUrl: window.location.origin + '/' })}
             >
                 <span className={styles.navIcon}>🚪</span>
                 Log Out
