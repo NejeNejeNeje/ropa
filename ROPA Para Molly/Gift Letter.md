@@ -14,8 +14,9 @@ Open this link in your browser to try it:
 
 | | |
 |---|---|
-| **Test login** | Email: `test1@ropa.trade` / Password: `ropa2026` |
-| **Admin login** | Email: `admin@ropa.trade` / Password: `ropa2026admin` |
+| **Test login** | Email: `test1@ropa.trade` / Password: `test1234` |
+| **Admin login** | Email: `admin@ropa.trade` / Password: `admin1234` |
+| **Demo account** | Email: `you@ropa.trade` / Password: `ropa2026` |
 
 Log in, swipe through clothing cards, check out the admin dashboard — it's all yours to explore.
 
