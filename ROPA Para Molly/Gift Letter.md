@@ -149,7 +149,7 @@ Once your own version is live, your IT person can turn on these extras with one 
 
 | Feature | Service | Cost | Time |
 |---------|---------|------|------|
-| Password reset emails | Resend | Free | 5 min |
+| Emails (welcome, password reset, offer updates) | Resend | Free | 5 min |
 | Photo uploads on listings | Vercel Blob | Free | 5 min |
 | Real payments (Stripe) | Stripe | Free (they take a %) | 30 min |
 | Google login button | Google | Free | 15 min |

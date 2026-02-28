@@ -441,6 +441,38 @@ This is the magic part. The AI inside Antigravity can:
 
 ---
 
+### 🟢 YOUR FIRST EXERCISE: Remove the Test Login Cards
+
+Before you go live with real users, you should remove the test account shortcuts from your login page. Right now, anyone who visits your login page can see 5 quick-login cards with passwords visible — that's fine for testing but not for production.
+
+**This is your practice run!** Follow these steps:
+
+1. Make sure Antigravity is open with your ROPA project (Steps 2–5 above)
+2. In the Antigravity chat panel, **copy and paste this exact message:**
+
+```
+I want to remove the test account quick-login cards from the login page.
+They are in the file src/app/login/page.tsx.
+
+Please:
+1. Delete the TEST_ACCOUNTS array at the top of the file (lines 10-16)
+2. Delete the entire "Test Accounts Panel" section in the JSX (the <div className={styles.testSection}> block and everything inside it)
+3. Also remove the handleQuickLogin function and the loggingInAs state since they won't be needed anymore
+4. Keep the rest of the login form exactly as it is (email, password, sign in button, register link, forgot password link)
+5. Run npm run build to make sure nothing is broken
+```
+
+3. The AI will make all the changes for you. When it asks for permission, **click "Allow" or "Approve"**
+4. The AI will show you exactly what it changed — you'll see the test cards disappear
+5. Open `http://localhost:3000/login` in your browser to verify the test cards are gone
+6. If everything looks good, follow Step 9 below to push it to your live website!
+
+> 💡 **Congratulations!** You just made your first code change without writing a single line of code. Every future change works exactly like this — describe what you want, the AI does it, you approve.
+
+> ⚠️ **Important:** Write down your admin login (`admin@ropa.trade` / `admin1234`) somewhere safe before removing the test cards — you'll still need it to access the admin panel! The login itself still works; you're only removing the visible shortcut cards.
+
+---
+
 ### 🟢 STEP 9: Putting Your Changes on the Live Website
 
 When you're happy with how everything looks on your computer and want it to appear on the **real website** that everyone can see:
@@ -452,6 +484,17 @@ When you're happy with how everything looks on your computer and want it to appe
 5. After about 2–3 minutes, your live website will automatically update!
 
 > 💡 **Good news:** You can't accidentally break your live website by editing files. The live site only changes when you specifically ask the AI to push the changes (this step). So feel free to experiment!
+
+#### 🚧 If the AI Says Something About "Git" or "Authentication"
+
+The first time you push, the AI might say it needs permission to connect to GitHub. Here's what to do:
+
+1. If it asks you to "log in to GitHub" → the AI will open a browser window. Sign in with the Google/GitHub account that owns the ROPA repository.
+2. If it says "remote rejected" or "permission denied" → type in the chat: **"Help me set up GitHub authentication so I can push changes."** The AI will walk you through it.
+3. If it says "there are merge conflicts" → type: **"Fix the merge conflicts for me and push again."**
+4. If ANYTHING confuses you → type: **"I'm stuck. What should I do next?"** — the AI will guide you through it.
+
+> 💪 **You will NOT get blocked.** The AI can solve any Git, authentication, or deployment issue. Just describe what happened and it will fix it.
 
 ---
 
@@ -535,7 +578,8 @@ These are like the "keys" that activate different features of the app. They live
 | `DATABASE_URL` | Connects to the database | ✅ YES |
 | `AUTH_SECRET` | Signs login sessions securely | ✅ YES |
 | `AUTH_URL` | The public address of your app | ✅ YES |
-| `RESEND_API_KEY` | Enables password reset emails | Recommended |
+| `RESEND_API_KEY` | Enables ALL emails (welcome, password reset, offer updates, swap confirmations) | Recommended |
+| `EMAIL_FROM` | The sender address for emails (e.g., `ROPA <noreply@yourdomain.com>`) | Recommended |
 | `BLOB_READ_WRITE_TOKEN` | Enables photo uploads | Recommended |
 | `GOOGLE_CLIENT_ID` | Enables "Sign in with Google" | Optional |
 | `GOOGLE_CLIENT_SECRET` | Required with `GOOGLE_CLIENT_ID` | Optional |
@@ -669,6 +713,7 @@ This is the full inventory of every source file in the project. Use this to unde
 | `trpc.ts` | tRPC v11 server setup — `publicProcedure`, `protectedProcedure` (extracts userId from JWT), context creates prisma+userId |
 | `trpc-client.ts` | tRPC React Query client — `httpBatchLink` to `/api/trpc` |
 | `karma.ts` | `recalcTrustTier(prisma, userId)` — recalculates trustTier (bronze/silver/gold) after every karma award. Works inside `$transaction` |
+| `email.ts` | `sendEmail(to, subject, html)` — centralized email sender using Resend API. Contains 7 branded HTML templates: welcome, password reset, offer received, offer accepted, offer countered, offer declined, escrow released. Gracefully logs to console when `RESEND_API_KEY` is absent |
 | `push.ts` | `sendPushToUser(userId, payload)` — web push via VAPID. Auto-cleans expired subscriptions (410/404) |
 | `data.ts` | Shared data constants (cities, categories, sizes) |
 | `StoryCardGenerator.ts` | Generates traveler story cards for the landing page |
