@@ -1,6 +1,6 @@
 'use client';
 
-import { ClothingCategory, ClothingSize, GenderTarget, Condition, CATEGORY_LABELS, CONDITION_LABELS, SIZE_ORDER } from '@/data/types';
+import { ClothingCategory, ClothingSize, GenderTarget, Condition, CATEGORY_LABELS, CONDITION_LABELS, SIZE_ORDER, POPULAR_BRANDS, LISTING_COLORS } from '@/data/types';
 import styles from './FilterPanel.module.css';
 
 interface Filters {
@@ -10,6 +10,8 @@ interface Filters {
     condition: Condition | 'all';
     maxPrice: number;
     freeOnly: boolean;
+    brand: string | 'all';
+    colors: string[];
 }
 
 interface FilterPanelProps {
@@ -112,6 +114,56 @@ export default function FilterPanel({ filters, onChange, onClose }: FilterPanelP
                 </div>
             </div>
 
+            {/* Brand */}
+            <div className={styles.group}>
+                <label className={styles.label}>Brand</label>
+                <div className={styles.chipGrid}>
+                    <button
+                        className={`${styles.chip} ${filters.brand === 'all' ? styles.chipActive : ''}`}
+                        onClick={() => update('brand', 'all')}
+                    >
+                        All
+                    </button>
+                    {POPULAR_BRANDS.map((brand) => (
+                        <button
+                            key={brand}
+                            className={`${styles.chip} ${filters.brand === brand ? styles.chipActive : ''}`}
+                            onClick={() => update('brand', brand)}
+                        >
+                            {brand}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Color */}
+            <div className={styles.group}>
+                <label className={styles.label}>Color</label>
+                <div className={styles.chipGrid}>
+                    {LISTING_COLORS.map((color) => {
+                        const isActive = filters.colors.includes(color.name);
+                        return (
+                            <button
+                                key={color.name}
+                                className={`${styles.chip} ${styles.colorChip} ${isActive ? styles.chipActive : ''}`}
+                                onClick={() => {
+                                    const next = isActive
+                                        ? filters.colors.filter(c => c !== color.name)
+                                        : [...filters.colors, color.name];
+                                    onChange({ ...filters, colors: next });
+                                }}
+                            >
+                                <span
+                                    className={styles.colorSwatch}
+                                    style={{ backgroundColor: color.hex }}
+                                />
+                                {color.name}
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+
             {/* Price */}
             <div className={styles.group}>
                 <label className={styles.label}>
@@ -154,6 +206,8 @@ export default function FilterPanel({ filters, onChange, onClose }: FilterPanelP
                     condition: 'all',
                     maxPrice: 100,
                     freeOnly: false,
+                    brand: 'all',
+                    colors: [],
                 })}
             >
                 Reset All Filters

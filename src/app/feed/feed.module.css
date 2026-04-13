@@ -3,6 +3,8 @@
     display: flex;
     flex-direction: column;
     padding-bottom: 80px;
+    overflow-x: hidden;
+    max-width: 100vw;
 }
 
 /* ─── Header ─────────────────────────────────────────────────── */
@@ -11,40 +13,77 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--space-3) var(--space-4);
+    padding: var(--space-2) var(--space-3);
     position: sticky;
     top: 0;
     z-index: var(--z-nav);
+    gap: var(--space-2);
 }
 
-.headerLeft,
-.headerRight {
-    flex: 1;
+.headerLeft {
+    flex: 0 0 auto;
 }
 
 .headerRight {
+    flex: 0 0 auto;
     display: flex;
     justify-content: flex-end;
 }
 
 .headerCenter {
-    flex: 2;
-    text-align: center;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    min-width: 0;
 }
 
 .logo {
     font-family: var(--font-heading);
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     font-weight: 800;
     display: flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: 4px;
+    white-space: nowrap;
 }
 
 .cityBadge {
     font-size: 0.8125rem;
     color: var(--color-text-secondary);
     font-weight: 500;
+}
+
+/* ─── Location Toggle ────────────────────────────────────────── */
+
+.locationToggle {
+    display: flex;
+    gap: 2px;
+    background: var(--color-bg-card);
+    border-radius: var(--radius-full);
+    padding: 2px;
+    border: 1px solid var(--color-border);
+}
+
+.locationBtn {
+    padding: 3px 8px;
+    border-radius: var(--radius-full);
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 0.6rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
+.locationBtn:hover {
+    color: var(--color-text-secondary);
+}
+
+.locationBtnActive {
+    background: var(--color-primary-glow);
+    color: var(--color-primary-light);
 }
 
 .filterBtn {
@@ -55,6 +94,10 @@
     border: 1px solid var(--color-border);
     font-size: 1rem;
     transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
 }
 
 .filterBtn:hover {
@@ -81,25 +124,240 @@
     justify-content: center;
 }
 
-/* ─── Card Area ──────────────────────────────────────────────── */
+/* ─── Search Bar ─────────────────────────────────────────────── */
 
-.cardArea {
+.searchBar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0 var(--space-4) var(--space-3);
+    padding: var(--space-2) var(--space-4);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    transition: border-color var(--transition-fast);
+}
+
+.searchBar:focus-within {
+    border-color: var(--color-primary);
+}
+
+.searchIcon {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+}
+
+.searchInput {
     flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--color-text);
+    font-size: 0.875rem;
+    outline: none;
+    min-width: 0;
+}
+
+.searchInput::placeholder {
+    color: var(--color-text-muted);
+}
+
+.searchClear {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-full);
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    font-size: 0.7rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--space-4);
-    min-height: 500px;
+    flex-shrink: 0;
+    transition: all var(--transition-fast);
 }
 
-.cardStack {
+.searchClear:hover {
+    background: var(--color-bg-card);
+    color: var(--color-text);
+}
+
+/* ─── Grid Area ──────────────────────────────────────────────── */
+
+.gridArea {
+    flex: 1;
+    padding: 0 var(--space-2) var(--space-4);
+    overflow-x: hidden;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+}
+
+/* ─── Grid Card ──────────────────────────────────────────────── */
+
+.gridCard {
+    background: var(--color-bg-card);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    transition: transform 150ms ease, box-shadow 150ms ease;
+    min-width: 0;
+}
+
+.gridCard:active {
+    transform: scale(0.97);
+}
+
+.gridCardImage {
     position: relative;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    background: var(--color-bg-elevated);
+}
+
+.gridCardImage img {
     width: 100%;
-    max-width: 380px;
-    height: 560px;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.gridPriceBadge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    padding: 2px 7px;
+    border-radius: var(--radius-full);
+    background: rgba(0, 0, 0, 0.7);
+    color: var(--color-primary-light);
+    font-size: 0.6rem;
+    font-weight: 700;
+    backdrop-filter: blur(4px);
+}
+
+.gridCardInfo {
+    padding: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-height: 36px;
+}
+
+.gridCardTitle {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--color-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.gridCardMeta {
+    font-size: 0.6rem;
+    color: var(--color-text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ─── Card Actions ───────────────────────────────────────────── */
+
+.gridCardActions {
+    display: flex;
+    justify-content: space-around;
+    padding: var(--space-1) var(--space-2) var(--space-2);
+    border-top: 1px solid var(--color-border);
+}
+
+.gridActionBtn {
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    background: transparent;
+    border: none;
+    transition: transform 150ms ease;
+    cursor: pointer;
+}
+
+.gridActionBtn:hover {
+    transform: scale(1.2);
+}
+
+.gridActionBtn:active {
+    transform: scale(0.9);
+}
+
+.heartBtn {
+    color: var(--color-nope);
+}
+
+.heartActive {
+    animation: heartPulse 300ms ease;
+}
+
+@keyframes heartPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.35); }
+    100% { transform: scale(1); }
+}
+
+.buyBtn {
+    color: var(--color-success);
+}
+
+/* ─── Pagination ─────────────────────────────────────────────── */
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4) 0;
+}
+
+.pagination span {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+}
+
+.pageBtn {
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-full);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+}
+
+.pageBtn:hover:not(:disabled) {
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+
+.pageBtn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
 }
 
 /* ─── Empty State ────────────────────────────────────────────── */
+
+.emptyWrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+}
 
 .empty {
     text-align: center;
@@ -133,72 +391,6 @@
     line-height: 1.6;
 }
 
-/* ─── Action Buttons ─────────────────────────────────────────── */
-
-.actions {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: var(--space-5);
-    padding: var(--space-3) var(--space-4);
-}
-
-.actionBtn {
-    width: 64px;
-    height: 64px;
-    border-radius: var(--radius-full);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.6rem;
-    border: 2.5px solid;
-    transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
-    background: var(--color-bg-elevated);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-}
-
-.actionBtn:hover {
-    transform: scale(1.15) translateY(-2px);
-}
-
-.actionBtn:active {
-    transform: scale(0.92);
-    transition-duration: 80ms;
-}
-
-.skipBtn {
-    border-color: var(--color-nope);
-    color: var(--color-nope);
-}
-
-.skipBtn:hover {
-    background: var(--color-nope-glow);
-    box-shadow: 0 6px 24px rgba(248, 113, 113, 0.4);
-}
-
-.superBtn {
-    border-color: var(--color-super);
-    color: var(--color-super);
-    width: 50px;
-    height: 50px;
-    font-size: 1.25rem;
-}
-
-.superBtn:hover {
-    background: var(--color-super-glow);
-    box-shadow: 0 6px 24px rgba(192, 132, 252, 0.4);
-}
-
-.likeBtn {
-    border-color: var(--color-like);
-    color: var(--color-like);
-}
-
-.likeBtn:hover {
-    background: var(--color-like-glow);
-    box-shadow: 0 6px 24px rgba(74, 222, 128, 0.4);
-}
-
 /* ─── Stats Bar ──────────────────────────────────────────────── */
 
 .statsBar {
@@ -216,6 +408,77 @@
     margin: 0 auto var(--space-2);
     width: fit-content;
     backdrop-filter: blur(8px);
+}
+
+/* ─── Skeleton Loading ───────────────────────────────────────── */
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.skeletonCard {
+    background: var(--color-bg-card);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.skeletonImage {
+    aspect-ratio: 3 / 4;
+    background: linear-gradient(
+        90deg,
+        var(--color-bg-elevated) 25%,
+        var(--color-surface) 50%,
+        var(--color-bg-elevated) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.skeletonInfo {
+    padding: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.skeletonLine {
+    border-radius: var(--radius-sm);
+    background: linear-gradient(
+        90deg,
+        var(--color-bg-elevated) 25%,
+        var(--color-surface) 50%,
+        var(--color-bg-elevated) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.skeletonTitle {
+    height: 10px;
+    width: 80%;
+}
+
+.skeletonMeta {
+    height: 8px;
+    width: 55%;
+}
+
+.skeletonActions {
+    height: 44px;
+    border-top: 1px solid var(--color-border);
+    background: linear-gradient(
+        90deg,
+        var(--color-bg-elevated) 25%,
+        var(--color-surface) 50%,
+        var(--color-bg-elevated) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
 }
 
 .toast {

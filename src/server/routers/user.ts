@@ -20,6 +20,9 @@ export const userRouter = router({
                 currentCity: true, country: true, karmaPoints: true, trustTier: true,
                 rating: true, totalTrades: true, completedTrades: true,
                 verifiedAt: true, citiesVisited: true, createdAt: true,
+                lat: true, lng: true,
+                destination: true, destinationDate: true,
+                destLat: true, destLng: true, destCountry: true,
             },
         });
     }),
@@ -29,6 +32,13 @@ export const userRouter = router({
         bio: z.string().max(1000).optional(),
         currentCity: z.string().max(100).optional(),
         country: z.string().max(100).optional(),
+        lat: z.number().optional(),
+        lng: z.number().optional(),
+        destination: z.string().max(100).optional(),
+        destinationDate: z.string().optional().nullable(),
+        destLat: z.number().nullable().optional(),
+        destLng: z.number().nullable().optional(),
+        destCountry: z.string().max(100).optional(),
         preferredSizes: z.array(z.string().max(30)).max(20).optional(),
         preferredStyles: z.array(z.string().max(50)).max(20).optional(),
     })).mutation(async ({ ctx, input }) => {
@@ -37,6 +47,15 @@ export const userRouter = router({
         if (input.bio !== undefined) data.bio = input.bio;
         if (input.currentCity) data.currentCity = input.currentCity;
         if (input.country) data.country = input.country;
+        if (input.lat !== undefined) data.lat = input.lat;
+        if (input.lng !== undefined) data.lng = input.lng;
+        if (input.destination !== undefined) data.destination = input.destination;
+        if (input.destinationDate !== undefined) {
+            data.destinationDate = input.destinationDate ? new Date(input.destinationDate) : null;
+        }
+        if (input.destLat !== undefined) data.destLat = input.destLat;
+        if (input.destLng !== undefined) data.destLng = input.destLng;
+        if (input.destCountry !== undefined) data.destCountry = input.destCountry;
         if (input.preferredSizes) data.preferredSizes = JSON.stringify(input.preferredSizes);
         if (input.preferredStyles) data.preferredStyles = JSON.stringify(input.preferredStyles);
 

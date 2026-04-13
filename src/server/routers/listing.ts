@@ -75,6 +75,13 @@ export const listingRouter = router({
         city: z.string().optional(),
         cursor: z.string().optional(),
         limit: z.number().min(1).max(50).default(20),
+        // Geo-radius filtering
+        nearLat: z.number().optional(),
+        nearLng: z.number().optional(),
+        destLat: z.number().optional(),
+        destLng: z.number().optional(),
+        radiusKm: z.number().min(1).max(5000).default(200),
+        locationMode: z.enum(['current', 'next', 'both', 'all']).default('all'),
     })).query(async ({ ctx, input }) => {
         const where: Record<string, unknown> = { isActive: true };
         if (input.excludeUserId) where.userId = { not: input.excludeUserId };
@@ -101,13 +108,45 @@ export const listingRouter = router({
             cursor: input.cursor ? { id: input.cursor } : undefined,
         });
 
+        // Haversine distance filter (post-query, avoids raw SQL extension dependency)
+        const haversineKm = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
+            const R = 6371;
+            const dLat = ((lat2 - lat1) * Math.PI) / 180;
+            const dLng = ((lng2 - lng1) * Math.PI) / 180;
+            const a =
+                Math.sin(dLat / 2) ** 2 +
+                Math.cos((lat1 * Math.PI) / 180) *
+                Math.cos((lat2 * Math.PI) / 180) *
+                Math.sin(dLng / 2) ** 2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        };
+
+        const isGeoActive =
+            input.locationMode !== 'all' &&
+            (input.nearLat !== undefined || input.destLat !== undefined);
+
+        const filtered = isGeoActive
+            ? listings.filter((l) => {
+                if (l.lat === 0 && l.lng === 0) return true; // no coords — always include
+                const inCurrent =
+                    (input.locationMode === 'current' || input.locationMode === 'both') &&
+                    input.nearLat !== undefined && input.nearLng !== undefined &&
+                    haversineKm(input.nearLat, input.nearLng, l.lat, l.lng) <= input.radiusKm;
+                const inNext =
+                    (input.locationMode === 'next' || input.locationMode === 'both') &&
+                    input.destLat !== undefined && input.destLng !== undefined &&
+                    haversineKm(input.destLat, input.destLng, l.lat, l.lng) <= input.radiusKm;
+                return inCurrent || inNext;
+            })
+            : listings;
+
         let nextCursor: string | undefined;
-        if (listings.length > input.limit) {
-            const next = listings.pop();
+        if (filtered.length > input.limit) {
+            const next = filtered.pop();
             nextCursor = next?.id;
         }
 
-        return { listings, nextCursor };
+        return { listings: filtered, nextCursor };
     }),
 
 
