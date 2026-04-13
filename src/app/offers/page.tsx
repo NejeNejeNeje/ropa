@@ -143,7 +143,7 @@ interface SellerViewProps {
 }
 
 function SellerView({ offers, refetch }: SellerViewProps) {
-    const [tab, setTab] = useState<'active' | 'resolved'>('active');
+    const [tab, setTab] = useState<'active' | 'offers'>('active');
     const [counteringId, setCounteringId] = useState<string | null>(null);
     const [counterAmount, setCounterAmount] = useState(0);
 
@@ -153,8 +153,7 @@ function SellerView({ offers, refetch }: SellerViewProps) {
 
     const all = offers || [];
     const active = all.filter((o) => o.status === 'pending');
-    const resolved = all.filter((o) => o.status !== 'pending');
-    const displayed = tab === 'active' ? active : resolved;
+    const displayed = tab === 'active' ? active : all;
 
     return (
         <>
@@ -162,16 +161,16 @@ function SellerView({ offers, refetch }: SellerViewProps) {
                 <button className={`${styles.tab} ${tab === 'active' ? styles.tabActive : ''}`} onClick={() => setTab('active')}>
                     ⏳ Active ({active.length})
                 </button>
-                <button className={`${styles.tab} ${tab === 'resolved' ? styles.tabActive : ''}`} onClick={() => setTab('resolved')}>
-                    📋 Resolved ({resolved.length})
+                <button className={`${styles.tab} ${tab === 'offers' ? styles.tabActive : ''}`} onClick={() => setTab('offers')}>
+                    💰 Offers ({all.length})
                 </button>
             </div>
 
             {displayed.length === 0 ? (
                 <div className={styles.empty}>
-                    <span className={styles.emptyIcon}>{tab === 'active' ? '📭' : '📦'}</span>
-                    <h3>{tab === 'active' ? 'No pending offers' : 'No resolved offers yet'}</h3>
-                    <p>{tab === 'active' ? 'When buyers swipe right on your items, their offers appear here.' : 'Accepted and declined offers will show here.'}</p>
+                    <span className={styles.emptyIcon}>{tab === 'active' ? '📭' : '🏷️'}</span>
+                    <h3>{tab === 'active' ? 'No pending offers' : 'No offers received yet'}</h3>
+                    <p>{tab === 'active' ? 'When buyers make offers on your items, they appear here.' : 'All offers made on your listings will show here.'}</p>
                 </div>
             ) : (
                 <div className={styles.offerList}>
@@ -280,31 +279,32 @@ interface BuyerViewProps {
 }
 
 function BuyerView({ offers, refetch }: BuyerViewProps) {
-    const [tab, setTab] = useState<'countered' | 'all'>('countered');
+    const [tab, setTab] = useState<'current' | 'accepted'>('current');
 
     const acceptCounterMutation = trpc.offer.acceptCounter.useMutation({ onSuccess: () => refetch() });
     const declineCounterMutation = trpc.offer.declineCounter.useMutation({ onSuccess: () => refetch() });
 
     const all = offers || [];
-    const countered = all.filter((o) => o.status === 'countered');
-    const displayed = tab === 'countered' ? countered : all;
+    const current = all.filter((o) => o.status === 'pending' || o.status === 'countered');
+    const accepted = all.filter((o) => o.status === 'accepted');
+    const displayed = tab === 'current' ? current : accepted;
 
     return (
         <>
             <div className={styles.tabs}>
-                <button className={`${styles.tab} ${tab === 'countered' ? styles.tabActive : ''}`} onClick={() => setTab('countered')}>
-                    💬 Counter-Offers ({countered.length})
+                <button className={`${styles.tab} ${tab === 'current' ? styles.tabActive : ''}`} onClick={() => setTab('current')}>
+                    ⏳ Current offers ({current.length})
                 </button>
-                <button className={`${styles.tab} ${tab === 'all' ? styles.tabActive : ''}`} onClick={() => setTab('all')}>
-                    📋 All My Offers ({all.length})
+                <button className={`${styles.tab} ${tab === 'accepted' ? styles.tabActive : ''}`} onClick={() => setTab('accepted')}>
+                    ✅ Accepted ({accepted.length})
                 </button>
             </div>
 
             {displayed.length === 0 ? (
                 <div className={styles.empty}>
-                    <span className={styles.emptyIcon}>{tab === 'countered' ? '💬' : '📭'}</span>
-                    <h3>{tab === 'countered' ? 'No counter-offers' : 'No offers sent yet'}</h3>
-                    <p>{tab === 'countered' ? 'When a seller counters your offer, it appears here for you to accept or decline.' : 'Swipe right on items in the feed to send offers.'}</p>
+                    <span className={styles.emptyIcon}>{tab === 'current' ? '📭' : '✅'}</span>
+                    <h3>{tab === 'current' ? 'No current offers' : 'No accepted offers yet'}</h3>
+                    <p>{tab === 'current' ? 'Offers waiting on the seller to agree a price will appear here.' : 'Once a seller agrees a price, your confirmed purchases show here.'}</p>
                 </div>
             ) : (
                 <div className={styles.offerList}>
@@ -314,7 +314,7 @@ function BuyerView({ offers, refetch }: BuyerViewProps) {
                         const isCountered = offer.status === 'countered';
 
                         return (
-                            <div key={offer.id} className={`${styles.offerCard} ${isCountered ? styles.offerCardHighlight : ''}`}>
+                            <div key={offer.id} className={`${styles.offerCard} ${isCountered && tab === 'current' ? styles.offerCardHighlight : ''}`}>
                                 <div className={styles.offerTop}>
                                     <div className={styles.offerThumb} style={{ backgroundImage: thumbUrl ? `url(${thumbUrl})` : 'none' }} />
                                     <div className={styles.offerInfo}>
@@ -407,14 +407,14 @@ export default function OffersPage() {
     const buyerQuery = trpc.offer.getForBuyer.useQuery(undefined, { retry: false, enabled: role === 'buying' });
 
     const sellerPending = (sellerQuery.data || []).filter((o) => o.status === 'pending').length;
-    const buyerCountered = (buyerQuery.data || []).filter((o) => o.status === 'countered').length;
+    const buyerCurrent = (buyerQuery.data || []).filter((o) => o.status === 'pending' || o.status === 'countered').length;
 
     return (
         <div className={styles.page}>
             <header className={styles.header}>
                 <h1>💰 Offers</h1>
                 <span className={styles.count}>
-                    {role === 'selling' ? `${sellerPending} pending` : `${buyerCountered} countered`}
+                    {role === 'selling' ? `${sellerPending} pending` : `${buyerCurrent} active`}
                 </span>
             </header>
 
@@ -426,7 +426,7 @@ export default function OffersPage() {
                     </button>
                     <button className={`${styles.roleTab} ${role === 'buying' ? styles.roleTabActive : ''}`} onClick={() => setRole('buying')}>
                         🛍️ Buying
-                        {buyerCountered > 0 && <span className={styles.badge}>{buyerCountered}</span>}
+                        {buyerCurrent > 0 && <span className={styles.badge}>{buyerCurrent}</span>}
                     </button>
                 </div>
 
