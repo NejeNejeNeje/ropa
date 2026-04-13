@@ -56,3 +56,4 @@ next-env.d.ts
 # Build artifacts
 *.zip
 Gemini_Generated_Image_*
+.env*.local
