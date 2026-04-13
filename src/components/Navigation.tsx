@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Flame, Compass, PlusCircle, Tag, MessageCircle, User, type LucideIcon } from 'lucide-react';
+import { Flame, Compass, PlusCircle, Tag, Heart, User, type LucideIcon } from 'lucide-react';
 import { trpc } from '@/lib/trpc-client';
 import styles from './Navigation.module.css';
 
@@ -18,7 +18,7 @@ const NAV_ITEMS: {
         { href: '/explore', label: 'Dropzones', Icon: Compass, alsoMatch: ['/dropzones', '/circles', '/community', '/travelswap'] },
         { href: '/listing/new', label: 'Sell', Icon: PlusCircle },
         { href: '/offers', label: 'Offers', Icon: Tag },
-        { href: '/matches', label: 'Matches', Icon: MessageCircle, showUnread: true },
+        { href: '/matches', label: 'Favorites', Icon: Heart, showUnread: true },
         { href: '/profile', label: 'Profile', Icon: User },
     ];
 

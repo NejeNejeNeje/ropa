@@ -22,7 +22,200 @@
     color: var(--color-text-muted);
 }
 
-/* ─── List ────────────────────────────────────────────────────── */
+/* ─── Grid Area ──────────────────────────────────────────────── */
+
+.gridArea {
+    flex: 1;
+    padding: var(--space-2) var(--space-2) var(--space-4);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+}
+
+/* ─── Grid Card ──────────────────────────────────────────────── */
+
+.gridCard {
+    background: var(--color-bg-card);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    transition: transform 150ms ease;
+    min-width: 0;
+}
+
+.gridCard:active {
+    transform: scale(0.97);
+}
+
+.gridCardImage {
+    position: relative;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    background: var(--color-bg-elevated);
+}
+
+.gridCardImage img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.gridCardImagePlaceholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--color-text-muted);
+}
+
+.statusBadge {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    font-size: 0.75rem;
+    background: rgba(0,0,0,0.6);
+    border-radius: var(--radius-full);
+    padding: 2px 5px;
+    backdrop-filter: blur(4px);
+}
+
+.meetupBadge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    font-size: 0.75rem;
+    background: rgba(0,0,0,0.6);
+    border-radius: var(--radius-full);
+    padding: 2px 5px;
+    backdrop-filter: blur(4px);
+}
+
+.status_pending {}
+.status_accepted {}
+.status_completed {}
+.status_expired { opacity: 0.6; }
+.status_disputed {}
+
+.gridCardInfo {
+    padding: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+}
+
+.gridCardTitle {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--color-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.gridCardMeta {
+    font-size: 0.6rem;
+    color: var(--color-text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.gridCardActions {
+    padding: var(--space-1) var(--space-2) var(--space-2);
+    border-top: 1px solid var(--color-border);
+}
+
+.offerBtn {
+    width: 100%;
+    padding: 6px 0;
+    border-radius: var(--radius-sm);
+    background: var(--color-primary-glow);
+    border: 1px solid var(--color-primary);
+    color: var(--color-primary-light);
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 150ms ease;
+}
+
+.offerBtn:hover {
+    background: var(--color-primary);
+    color: #000;
+}
+
+/* ─── Match Action Panel ─────────────────────────────────────── */
+
+.panelOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 200;
+    backdrop-filter: blur(2px);
+}
+
+.panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 201;
+    background: var(--color-bg-elevated);
+    border-top: 1px solid var(--color-border);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    padding: var(--space-4);
+    padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+    max-height: 80dvh;
+    overflow-y: auto;
+    animation: slideUp 250ms ease-out;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+
+.panelHandle {
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--color-border);
+    margin: 0 auto var(--space-4);
+}
+
+.panelHeader {
+    margin-bottom: var(--space-4);
+}
+
+.panelClose {
+    width: 100%;
+    margin-top: var(--space-4);
+    padding: var(--space-3);
+    border-radius: var(--radius-full);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.panelClose:hover {
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+
+/* ─── List (legacy — keep for fallback) ─────────────────────── */
 
 .list {
     padding: var(--space-4);
