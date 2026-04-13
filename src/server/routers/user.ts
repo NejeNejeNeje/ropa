@@ -65,6 +65,32 @@ export const userRouter = router({
         });
     }),
 
+    boostListing: protectedProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
+        const user = await ctx.prisma.user.findUniqueOrThrow({
+            where: { id: ctx.userId },
+            select: { boostCredits: true },
+        });
+        if (user.boostCredits < 1) throw new Error('No boost credits available');
+        // Verify listing belongs to user and is active
+        const listing = await ctx.prisma.listing.findFirst({
+            where: { id: input, userId: ctx.userId, isActive: true },
+        });
+        if (!listing) throw new Error('Listing not found or not yours');
+        if (listing.isBoosted) throw new Error('Listing is already boosted');
+
+        await ctx.prisma.$transaction([
+            ctx.prisma.user.update({
+                where: { id: ctx.userId },
+                data: { boostCredits: { decrement: 1 } },
+            }),
+            ctx.prisma.listing.update({
+                where: { id: input },
+                data: { isBoosted: true, boostedAt: new Date() },
+            }),
+        ]);
+        return { success: true };
+    }),
+
     getSwapBuddies: protectedProcedure.query(async ({ ctx }) => {
         const buddies = await ctx.prisma.swapBuddy.findMany({
             where: {

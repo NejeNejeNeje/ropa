@@ -333,6 +333,124 @@
     margin-bottom: 14px;
 }
 
+.passportHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.passportHeader h3 {
+    margin-bottom: 0;
+}
+
+.salePointsBadge {
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    background: rgba(168, 85, 247, 0.15);
+    color: #c084fc;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.flagsGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.flagStamp {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    background: rgba(233, 180, 76, 0.06);
+    border: 1px solid rgba(233, 180, 76, 0.15);
+    transition: all var(--transition-fast);
+}
+
+.flagStamp:hover {
+    background: rgba(233, 180, 76, 0.12);
+    border-color: rgba(233, 180, 76, 0.3);
+    transform: translateY(-1px);
+}
+
+.flagEmoji {
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.flagCountry {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    max-width: 60px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.passportEmpty {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 12px 0;
+    margin-bottom: 16px;
+}
+
+.boostSection {
+    padding-top: 14px;
+    border-top: 1px solid var(--color-border);
+}
+
+.boostRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.boostLabel {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.boostCount {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-primary-light);
+}
+
+.boostBar {
+    height: 8px;
+    border-radius: 4px;
+    background: var(--color-surface);
+    overflow: hidden;
+    margin-bottom: 6px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.boostFill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #8b5cf6, #c084fc);
+    transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.4);
+}
+
+.boostSub {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+}
+
 .stamps {
     display: flex;
     flex-wrap: wrap;
@@ -355,12 +473,11 @@
 }
 
 .stampCity {
-    font-size: 0.78rem;
+    font-size: 0.68rem;
     color: var(--color-primary-light);
     font-weight: 700;
     letter-spacing: 0.3px;
     text-transform: uppercase;
-    font-size: 0.68rem;
 }
 
 /* ─── Swap Buddies ──── */

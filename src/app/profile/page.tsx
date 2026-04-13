@@ -7,6 +7,7 @@ import { CURRENT_USER, KARMA_LOG, USERS } from '@/data/mockData';
 import { KARMA_TIERS, TRUST_TIER_CONFIG, CATEGORY_LABELS, TrustTier, ClothingCategory } from '@/data/types';
 import { trpc } from '@/lib/trpc-client';
 import { signOut } from 'next-auth/react';
+import { countryFlag } from '@/lib/countryFlag';
 
 export default function ProfilePage() {
     const { data: meData } = trpc.user.me.useQuery(undefined, { retry: false });
@@ -31,7 +32,15 @@ export default function ProfilePage() {
         citiesVisited: typeof meData.citiesVisited === 'string' ? JSON.parse(meData.citiesVisited) : [],
         preferredSizes: typeof meData.preferredSizes === 'string' ? JSON.parse(meData.preferredSizes) : [],
         preferredStyles: typeof meData.preferredStyles === 'string' ? JSON.parse(meData.preferredStyles) : [],
-    } : { ...CURRENT_USER, destination: '', destinationDate: null as Date | null };
+        salePoints: (meData as Record<string, unknown>).salePoints as number ?? 0,
+        countriesSold: (() => {
+            try {
+                const raw = (meData as Record<string, unknown>).countriesSold;
+                return typeof raw === 'string' ? JSON.parse(raw) as string[] : [];
+            } catch { return []; }
+        })(),
+        boostCredits: (meData as Record<string, unknown>).boostCredits as number ?? 0,
+    } : { ...CURRENT_USER, destination: '', destinationDate: null as Date | null, salePoints: 0, countriesSold: [] as string[], boostCredits: 0 };
 
     const karmaLog = karmaData || KARMA_LOG;
     const buddies = buddiesData
@@ -146,17 +155,61 @@ export default function ProfilePage() {
                     </div>
                 </div>
 
-                {/* Passport */}
+                {/* Seller Passport */}
                 <div className={styles.passportCard}>
-                    <h3>🌍 Passport</h3>
-                    <div className={styles.stamps}>
-                        {user.citiesVisited.map((city: string) => (
-                            <div key={city} className={styles.stamp}>
-                                <span className={styles.stampCity}>{city}</span>
-                            </div>
-                        ))}
+                    <div className={styles.passportHeader}>
+                        <h3>🛂 Seller Passport</h3>
+                        <span className={styles.salePointsBadge}>{user.salePoints} pts</span>
+                    </div>
+
+                    {/* Countries sold in — flag emojis */}
+                    {user.countriesSold.length > 0 ? (
+                        <div className={styles.flagsGrid}>
+                            {user.countriesSold.map((country: string) => (
+                                <div key={country} className={styles.flagStamp}>
+                                    <span className={styles.flagEmoji}>{countryFlag(country)}</span>
+                                    <span className={styles.flagCountry}>{country}</span>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className={styles.passportEmpty}>Complete your first sale to start collecting flags!</p>
+                    )}
+
+                    {/* Points progress toward next boost */}
+                    <div className={styles.boostSection}>
+                        <div className={styles.boostRow}>
+                            <span className={styles.boostLabel}>🚀 Boost Credits</span>
+                            <span className={styles.boostCount}>{user.boostCredits}</span>
+                        </div>
+                        {(() => {
+                            const pointsInCurrentCycle = user.salePoints % 15;
+                            const progress = (pointsInCurrentCycle / 15) * 100;
+                            return (
+                                <>
+                                    <div className={styles.boostBar}>
+                                        <div className={styles.boostFill} style={{ width: `${progress}%` }} />
+                                    </div>
+                                    <p className={styles.boostSub}>{15 - pointsInCurrentCycle} pts to next free boost</p>
+                                </>
+                            );
+                        })()}
                     </div>
                 </div>
+
+                {/* Cities Visited */}
+                {user.citiesVisited.length > 0 && (
+                    <div className={styles.passportCard}>
+                        <h3>🌍 Cities Visited</h3>
+                        <div className={styles.stamps}>
+                            {user.citiesVisited.map((city: string) => (
+                                <div key={city} className={styles.stamp}>
+                                    <span className={styles.stampCity}>{city}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {/* Swap Buddies */}
                 <div className={styles.buddiesCard}>

@@ -69,6 +69,9 @@ model User {
   destLng           Float?   // destination longitude
   destCountry       String   @default("") // destination country name
   karmaPoints    Int      @default(0)
+  salePoints     Int      @default(0)        // 5 per sale, 10 per new country
+  countriesSold  String   @default("[]")     // JSON array of country codes/names sold in
+  boostCredits   Int      @default(0)        // earned at 15 salePoints, 1 credit = 1 boost
   trustTier      String   @default("bronze") // bronze | silver | gold
   rating         Float    @default(0)
   totalTrades    Int      @default(0)
@@ -127,6 +130,8 @@ model Listing {
   lng         Float    @default(0)
   images      String   @default("[]") // JSON array of {id, url, sortOrder}
   isActive    Boolean  @default(true)
+  isBoosted   Boolean  @default(false)
+  boostedAt   DateTime?
   dropZoneId  String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

@@ -185,7 +185,7 @@ export const matchRouter = router({
     confirmDelivery: protectedProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
         const match = await ctx.prisma.match.findUniqueOrThrow({
             where: { id: input },
-            include: { offer: true, listingA: { select: { title: true } } },
+            include: { offer: true, listingA: { select: { title: true, country: true } } },
         });
 
         // Verify caller is a participant
@@ -219,11 +219,17 @@ export const matchRouter = router({
             && (!isSeller ? updated.buyerConfirmedAt : match.buyerConfirmedAt);
 
         if (bothConfirmed) {
-            // Auto-complete the match + release escrow
-            await ctx.prisma.match.update({
-                where: { id: input },
+            // RACE-GUARD: Use updateMany with status guard so only one concurrent
+            // call can transition accepted→completed and trigger rewards.
+            const transitioned = await ctx.prisma.match.updateMany({
+                where: { id: input, status: 'accepted' },
                 data: { status: 'completed', escrowReleasedAt: now },
             });
+
+            // If count === 0, another call already completed this match — skip rewards
+            if (transitioned.count === 0) {
+                return { confirmed: true, bothConfirmed: true, status: 'completed' };
+            }
 
             // Release escrow on the linked offer
             if (match.offer) {
@@ -246,6 +252,39 @@ export const matchRouter = router({
             });
             await recalcTrustTier(ctx.prisma, match.userAId);
             await recalcTrustTier(ctx.prisma, match.userBId);
+
+            // ── Sale Points System ──
+            // Seller (userA) gets 5 points per sale + 10 bonus for new country
+            const seller = await ctx.prisma.user.findUnique({
+                where: { id: match.userAId },
+                select: { salePoints: true, countriesSold: true, boostCredits: true },
+            });
+            if (seller) {
+                const countriesSold: string[] = (() => {
+                    try { return JSON.parse(seller.countriesSold); } catch { return []; }
+                })();
+                let pointsEarned = 5; // base points per sale
+                const listingCountry = match.listingA.country;
+                const isNewCountry = listingCountry && !countriesSold.includes(listingCountry);
+                if (isNewCountry) {
+                    pointsEarned += 10;
+                    countriesSold.push(listingCountry);
+                }
+                const newTotal = seller.salePoints + pointsEarned;
+                // Award boost credit for every 15 points earned (cumulative)
+                const prevCreditsEarned = Math.floor(seller.salePoints / 15);
+                const newCreditsEarned = Math.floor(newTotal / 15);
+                const boostCreditsToAdd = newCreditsEarned - prevCreditsEarned;
+
+                await ctx.prisma.user.update({
+                    where: { id: match.userAId },
+                    data: {
+                        salePoints: { increment: pointsEarned },
+                        countriesSold: JSON.stringify(countriesSold),
+                        boostCredits: { increment: boostCreditsToAdd },
+                    },
+                });
+            }
 
             // Create buddy connection if not exists
             const existing = await ctx.prisma.swapBuddy.findFirst({

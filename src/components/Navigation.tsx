@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Flame, Compass, PlusCircle, Tag, Heart, User, type LucideIcon } from 'lucide-react';
 import { trpc } from '@/lib/trpc-client';
+import CustomerServiceIcon from './CustomerServiceIcon';
 import styles from './Navigation.module.css';
 
 const NAV_ITEMS: {
@@ -36,6 +37,8 @@ export default function Navigation() {
     });
 
     return (
+        <>
+        <CustomerServiceIcon />
         <nav className={`${styles.nav} glass-strong`} aria-label="Main navigation">
             {NAV_ITEMS.map((item) => {
                 const isActive = pathname.startsWith(item.href) ||
@@ -69,5 +72,6 @@ export default function Navigation() {
                 );
             })}
         </nav>
+        </>
     );
 }
