@@ -80,6 +80,13 @@
     color: var(--text-muted);
 }
 
+.destination {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--color-primary-light, #f0c96b);
+    margin-top: 2px;
+}
+
 .bio {
     font-size: 0.82rem;
     color: var(--text-secondary);

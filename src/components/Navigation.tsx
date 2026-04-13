@@ -15,7 +15,7 @@ const NAV_ITEMS: {
     showUnread?: boolean;
 }[] = [
         { href: '/feed', label: 'Feed', Icon: Flame },
-        { href: '/explore', label: 'Explore', Icon: Compass, alsoMatch: ['/dropzones', '/circles', '/community', '/travelswap'] },
+        { href: '/explore', label: 'Dropzones', Icon: Compass, alsoMatch: ['/dropzones', '/circles', '/community', '/travelswap'] },
         { href: '/listing/new', label: 'Sell', Icon: PlusCircle },
         { href: '/offers', label: 'Offers', Icon: Tag },
         { href: '/matches', label: 'Matches', Icon: MessageCircle, showUnread: true },

@@ -335,3 +335,27 @@ export const DROP_ZONE_TYPE_LABELS: Record<DropZoneType, { label: string; emoji:
   coworking: { label: 'Coworking', emoji: '💻' },
   cafe: { label: 'Café', emoji: '☕' },
 };
+
+// ─── Feed Filter Constants ──────────────────────────────────
+
+export const POPULAR_BRANDS = [
+  'Nike', 'Adidas', 'Zara', 'H&M', 'Uniqlo', "Levi's",
+  'Patagonia', 'The North Face', 'Shein', 'Urban Outfitters',
+  'Mango', 'Cos', 'Carhartt', 'Vintage / Unknown',
+] as const;
+
+export const LISTING_COLORS = [
+  { name: 'Black', hex: '#1a1a1a' },
+  { name: 'White', hex: '#f5f5f5' },
+  { name: 'Gray', hex: '#9ca3af' },
+  { name: 'Red', hex: '#ef4444' },
+  { name: 'Blue', hex: '#3b82f6' },
+  { name: 'Green', hex: '#22c55e' },
+  { name: 'Yellow', hex: '#eab308' },
+  { name: 'Pink', hex: '#ec4899' },
+  { name: 'Purple', hex: '#a855f7' },
+  { name: 'Orange', hex: '#f97316' },
+  { name: 'Brown', hex: '#92400e' },
+  { name: 'Beige', hex: '#d4a574' },
+  { name: 'Navy', hex: '#1e3a5f' },
+] as const;

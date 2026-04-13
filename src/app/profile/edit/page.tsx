@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Navigation from '@/components/Navigation';
+import LocationInput from '@/components/LocationInput';
 import { trpc } from '@/lib/trpc-client';
 import styles from './edit.module.css';
 
@@ -29,6 +30,13 @@ export default function EditProfilePage() {
     const [bio, setBio] = useState('');
     const [currentCity, setCurrentCity] = useState('');
     const [country, setCountry] = useState('');
+    const [lat, setLat] = useState(0);
+    const [lng, setLng] = useState(0);
+    const [destination, setDestination] = useState('');
+    const [destinationDate, setDestinationDate] = useState('');
+    const [destLat, setDestLat] = useState<number | null>(null);
+    const [destLng, setDestLng] = useState<number | null>(null);
+    const [destCountry, setDestCountry] = useState('');
     const [sizes, setSizes] = useState<string[]>([]);
     const [stylePrefs, setStylePrefs] = useState<string[]>([]);
 
@@ -38,6 +46,10 @@ export default function EditProfilePage() {
             setBio(me.bio || '');
             setCurrentCity(me.currentCity || '');
             setCountry(me.country || '');
+            setLat(me.lat || 0);
+            setLng(me.lng || 0);
+            setDestination(me.destination || '');
+            setDestinationDate(me.destinationDate ? new Date(me.destinationDate).toISOString().split('T')[0] : '');
             const safeParse = (val: unknown): string[] => {
                 if (Array.isArray(val)) return val as string[];
                 if (typeof val === 'string' && val) {
@@ -59,6 +71,13 @@ export default function EditProfilePage() {
             bio,
             currentCity,
             country,
+            lat,
+            lng,
+            destination: destination || '',
+            destinationDate: destinationDate ? new Date(destinationDate).toISOString() : null,
+            destLat,
+            destLng,
+            destCountry,
             preferredSizes: sizes,
             preferredStyles: stylePrefs,
         });
@@ -67,16 +86,19 @@ export default function EditProfilePage() {
     if (isLoading) {
         return (
             <div className={styles.page}>
-                <div className={styles.loading}>Loading your profile…</div>
+                <div className={styles.loading}>Loading your profile...</div>
             </div>
         );
     }
+
+    const locationDisplay = currentCity && country ? `${currentCity}, ${country}` : currentCity || country || '';
+    const destDisplay = destination || '';
 
     return (
         <div className={styles.page}>
             <header className={styles.header}>
                 <button className={styles.backBtn} onClick={() => router.push('/profile')}>← Back</button>
-                <h1>✏️ Edit Profile</h1>
+                <h1>Edit Profile</h1>
             </header>
 
             <main className={styles.main}>
@@ -87,18 +109,63 @@ export default function EditProfilePage() {
 
                 <div className={styles.field}>
                     <label className={styles.label}>Bio</label>
-                    <textarea className={styles.textarea} value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Tell travelers about yourself…" rows={3} />
+                    <textarea className={styles.textarea} value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Tell travelers about yourself..." rows={3} />
                 </div>
 
-                <div className={styles.fieldRow}>
-                    <div className={styles.field}>
-                        <label className={styles.label}>📍 City</label>
-                        <input className={styles.input} value={currentCity} onChange={(e) => setCurrentCity(e.target.value)} placeholder="e.g. Paris" />
-                    </div>
-                    <div className={styles.field}>
-                        <label className={styles.label}>🌍 Country</label>
-                        <input className={styles.input} value={country} onChange={(e) => setCountry(e.target.value)} placeholder="e.g. France" />
-                    </div>
+                {/* Current Location */}
+                <div className={styles.locationSection}>
+                    <label className={styles.label}>📍 Current Location</label>
+                    <LocationInput
+                        value={locationDisplay}
+                        onSelect={(result) => {
+                            setCurrentCity(result.city);
+                            setCountry(result.country);
+                            setLat(result.lat);
+                            setLng(result.lng);
+                        }}
+                        onClear={() => {
+                            setCurrentCity('');
+                            setCountry('');
+                            setLat(0);
+                            setLng(0);
+                        }}
+                        placeholder="Search your current city..."
+                    />
+                </div>
+
+                {/* Next Destination */}
+                <div className={styles.locationSection}>
+                    <label className={styles.label}>✈️ Next Destination</label>
+                    <LocationInput
+                        value={destDisplay}
+                        onSelect={(result) => {
+                            setDestination(`${result.city}, ${result.country}`);
+                            setDestLat(result.lat);
+                            setDestLng(result.lng);
+                            setDestCountry(result.country);
+                        }}
+                        onClear={() => {
+                            setDestination('');
+                            setDestinationDate('');
+                            setDestLat(null);
+                            setDestLng(null);
+                            setDestCountry('');
+                        }}
+                        placeholder="Where are you heading next?"
+                    />
+                    {destination && (
+                        <div className={styles.dateField}>
+                            <label className={styles.dateLabel}>When?</label>
+                            <input
+                                type="date"
+                                className={styles.dateInput}
+                                value={destinationDate}
+                                onChange={(e) => setDestinationDate(e.target.value)}
+                                min={new Date().toISOString().split('T')[0]}
+                            />
+                        </div>
+                    )}
+                    <p className={styles.hint}>Optional — helps travelers in your next city find you</p>
                 </div>
 
                 <div className={styles.field}>
@@ -115,7 +182,7 @@ export default function EditProfilePage() {
                 </div>
 
                 <div className={styles.field}>
-                    <label className={styles.label}>✨ Style Preferences</label>
+                    <label className={styles.label}>Style Preferences</label>
                     <div className={styles.chips}>
                         {STYLES.map((s) => (
                             <button
@@ -132,7 +199,7 @@ export default function EditProfilePage() {
                     onClick={handleSave}
                     disabled={updateMutation.isPending}
                 >
-                    {updateMutation.isPending ? '⏳ Saving…' : '✅ Save Changes'}
+                    {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
                 </button>
 
                 {updateMutation.isError && (

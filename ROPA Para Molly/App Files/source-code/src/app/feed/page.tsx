@@ -18,6 +18,8 @@ export interface Filters {
     condition: Condition | 'all';
     maxPrice: number;
     freeOnly: boolean;
+    brand: string | 'all';
+    colors: string[];
 }
 
 const DEFAULT_FILTERS: Filters = {
@@ -27,6 +29,8 @@ const DEFAULT_FILTERS: Filters = {
     condition: 'all',
     maxPrice: 100,
     freeOnly: false,
+    brand: 'all',
+    colors: [],
 };
 
 export default function FeedPage() {

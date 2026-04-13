@@ -1,0 +1,134 @@
+.wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.inputWrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input {
+    width: 100%;
+    background: var(--color-bg-elevated, #1a1a1a);
+    border: 1px solid var(--color-border, #333);
+    border-radius: 12px;
+    padding: 12px 40px 12px 14px;
+    color: var(--color-text, #f5f5f5);
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--color-primary, #E9B44C);
+}
+
+.input::placeholder {
+    color: var(--color-text-muted, #737373);
+}
+
+.spinner {
+    position: absolute;
+    right: 12px;
+    color: var(--color-text-muted, #737373);
+    font-size: 0.8rem;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+}
+
+.clearBtn {
+    position: absolute;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--color-surface, #333);
+    color: var(--color-text-muted, #737373);
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.clearBtn:hover {
+    background: var(--color-bg-card, #242424);
+    color: var(--color-text, #f5f5f5);
+}
+
+/* ─── Dropdown ───────────────────────────────────────────────── */
+
+.dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--color-bg-card, #242424);
+    border: 1px solid var(--color-border, #333);
+    border-radius: 12px;
+    overflow: hidden;
+    z-index: 200;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.suggestion {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: transparent;
+    border: none;
+    color: var(--color-text, #f5f5f5);
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s;
+    font-family: inherit;
+}
+
+.suggestion:hover {
+    background: var(--color-surface, #333);
+}
+
+.suggestionIcon {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.suggestionText {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.suggestionCity {
+    font-weight: 600;
+    font-size: 0.875rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.suggestionCountry {
+    font-size: 0.75rem;
+    color: var(--color-text-muted, #737373);
+}
+
+.dropdown li + li {
+    border-top: 1px solid var(--color-border, #333);
+}

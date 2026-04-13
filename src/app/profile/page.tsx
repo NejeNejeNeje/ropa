@@ -20,6 +20,9 @@ export default function ProfilePage() {
         bio: meData.bio || '',
         currentCity: meData.currentCity || '',
         country: meData.country || '',
+        destination: meData.destination || '',
+        destinationDate: meData.destinationDate ? new Date(meData.destinationDate) : null,
+        destCountry: (meData as Record<string, unknown>).destCountry as string | undefined || '',
         rating: meData.rating,
         totalTrades: meData.totalTrades,
         completedTrades: meData.completedTrades,
@@ -28,7 +31,7 @@ export default function ProfilePage() {
         citiesVisited: typeof meData.citiesVisited === 'string' ? JSON.parse(meData.citiesVisited) : [],
         preferredSizes: typeof meData.preferredSizes === 'string' ? JSON.parse(meData.preferredSizes) : [],
         preferredStyles: typeof meData.preferredStyles === 'string' ? JSON.parse(meData.preferredStyles) : [],
-    } : CURRENT_USER;
+    } : { ...CURRENT_USER, destination: '', destinationDate: null as Date | null };
 
     const karmaLog = karmaData || KARMA_LOG;
     const buddies = buddiesData
@@ -73,6 +76,14 @@ export default function ProfilePage() {
                     <div className={styles.profileInfo}>
                         <h2>{user.displayName}</h2>
                         <span className={styles.location}>📍 {user.currentCity}, {user.country}</span>
+                        {user.destination && (
+                            <span className={styles.destination}>
+                                ✈️ Next: {user.destination}
+                                {user.destinationDate && (
+                                    <> · {user.destinationDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</>
+                                )}
+                            </span>
+                        )}
                         <p className={styles.bio}>{user.bio}</p>
                     </div>
                 </div>

@@ -65,6 +65,9 @@ model User {
   lng            Float    @default(0)
   destination       String   @default("") // next destination city
   destinationDate   DateTime? // approximate departure date
+  destLat           Float?   // destination latitude
+  destLng           Float?   // destination longitude
+  destCountry       String   @default("") // destination country name
   karmaPoints    Int      @default(0)
   trustTier      String   @default("bronze") // bronze | silver | gold
   rating         Float    @default(0)

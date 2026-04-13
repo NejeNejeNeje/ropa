@@ -88,6 +88,20 @@
     text-align: center;
 }
 
+.colorChip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.colorSwatch {
+    width: 14px;
+    height: 14px;
+    border-radius: var(--radius-full);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    flex-shrink: 0;
+}
+
 /* ─── Slider ─────────────────────────────────────────────────── */
 
 .slider {
