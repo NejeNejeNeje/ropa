@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import Navigation from '@/components/Navigation';
 import styles from './offers.module.css';
 import { trpc } from '@/lib/trpc-client';
@@ -171,6 +172,9 @@ function SellerView({ offers, refetch }: SellerViewProps) {
                     <span className={styles.emptyIcon}>{tab === 'active' ? '📭' : '🏷️'}</span>
                     <h3>{tab === 'active' ? 'No pending offers' : 'No offers received yet'}</h3>
                     <p>{tab === 'active' ? 'When buyers make offers on your items, they appear here.' : 'All offers made on your listings will show here.'}</p>
+                    {tab === 'active' && (
+                        <Link href="/profile" className="btn btn-primary" style={{ marginTop: '16px' }}>Boost your listings to get more offers!</Link>
+                    )}
                 </div>
             ) : (
                 <div className={styles.offerList}>
@@ -305,6 +309,9 @@ function BuyerView({ offers, refetch }: BuyerViewProps) {
                     <span className={styles.emptyIcon}>{tab === 'current' ? '📭' : '✅'}</span>
                     <h3>{tab === 'current' ? 'No current offers' : 'No accepted offers yet'}</h3>
                     <p>{tab === 'current' ? 'Offers waiting on the seller to agree a price will appear here.' : 'Once a seller agrees a price, your confirmed purchases show here.'}</p>
+                    {tab === 'current' && (
+                        <Link href="/explore" className="btn btn-primary" style={{ marginTop: '16px' }}>Explore dropzones and send offers!</Link>
+                    )}
                 </div>
             ) : (
                 <div className={styles.offerList}>

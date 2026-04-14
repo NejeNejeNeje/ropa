@@ -90,7 +90,7 @@ export default function MatchesPage() {
     return (
         <div className={styles.page}>
             <header className={`${styles.header} glass-strong`}>
-                <h1 className={styles.title}>❤️ Favorites</h1>
+                <h1 className={styles.title}>🔁 Trades</h1>
                 <span className={styles.count}>{matches.length} matches</span>
             </header>
 
@@ -98,7 +98,7 @@ export default function MatchesPage() {
                 {matches.length === 0 ? (
                     <div className={styles.empty}>
                         <span className={styles.emptyIcon}>💫</span>
-                        <h3>No favorites yet</h3>
+                        <h3>No active trades yet</h3>
                         <p>Start swiping to find your first match!</p>
                         <Link href="/feed" className="btn btn-primary">Go to Feed</Link>
                     </div>

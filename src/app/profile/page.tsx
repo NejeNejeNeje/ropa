@@ -122,7 +122,7 @@ export default function ProfilePage() {
                 {/* SwapShield Trust */}
                 <div className={styles.trustCard}>
                     <div className={styles.trustHeader}>
-                        <h3>🛡️ SwapShield</h3>
+                        <h3 title="Trust Tiers are unlocked automatically as you complete more verification steps and trades.">🛡️ SwapShield</h3>
                         <span className={styles.tierBadge} style={{ borderColor: trustConfig.color, color: trustConfig.color }}>{trustConfig.label}</span>
                     </div>
                     <div className={styles.trustTiers}>
@@ -155,7 +155,7 @@ export default function ProfilePage() {
                 {/* Karma Points */}
                 <div className={styles.karmaCard}>
                     <div className={styles.karmaHeader}>
-                        <h3>{currentKarmaTier.name}</h3>
+                        <h3 title="Karma is earned by completing successful trades and being a reliable community member.">{currentKarmaTier.name}</h3>
                         <span className={styles.karmaPoints}>{user.karmaPoints} pts</span>
                     </div>
                     <div className={styles.karmaBar}>
@@ -195,7 +195,7 @@ export default function ProfilePage() {
                             ))}
                         </div>
                     ) : (
-                        <p className={styles.passportEmpty}>Complete your first sale to start collecting flags!</p>
+                        <p className={styles.passportEmpty}>Make your first international trade to start filling out your passport!</p>
                     )}
 
                     {/* Points progress toward next boost */}
@@ -297,7 +297,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div className={styles.actions}>
-                    <Link href="/profile/edit" className={styles.editBtn}>✏️ Edit Profile</Link>
+                    <Link href="/profile/edit" className={styles.editBtn} data-testid="edit-profile-btn">✏️ Edit Profile</Link>
                 </div>
             </main>
 
