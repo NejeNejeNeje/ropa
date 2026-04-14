@@ -43,10 +43,10 @@ export const userRouter = router({
         preferredStyles: z.array(z.string().max(50)).max(20).optional(),
     })).mutation(async ({ ctx, input }) => {
         const data: Record<string, unknown> = {};
-        if (input.name) data.name = input.name;
+        if (input.name !== undefined) data.name = input.name;
         if (input.bio !== undefined) data.bio = input.bio;
-        if (input.currentCity) data.currentCity = input.currentCity;
-        if (input.country) data.country = input.country;
+        if (input.currentCity !== undefined) data.currentCity = input.currentCity;
+        if (input.country !== undefined) data.country = input.country;
         if (input.lat !== undefined) data.lat = input.lat;
         if (input.lng !== undefined) data.lng = input.lng;
         if (input.destination !== undefined) data.destination = input.destination;

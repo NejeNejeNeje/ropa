@@ -100,6 +100,9 @@ export const listingRouter = router({
             }
         }
 
+        // TODO: Post-query geo filtering can return fewer items than `limit` when
+        // many listings fall outside the radius. At scale, consider prefetching
+        // more rows or migrating to PostGIS for server-side distance filtering.
         const listings = await ctx.prisma.listing.findMany({
             where,
             include: { user: true, dropZone: true },

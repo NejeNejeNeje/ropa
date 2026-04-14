@@ -14,32 +14,54 @@ export default function ProfilePage() {
     const { data: karmaData } = trpc.karma.getLog.useQuery(undefined, { retry: false });
     const { data: buddiesData } = trpc.user.getSwapBuddies.useQuery(undefined, { retry: false });
 
+    interface MeData {
+        name: string | null;
+        image: string | null;
+        bio: string | null;
+        currentCity: string;
+        country: string;
+        destination: string;
+        destinationDate: string | Date | null;
+        destCountry: string;
+        rating: number;
+        totalTrades: number;
+        completedTrades: number;
+        karmaPoints: number;
+        trustTier: string;
+        citiesVisited: string;
+        preferredSizes: string;
+        preferredStyles: string;
+        salePoints: number;
+        countriesSold: string;
+        boostCredits: number;
+    }
+
     // Map DB user to display format, fallback to mock
     const user = meData ? {
-        displayName: meData.name || '',
-        avatarUrl: meData.image || '',
-        bio: meData.bio || '',
-        currentCity: meData.currentCity || '',
-        country: meData.country || '',
-        destination: meData.destination || '',
-        destinationDate: meData.destinationDate ? new Date(meData.destinationDate) : null,
-        destCountry: (meData as Record<string, unknown>).destCountry as string | undefined || '',
-        rating: meData.rating,
-        totalTrades: meData.totalTrades,
-        completedTrades: meData.completedTrades,
-        karmaPoints: meData.karmaPoints,
-        trustTier: (meData.trustTier || 'bronze') as TrustTier,
-        citiesVisited: typeof meData.citiesVisited === 'string' ? JSON.parse(meData.citiesVisited) : [],
-        preferredSizes: typeof meData.preferredSizes === 'string' ? JSON.parse(meData.preferredSizes) : [],
-        preferredStyles: typeof meData.preferredStyles === 'string' ? JSON.parse(meData.preferredStyles) : [],
-        salePoints: (meData as Record<string, unknown>).salePoints as number ?? 0,
+        displayName: (meData as MeData).name || '',
+        avatarUrl: (meData as MeData).image || '',
+        bio: (meData as MeData).bio || '',
+        currentCity: (meData as MeData).currentCity || '',
+        country: (meData as MeData).country || '',
+        destination: (meData as MeData).destination || '',
+        destinationDate: (meData as MeData).destinationDate ? new Date((meData as MeData).destinationDate as string | Date) : null,
+        destCountry: (meData as MeData).destCountry || '',
+        rating: (meData as MeData).rating,
+        totalTrades: (meData as MeData).totalTrades,
+        completedTrades: (meData as MeData).completedTrades,
+        karmaPoints: (meData as MeData).karmaPoints,
+        trustTier: ((meData as MeData).trustTier || 'bronze') as TrustTier,
+        citiesVisited: typeof (meData as MeData).citiesVisited === 'string' ? JSON.parse((meData as MeData).citiesVisited as string) : [],
+        preferredSizes: typeof (meData as MeData).preferredSizes === 'string' ? JSON.parse((meData as MeData).preferredSizes as string) : [],
+        preferredStyles: typeof (meData as MeData).preferredStyles === 'string' ? JSON.parse((meData as MeData).preferredStyles as string) : [],
+        salePoints: (meData as MeData).salePoints ?? 0,
         countriesSold: (() => {
             try {
-                const raw = (meData as Record<string, unknown>).countriesSold;
+                const raw = (meData as MeData).countriesSold;
                 return typeof raw === 'string' ? JSON.parse(raw) as string[] : [];
             } catch { return []; }
         })(),
-        boostCredits: (meData as Record<string, unknown>).boostCredits as number ?? 0,
+        boostCredits: (meData as MeData).boostCredits ?? 0,
     } : { ...CURRENT_USER, destination: '', destinationDate: null as Date | null, salePoints: 0, countriesSold: [] as string[], boostCredits: 0 };
 
     const karmaLog = karmaData || KARMA_LOG;

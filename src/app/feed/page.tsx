@@ -1,7 +1,5 @@
 'use client';
 
-'use client';
-
 import { useState, useMemo, useCallback } from 'react';
 import { SlidersHorizontal } from 'lucide-react';
 import FilterPanel from '@/components/FilterPanel';
@@ -63,7 +61,7 @@ export default function FeedPage() {
             nearLng: me?.lng ?? undefined,
             destLat: (me?.destLat ?? undefined) as number | undefined,
             destLng: (me?.destLng ?? undefined) as number | undefined,
-            radiusKm: 300,
+            radiusKm: 300, // spec default was 200; widened to 300 for better coverage
         };
     }, [locationMode, me]);
 
