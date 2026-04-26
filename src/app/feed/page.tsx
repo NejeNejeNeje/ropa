@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
-import { SlidersHorizontal } from 'lucide-react';
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { SlidersHorizontal, Heart, DollarSign } from 'lucide-react';
 import FilterPanel from '@/components/FilterPanel';
 import MatchNotification from '@/components/MatchNotification';
 import OfferSheet from '@/components/OfferSheet';
@@ -48,6 +48,35 @@ export default function FeedPage() {
     const [offerListing, setOfferListing] = useState<Listing | null>(null);
     const [offerSent, setOfferSent] = useState(false);
     const [page, setPage] = useState(0);
+    const [swipeOffset, setSwipeOffset] = useState(0);
+    const [isDragging, setIsDragging] = useState(false);
+    const [batchUndoIds, setBatchUndoIds] = useState<string[] | null>(null);
+    const [showSwipeHint, setShowSwipeHint] = useState(false);
+    const swipeState = useRef<{ x: number; y: number; lock: 'h' | 'v' | null } | null>(null);
+    const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Client-only: read localStorage after mount to avoid SSR/hydration mismatch.
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        if (!window.localStorage.getItem('ropa.feed.swipeHintSeen')) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setShowSwipeHint(true);
+        }
+    }, []);
+
+    // Clear pending undo timer on unmount to avoid setState-on-unmounted warnings.
+    useEffect(() => {
+        return () => {
+            if (undoTimer.current) clearTimeout(undoTimer.current);
+        };
+    }, []);
+
+    const dismissSwipeHint = useCallback(() => {
+        if (typeof window !== 'undefined') {
+            window.localStorage.setItem('ropa.feed.swipeHintSeen', '1');
+        }
+        setShowSwipeHint(false);
+    }, []);
 
     // User profile — needed for geo coords
     const { data: me } = trpc.user.me.useQuery(undefined, { retry: false });
@@ -71,6 +100,7 @@ export default function FeedPage() {
         { retry: false }
     );
     const swipeMutation = trpc.swipe.create.useMutation();
+    const unswipeMutation = trpc.swipe.unswipe.useMutation();
     const offerMutation = trpc.offer.create.useMutation();
 
     // Use live data if available, fallback to mock
@@ -140,6 +170,7 @@ export default function FeedPage() {
     const pageListings = filteredListings.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
 
     const handleLike = useCallback((listing: Listing) => {
+        if (showSwipeHint) dismissSwipeHint();
         if (likedIds.has(listing.id)) return; // Already liked
 
         setLikedIds((prev) => new Set(prev).add(listing.id));
@@ -155,15 +186,58 @@ export default function FeedPage() {
                 },
             }
         );
+    }, [likedIds, swipeMutation, showSwipeHint, dismissSwipeHint]);
+
+    const handleLikeAll = useCallback((listings: Listing[]) => {
+        const newlyLiked: string[] = [];
+        listings.forEach((listing) => {
+            if (likedIds.has(listing.id)) return;
+            newlyLiked.push(listing.id);
+            setLikedIds((prev) => new Set(prev).add(listing.id));
+            setLikeCount((c) => c + 1);
+            swipeMutation.mutate(
+                { listingId: listing.id, direction: 'RIGHT' },
+                {
+                    onSuccess: (result) => {
+                        if (result.matched) setMatchedListing(listing);
+                    },
+                }
+            );
+        });
+        if (newlyLiked.length > 0) {
+            // Subsequent batches replace the undoable set — older batches are committed.
+            setBatchUndoIds(newlyLiked);
+            if (undoTimer.current) clearTimeout(undoTimer.current);
+            undoTimer.current = setTimeout(() => setBatchUndoIds(null), 5000);
+        }
     }, [likedIds, swipeMutation]);
 
+    const handleUndoBatch = useCallback(() => {
+        if (!batchUndoIds || batchUndoIds.length === 0) return;
+        const ids = new Set(batchUndoIds);
+        setLikedIds((prev) => {
+            const next = new Set(prev);
+            ids.forEach((id) => next.delete(id));
+            return next;
+        });
+        setLikeCount((c) => Math.max(0, c - batchUndoIds.length));
+        // Server-side reversal: unswipe transactionally flips swipe direction to LEFT
+        // and deletes any Match row that involves this listing + the current user.
+        batchUndoIds.forEach((id) => {
+            unswipeMutation.mutate({ listingId: id });
+        });
+        if (undoTimer.current) clearTimeout(undoTimer.current);
+        setBatchUndoIds(null);
+    }, [batchUndoIds, unswipeMutation]);
+
     const handleBuy = useCallback((listing: Listing) => {
+        if (showSwipeHint) dismissSwipeHint();
         if (listing.pricingType === 'free') {
             handleLike(listing);
             return;
         }
         setOfferListing(listing);
-    }, [handleLike]);
+    }, [handleLike, showSwipeHint, dismissSwipeHint]);
 
     const handleOfferSubmit = useCallback((amount: number) => {
         if (!offerListing) return;
@@ -180,6 +254,40 @@ export default function FeedPage() {
         );
         setOfferListing(null);
     }, [offerListing, offerMutation]);
+
+    const onTouchStart = useCallback((e: React.TouchEvent) => {
+        const t = e.touches[0];
+        swipeState.current = { x: t.clientX, y: t.clientY, lock: null };
+        setIsDragging(true);
+        if (showSwipeHint) dismissSwipeHint();
+    }, [showSwipeHint, dismissSwipeHint]);
+
+    const onTouchMove = useCallback((e: React.TouchEvent) => {
+        const s = swipeState.current;
+        if (!s) return;
+        const dx = e.touches[0].clientX - s.x;
+        const dy = e.touches[0].clientY - s.y;
+        if (s.lock === null && (Math.abs(dx) > 12 || Math.abs(dy) > 12)) {
+            s.lock = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
+        }
+        if (s.lock === 'h') setSwipeOffset(dx);
+    }, []);
+
+    const onTouchEnd = useCallback(() => {
+        const s = swipeState.current;
+        const offset = swipeOffset;
+        swipeState.current = null;
+        setSwipeOffset(0);
+        setIsDragging(false);
+        if (!s || s.lock !== 'h') return;
+        const SWIPE_THRESHOLD = 100;
+        if (offset > SWIPE_THRESHOLD) {
+            handleLikeAll(pageListings);
+            if (page + 1 < totalPages) setPage((p) => p + 1);
+        } else if (offset < -SWIPE_THRESHOLD) {
+            if (page + 1 < totalPages) setPage((p) => p + 1);
+        }
+    }, [swipeOffset, pageListings, handleLikeAll, page, totalPages]);
 
     const activeCount = Object.entries(filters).filter(
         ([key, val]) => {
@@ -236,6 +344,7 @@ export default function FeedPage() {
                     placeholder="Search items..."
                     value={searchQuery}
                     onChange={(e) => { setSearchQuery(e.target.value); setPage(0); }}
+                    onFocus={() => { if (showSwipeHint) dismissSwipeHint(); }}
                     className={styles.searchInput}
                 />
                 {searchQuery && (
@@ -253,7 +362,40 @@ export default function FeedPage() {
             )}
 
             {/* Grid */}
-            <main className={styles.gridArea}>
+            <main
+                className={styles.gridArea}
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+                onTouchCancel={onTouchEnd}
+            >
+                {Math.abs(swipeOffset) > 30 && (
+                    <div
+                        className={`${styles.swipeHint} ${swipeOffset > 0 ? styles.swipeHintRight : styles.swipeHintLeft}`}
+                        style={{ opacity: Math.min(Math.abs(swipeOffset) / 100, 1) }}
+                    >
+                        {swipeOffset > 0 ? '❤️ Add all to favorites' : '→ Skip'}
+                    </div>
+                )}
+                {showSwipeHint && !feedLoading && pageListings.length > 0 && (
+                    <div className={styles.swipeOnboarding}>
+                        <span>💡 Swipe right to favorite all on this page · Swipe left to skip</span>
+                        <button
+                            className={styles.swipeOnboardingClose}
+                            onClick={dismissSwipeHint}
+                            aria-label="Dismiss hint"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                )}
+                <div
+                    className={styles.swipeWrap}
+                    style={{
+                        transform: `translateX(${swipeOffset}px)`,
+                        transition: isDragging ? 'none' : 'transform 250ms ease',
+                    }}
+                >
                 {feedLoading ? (
                     <div className={styles.grid}>
                         {Array.from({ length: 9 }).map((_, i) => (
@@ -299,14 +441,18 @@ export default function FeedPage() {
                                                 onClick={() => handleLike(listing)}
                                                 aria-label="Like"
                                             >
-                                                {likedIds.has(listing.id) ? '❤️' : '🤍'}
+                                                <Heart
+                                                    size={20}
+                                                    fill={likedIds.has(listing.id) ? 'currentColor' : 'none'}
+                                                    strokeWidth={2}
+                                                />
                                             </button>
                                             <button
                                                 className={`${styles.gridActionBtn} ${styles.buyBtn}`}
                                                 onClick={() => handleBuy(listing)}
-                                                aria-label="Buy"
+                                                aria-label="Make offer"
                                             >
-                                                💲
+                                                <DollarSign size={20} strokeWidth={2.5} />
                                             </button>
                                         </div>
                                     </div>
@@ -320,7 +466,7 @@ export default function FeedPage() {
                                 <button
                                     className={styles.pageBtn}
                                     disabled={page === 0}
-                                    onClick={() => setPage((p) => p - 1)}
+                                    onClick={() => { if (showSwipeHint) dismissSwipeHint(); setPage((p) => p - 1); }}
                                 >
                                     Previous
                                 </button>
@@ -328,7 +474,7 @@ export default function FeedPage() {
                                 <button
                                     className={styles.pageBtn}
                                     disabled={page + 1 >= totalPages}
-                                    onClick={() => setPage((p) => p + 1)}
+                                    onClick={() => { if (showSwipeHint) dismissSwipeHint(); setPage((p) => p + 1); }}
                                 >
                                     Next
                                 </button>
@@ -358,6 +504,7 @@ export default function FeedPage() {
                         </div>
                     </div>
                 )}
+                </div>
             </main>
 
             {/* Stats bar */}
@@ -394,6 +541,14 @@ export default function FeedPage() {
             {/* Offer sent toast */}
             {offerSent && (
                 <div className={styles.toast}>🎉 Offer sent! Seller has 24h to respond.</div>
+            )}
+
+            {/* Batch-like undo toast */}
+            {batchUndoIds && batchUndoIds.length > 0 && (
+                <div className={styles.undoToast}>
+                    <span>❤️ Liked {batchUndoIds.length} {batchUndoIds.length === 1 ? 'item' : 'items'}</span>
+                    <button className={styles.undoBtn} onClick={handleUndoBatch}>Undo</button>
+                </div>
             )}
 
             <Navigation />

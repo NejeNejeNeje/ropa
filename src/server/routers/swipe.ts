@@ -72,6 +72,40 @@ export const swipeRouter = router({
         return { swipe, matched: false };
     }),
 
+    // Reverse a prior RIGHT/SUPER swipe: flip direction to LEFT and delete any
+    // Match row that involves this listing AND the current user. Idempotent —
+    // safe to call when no swipe exists or when it's already LEFT.
+    unswipe: protectedProcedure.input(z.object({
+        listingId: z.string().max(100),
+    })).mutation(async ({ ctx, input }) => {
+        return await ctx.prisma.$transaction(async (tx) => {
+            const existing = await tx.swipe.findUnique({
+                where: { swiperId_listingId: { swiperId: ctx.userId, listingId: input.listingId } },
+            });
+            if (!existing) {
+                return { undone: false, matchesDeleted: 0 };
+            }
+            if (existing.direction !== 'LEFT') {
+                await tx.swipe.update({
+                    where: { swiperId_listingId: { swiperId: ctx.userId, listingId: input.listingId } },
+                    data: { direction: 'LEFT' },
+                });
+            }
+            // A Match involving (currentUser, listingId) takes one of two shapes:
+            //   - currentUser closed the match (userA=us, listingB=this listing)
+            //   - the other user closed the match (userB=us, listingA=this listing)
+            const deleted = await tx.match.deleteMany({
+                where: {
+                    OR: [
+                        { userAId: ctx.userId, listingBId: input.listingId },
+                        { userBId: ctx.userId, listingAId: input.listingId },
+                    ],
+                },
+            });
+            return { undone: true, matchesDeleted: deleted.count };
+        });
+    }),
+
     getStats: protectedProcedure.query(async ({ ctx }) => {
         const [total, rights, matches] = await Promise.all([
             ctx.prisma.swipe.count({ where: { swiperId: ctx.userId } }),

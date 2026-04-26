@@ -187,6 +187,37 @@
     flex: 1;
     padding: 0 var(--space-2) var(--space-4);
     overflow-x: hidden;
+    position: relative;
+    touch-action: pan-y;
+}
+
+.swipeWrap {
+    will-change: transform;
+}
+
+.swipeHint {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: var(--space-3) var(--space-5);
+    border-radius: var(--radius-full);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: white;
+    z-index: 500;
+    pointer-events: none;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.swipeHintRight {
+    right: var(--space-5);
+    background: linear-gradient(135deg, var(--color-nope), #ef4444);
+}
+
+.swipeHintLeft {
+    left: var(--space-5);
+    background: linear-gradient(135deg, #6b7280, #4b5563);
 }
 
 .grid {
@@ -296,7 +327,7 @@
 }
 
 .heartBtn {
-    color: var(--color-nope);
+    color: #ef4444;
 }
 
 .heartActive {
@@ -310,7 +341,7 @@
 }
 
 .buyBtn {
-    color: var(--color-success);
+    color: #ffffff;
 }
 
 /* ─── Pagination ─────────────────────────────────────────────── */
@@ -495,4 +526,81 @@
     z-index: 600;
     animation: slideUp 0.3s ease-out;
     box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+}
+
+/* ─── Swipe Onboarding Hint ──────────────────────────────────── */
+
+.swipeOnboarding {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3) var(--space-2) var(--space-4);
+    margin: 0 var(--space-2) var(--space-2);
+    border-radius: var(--radius-full);
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    font-size: 0.78rem;
+    font-weight: 500;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    animation: slideDown 0.3s ease-out;
+}
+
+.swipeOnboardingClose {
+    width: 22px;
+    height: 22px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: none;
+    font-size: 0.7rem;
+    flex-shrink: 0;
+    transition: background var(--transition-fast);
+}
+
+.swipeOnboardingClose:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Undo Toast ─────────────────────────────────────────────── */
+
+.undoToast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+    border-radius: var(--radius-full);
+    background: rgba(15, 15, 15, 0.95);
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 500;
+    z-index: 600;
+    animation: slideUp 0.3s ease-out;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--color-border);
+}
+
+.undoBtn {
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-full);
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform var(--transition-fast);
+}
+
+.undoBtn:hover {
+    transform: scale(1.05);
 }

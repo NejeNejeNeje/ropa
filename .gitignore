@@ -57,3 +57,8 @@ next-env.d.ts
 *.zip
 Gemini_Generated_Image_*
 .env*.local
+
+# Playwright
+/playwright-report/
+/test-results/
+/playwright/.cache/
