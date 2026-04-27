@@ -189,6 +189,9 @@
     overflow-x: hidden;
     position: relative;
     touch-action: pan-y;
+    width: 100%;
+    max-width: 1180px;
+    margin: 0 auto;
 }
 
 .swipeWrap {
@@ -224,6 +227,47 @@
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 6px;
+}
+
+.pageActions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin: 0 var(--space-2) var(--space-3);
+}
+
+.pageActionBtn {
+    min-height: 44px;
+    flex: 1 1 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-full);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+    color: var(--color-text-secondary);
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+}
+
+.pageActionBtn:hover:not(:disabled) {
+    background: var(--color-surface);
+    color: var(--color-text);
+    transform: translateY(-1px);
+}
+
+.pageActionBtn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.favoritePageBtn {
+    color: #ef4444;
 }
 
 /* ─── Grid Card ──────────────────────────────────────────────── */
@@ -546,6 +590,11 @@
     animation: slideDown 0.3s ease-out;
 }
 
+.swipeOnboarding span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
 .swipeOnboardingClose {
     width: 22px;
     height: 22px;
@@ -603,4 +652,36 @@
 
 .undoBtn:hover {
     transform: scale(1.05);
+}
+
+@media (min-width: 640px) {
+    .gridArea {
+        padding-inline: var(--space-4);
+    }
+
+    .grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: var(--space-3);
+    }
+
+    .pageActions {
+        justify-content: flex-end;
+    }
+
+    .pageActionBtn {
+        flex: 0 0 auto;
+        min-width: 150px;
+    }
+}
+
+@media (min-width: 900px) {
+    .grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1180px) {
+    .grid {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
 }

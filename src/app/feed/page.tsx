@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { useState, useMemo, useCallback, useRef, useEffect, type PointerEvent as ReactPointerEvent, type MouseEvent as ReactMouseEvent } from 'react';
 import { SlidersHorizontal, Heart, DollarSign } from 'lucide-react';
 import FilterPanel from '@/components/FilterPanel';
 import MatchNotification from '@/components/MatchNotification';
@@ -52,7 +52,10 @@ export default function FeedPage() {
     const [isDragging, setIsDragging] = useState(false);
     const [batchUndoIds, setBatchUndoIds] = useState<string[] | null>(null);
     const [showSwipeHint, setShowSwipeHint] = useState(false);
-    const swipeState = useRef<{ x: number; y: number; lock: 'h' | 'v' | null } | null>(null);
+    const likedIdsRef = useRef<Set<string>>(new Set());
+    const swipeState = useRef<{ x: number; y: number; lock: 'h' | 'v' | null; pointerId: number } | null>(null);
+    const swipeOffsetRef = useRef(0);
+    const suppressNextClick = useRef(false);
     const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Client-only: read localStorage after mount to avoid SSR/hydration mismatch.
@@ -70,6 +73,10 @@ export default function FeedPage() {
             if (undoTimer.current) clearTimeout(undoTimer.current);
         };
     }, []);
+
+    useEffect(() => {
+        likedIdsRef.current = likedIds;
+    }, [likedIds]);
 
     const dismissSwipeHint = useCallback(() => {
         if (typeof window !== 'undefined') {
@@ -171,9 +178,11 @@ export default function FeedPage() {
 
     const handleLike = useCallback((listing: Listing) => {
         if (showSwipeHint) dismissSwipeHint();
-        if (likedIds.has(listing.id)) return; // Already liked
+        if (likedIdsRef.current.has(listing.id)) return; // Already liked
 
-        setLikedIds((prev) => new Set(prev).add(listing.id));
+        const next = new Set(likedIdsRef.current).add(listing.id);
+        likedIdsRef.current = next;
+        setLikedIds(next);
         setLikeCount((c) => c + 1);
 
         swipeMutation.mutate(
@@ -186,15 +195,20 @@ export default function FeedPage() {
                 },
             }
         );
-    }, [likedIds, swipeMutation, showSwipeHint, dismissSwipeHint]);
+    }, [swipeMutation, showSwipeHint, dismissSwipeHint]);
 
     const handleLikeAll = useCallback((listings: Listing[]) => {
-        const newlyLiked: string[] = [];
-        listings.forEach((listing) => {
-            if (likedIds.has(listing.id)) return;
-            newlyLiked.push(listing.id);
-            setLikedIds((prev) => new Set(prev).add(listing.id));
-            setLikeCount((c) => c + 1);
+        const current = likedIdsRef.current;
+        const newlyLiked = listings.filter((listing) => !current.has(listing.id));
+        if (newlyLiked.length === 0) return;
+
+        const next = new Set(current);
+        newlyLiked.forEach((listing) => next.add(listing.id));
+        likedIdsRef.current = next;
+        setLikedIds(next);
+        setLikeCount((c) => c + newlyLiked.length);
+
+        newlyLiked.forEach((listing) => {
             swipeMutation.mutate(
                 { listingId: listing.id, direction: 'RIGHT' },
                 {
@@ -204,22 +218,30 @@ export default function FeedPage() {
                 }
             );
         });
-        if (newlyLiked.length > 0) {
-            // Subsequent batches replace the undoable set — older batches are committed.
-            setBatchUndoIds(newlyLiked);
-            if (undoTimer.current) clearTimeout(undoTimer.current);
-            undoTimer.current = setTimeout(() => setBatchUndoIds(null), 5000);
-        }
-    }, [likedIds, swipeMutation]);
+        // Subsequent batches replace the undoable set — older batches are committed.
+        setBatchUndoIds(newlyLiked.map((listing) => listing.id));
+        if (undoTimer.current) clearTimeout(undoTimer.current);
+        undoTimer.current = setTimeout(() => setBatchUndoIds(null), 5000);
+    }, [swipeMutation]);
+
+    const goToNextPage = useCallback(() => {
+        if (page + 1 >= totalPages) return;
+        if (showSwipeHint) dismissSwipeHint();
+        setPage((p) => p + 1);
+    }, [page, totalPages, showSwipeHint, dismissSwipeHint]);
+
+    const handleFavoritePage = useCallback(() => {
+        if (showSwipeHint) dismissSwipeHint();
+        handleLikeAll(pageListings);
+    }, [showSwipeHint, dismissSwipeHint, handleLikeAll, pageListings]);
 
     const handleUndoBatch = useCallback(() => {
         if (!batchUndoIds || batchUndoIds.length === 0) return;
         const ids = new Set(batchUndoIds);
-        setLikedIds((prev) => {
-            const next = new Set(prev);
-            ids.forEach((id) => next.delete(id));
-            return next;
-        });
+        const next = new Set(likedIdsRef.current);
+        ids.forEach((id) => next.delete(id));
+        likedIdsRef.current = next;
+        setLikedIds(next);
         setLikeCount((c) => Math.max(0, c - batchUndoIds.length));
         // Server-side reversal: unswipe transactionally flips swipe direction to LEFT
         // and deletes any Match row that involves this listing + the current user.
@@ -255,29 +277,47 @@ export default function FeedPage() {
         setOfferListing(null);
     }, [offerListing, offerMutation]);
 
-    const onTouchStart = useCallback((e: React.TouchEvent) => {
-        const t = e.touches[0];
-        swipeState.current = { x: t.clientX, y: t.clientY, lock: null };
+    const setCurrentSwipeOffset = useCallback((offset: number) => {
+        swipeOffsetRef.current = offset;
+        setSwipeOffset(offset);
+    }, []);
+
+    const isInteractiveTarget = (target: EventTarget | null) => {
+        return target instanceof HTMLElement && Boolean(target.closest('button, input, select, textarea, [role="button"]'));
+    };
+
+    const onPointerDown = useCallback((e: ReactPointerEvent<HTMLElement>) => {
+        if (isInteractiveTarget(e.target)) return;
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        swipeState.current = { x: e.clientX, y: e.clientY, lock: null, pointerId: e.pointerId };
+        swipeOffsetRef.current = 0;
         setIsDragging(true);
         if (showSwipeHint) dismissSwipeHint();
+        e.currentTarget.setPointerCapture(e.pointerId);
     }, [showSwipeHint, dismissSwipeHint]);
 
-    const onTouchMove = useCallback((e: React.TouchEvent) => {
+    const onPointerMove = useCallback((e: ReactPointerEvent<HTMLElement>) => {
         const s = swipeState.current;
-        if (!s) return;
-        const dx = e.touches[0].clientX - s.x;
-        const dy = e.touches[0].clientY - s.y;
+        if (!s || e.pointerId !== s.pointerId) return;
+        const dx = e.clientX - s.x;
+        const dy = e.clientY - s.y;
         if (s.lock === null && (Math.abs(dx) > 12 || Math.abs(dy) > 12)) {
             s.lock = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
         }
-        if (s.lock === 'h') setSwipeOffset(dx);
-    }, []);
+        if (s.lock === 'h') {
+            suppressNextClick.current = true;
+            setCurrentSwipeOffset(dx);
+        }
+    }, [setCurrentSwipeOffset]);
 
-    const onTouchEnd = useCallback(() => {
+    const onPointerEnd = useCallback((e: ReactPointerEvent<HTMLElement>) => {
         const s = swipeState.current;
-        const offset = swipeOffset;
+        const offset = swipeOffsetRef.current;
+        if (s && e.currentTarget.hasPointerCapture(s.pointerId)) {
+            e.currentTarget.releasePointerCapture(s.pointerId);
+        }
         swipeState.current = null;
-        setSwipeOffset(0);
+        setCurrentSwipeOffset(0);
         setIsDragging(false);
         if (!s || s.lock !== 'h') return;
         const SWIPE_THRESHOLD = 100;
@@ -287,7 +327,14 @@ export default function FeedPage() {
         } else if (offset < -SWIPE_THRESHOLD) {
             if (page + 1 < totalPages) setPage((p) => p + 1);
         }
-    }, [swipeOffset, pageListings, handleLikeAll, page, totalPages]);
+    }, [pageListings, handleLikeAll, page, totalPages, setCurrentSwipeOffset]);
+
+    const onGridClickCapture = useCallback((e: ReactMouseEvent<HTMLElement>) => {
+        if (!suppressNextClick.current) return;
+        suppressNextClick.current = false;
+        e.preventDefault();
+        e.stopPropagation();
+    }, []);
 
     const activeCount = Object.entries(filters).filter(
         ([key, val]) => {
@@ -364,10 +411,11 @@ export default function FeedPage() {
             {/* Grid */}
             <main
                 className={styles.gridArea}
-                onTouchStart={onTouchStart}
-                onTouchMove={onTouchMove}
-                onTouchEnd={onTouchEnd}
-                onTouchCancel={onTouchEnd}
+                onPointerDown={onPointerDown}
+                onPointerMove={onPointerMove}
+                onPointerUp={onPointerEnd}
+                onPointerCancel={onPointerEnd}
+                onClickCapture={onGridClickCapture}
             >
                 {Math.abs(swipeOffset) > 30 && (
                     <div
@@ -379,7 +427,7 @@ export default function FeedPage() {
                 )}
                 {showSwipeHint && !feedLoading && pageListings.length > 0 && (
                     <div className={styles.swipeOnboarding}>
-                        <span>💡 Swipe right to favorite all on this page · Swipe left to skip</span>
+                        <span>💡 Swipe or drag right to favorite this page · Use page actions to favorite or skip</span>
                         <button
                             className={styles.swipeOnboardingClose}
                             onClick={dismissSwipeHint}
@@ -411,6 +459,24 @@ export default function FeedPage() {
                     </div>
                 ) : pageListings.length > 0 ? (
                     <>
+                        <div className={styles.pageActions} aria-label="Page actions">
+                            <button
+                                className={`${styles.pageActionBtn} ${styles.favoritePageBtn}`}
+                                onClick={handleFavoritePage}
+                                disabled={pageListings.every((listing) => likedIds.has(listing.id))}
+                            >
+                                <Heart size={16} fill="currentColor" strokeWidth={2} />
+                                <span>Favorite page</span>
+                            </button>
+                            <button
+                                className={styles.pageActionBtn}
+                                onClick={goToNextPage}
+                                disabled={page + 1 >= totalPages}
+                            >
+                                <span>Skip page</span>
+                                <span aria-hidden="true">→</span>
+                            </button>
+                        </div>
                         <div className={styles.grid}>
                             {pageListings.map((listing) => {
                                 const priceDisplay = listing.pricingType === 'free'
