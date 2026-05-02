@@ -33,6 +33,14 @@ test.fixme('horizontal swipe changes the visible 9-item page', async ({ page, co
     // Assert active page advances to group 2 after the gesture.
 });
 
+test.fixme('current page never exposes more than 9 listing cards', async ({ page }) => {
+    await page.goto('/feed');
+
+    const currentPanel = page.locator('[aria-label^="Listings page"][aria-hidden="false"]');
+    await expect(currentPanel.locator('[class*="gridCard"]')).toHaveCount(9);
+    await expect(page.getByText(/9 shown/)).toBeVisible();
+});
+
 test.fixme('per-item like only likes the targeted item', async ({ page }) => {
     await page.goto('/feed');
 

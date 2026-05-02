@@ -164,6 +164,7 @@ export default function FeedPage() {
 
     const totalPages = pagedListings.length;
     const currentPage = totalPages === 0 ? 0 : Math.min(page, totalPages - 1);
+    const currentPageListings = pagedListings[currentPage] ?? [];
 
     const clearProgrammaticScroll = useCallback(() => {
         programmaticPageRef.current = null;
@@ -421,9 +422,10 @@ export default function FeedPage() {
                                         key={`page-${pageIndex}`}
                                         className={styles.pagePanel}
                                         aria-label={`Listings page ${pageIndex + 1} of ${totalPages}`}
+                                        aria-hidden={pageIndex !== currentPage}
                                     >
                                         <div className={styles.grid}>
-                                            {listingPage.map((listing) => {
+                                            {listingPage.slice(0, ITEMS_PER_PAGE).map((listing) => {
                                                 const priceDisplay = listing.pricingType === 'free'
                                                     ? 'FREE'
                                                     : listing.pricingType === 'negotiable'
@@ -536,7 +538,13 @@ export default function FeedPage() {
             <div className={styles.statsBar}>
                 <span>❤️ {likeCount} liked</span>
                 <span>•</span>
-                <span>📦 {filteredListings.length} items</span>
+                <span>📦 {currentPageListings.length} shown</span>
+                {filteredListings.length > currentPageListings.length && (
+                    <>
+                        <span>•</span>
+                        <span>{filteredListings.length} total</span>
+                    </>
+                )}
             </div>
 
             {/* Match notification */}
