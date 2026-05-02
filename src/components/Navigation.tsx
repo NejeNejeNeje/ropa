@@ -28,6 +28,7 @@ export default function Navigation() {
     const pathname = usePathname();
     const { data: session } = useSession();
     const isAuthed = !!session?.user;
+    const showCustomerService = !pathname.startsWith('/feed');
 
     // CHAT-3: Unread message count for badge dot — only when authenticated
     const { data: unreadCount = 0 } = trpc.match.getUnreadCount.useQuery(undefined, {
@@ -38,7 +39,7 @@ export default function Navigation() {
 
     return (
         <>
-        <CustomerServiceIcon />
+        {showCustomerService && <CustomerServiceIcon />}
         <nav className={`${styles.nav} glass-strong`} aria-label="Main navigation">
             {NAV_ITEMS.map((item) => {
                 const isActive = pathname.startsWith(item.href) ||

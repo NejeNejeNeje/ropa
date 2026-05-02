@@ -40,6 +40,7 @@ test.fixme('current page never exposes more than 9 listing cards', async ({ page
     await expect(currentPanel.locator('[class*="gridCard"]')).toHaveCount(9);
     await expect(page.getByText(/9 shown/)).toBeVisible();
     await expect(page.getByText(/10 total/)).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Customer service' })).toHaveCount(0);
 });
 
 test.fixme('per-item like only likes the targeted item', async ({ page }) => {
