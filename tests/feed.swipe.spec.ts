@@ -11,8 +11,7 @@ import { test, expect } from '@playwright/test';
  *   2. Add a Playwright fixture or `test.beforeEach` that signs in via the
  *      credentials provider — either by hitting /api/auth/callback/credentials
  *      directly or by setting the next-auth session cookie.
- *   3. Seed more than 9 eligible listings so horizontal page navigation has
- *      at least two pages to traverse.
+ *   3. Seed at least 9 eligible listings so the 9-option feed can be verified.
  *   4. Remove the .fixme() marker on each test below.
  *
  * Once enabled, this becomes the canonical regression test for the feed
@@ -20,20 +19,16 @@ import { test, expect } from '@playwright/test';
  * that every prod regression converts into a test case here.
  */
 
-test.fixme('horizontal swipe changes the visible 9-item page', async ({ page, context }) => {
+test.fixme('feed exposes only one visible 9-option set', async ({ page, context }) => {
     await context.clearCookies();
     await page.goto('/feed');
 
-    const activePage = page.getByRole('button', { current: 'page' }).first();
-    await expect(activePage).toHaveAttribute('aria-label', /group 1/i);
-
-    // Simulate horizontal swipe left on the page track. Playwright's touchscreen
-    // API does not have multi-step gestures, so dispatch pointer/touch events.
-    await expect(page.locator('[class*="pageTrack"]')).toBeVisible();
-    // Assert active page advances to group 2 after the gesture.
+    await expect(page.locator('[aria-label^="Listings page"]')).toHaveCount(1);
+    await expect(page.getByRole('button', { name: /Next group of listings/i })).toHaveCount(0);
+    await expect(page.getByText(new RegExp('Page 1/'))).toHaveCount(0);
 });
 
-test.fixme('current page never exposes more than 9 listing cards', async ({ page }) => {
+test.fixme('feed never exposes more than 9 listing cards', async ({ page }) => {
     await page.goto('/feed');
 
     const currentPanel = page.locator('[aria-label^="Listings page"][aria-hidden="false"]');

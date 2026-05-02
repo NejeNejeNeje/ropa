@@ -154,13 +154,18 @@ export default function FeedPage() {
         });
     }, [rawListings, filters, searchQuery]);
 
+    const visibleListings = useMemo(
+        () => filteredListings.slice(0, ITEMS_PER_PAGE),
+        [filteredListings]
+    );
+
     const pagedListings = useMemo(() => {
         const pages: Listing[][] = [];
-        for (let index = 0; index < filteredListings.length; index += ITEMS_PER_PAGE) {
-            pages.push(filteredListings.slice(index, index + ITEMS_PER_PAGE));
+        for (let index = 0; index < visibleListings.length; index += ITEMS_PER_PAGE) {
+            pages.push(visibleListings.slice(index, index + ITEMS_PER_PAGE));
         }
         return pages;
-    }, [filteredListings]);
+    }, [visibleListings]);
 
     const totalPages = pagedListings.length;
     const currentPage = totalPages === 0 ? 0 : Math.min(page, totalPages - 1);
