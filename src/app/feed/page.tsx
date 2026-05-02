@@ -1,6 +1,14 @@
 'use client';
 
-import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import {
+    useState,
+    useMemo,
+    useCallback,
+    useRef,
+    type KeyboardEvent,
+    type MouseEvent,
+    type PointerEvent,
+} from 'react';
 import Link from 'next/link';
 import { SlidersHorizontal } from 'lucide-react';
 import FilterPanel from '@/components/FilterPanel';
@@ -49,14 +57,13 @@ export default function FeedPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [locationMode, setLocationMode] = useState<LocationMode>('all');
     const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
+    const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
     const [matchedListing, setMatchedListing] = useState<Listing | null>(null);
     const [likeCount, setLikeCount] = useState(0);
     const [offerListing, setOfferListing] = useState<Listing | null>(null);
     const [offerSent, setOfferSent] = useState(false);
-    const [page, setPage] = useState(0);
-    const pageTrackRef = useRef<HTMLDivElement | null>(null);
-    const programmaticPageRef = useRef<number | null>(null);
-    const programmaticScrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const batchSwipeStartRef = useRef<{ x: number; y: number; pointerId: number } | null>(null);
+    const suppressCardClickRef = useRef(false);
 
     // User profile — needed for geo coords
     const { data: me } = trpc.user.me.useQuery(undefined, { retry: false });
@@ -120,6 +127,7 @@ export default function FeedPage() {
     const filteredListings = useMemo(() => {
         const query = searchQuery.trim().toLowerCase();
         return (rawListings as Listing[]).filter((l) => {
+            if (dismissedIds.has(l.id)) return false;
             // Search query
             if (query) {
                 const haystack = `${l.title} ${l.description} ${l.brand || ''}`.toLowerCase();
@@ -152,124 +160,14 @@ export default function FeedPage() {
             if (l.price !== null && l.price !== undefined && l.price > filters.maxPrice) return false;
             return true;
         });
-    }, [rawListings, filters, searchQuery]);
+    }, [rawListings, dismissedIds, filters, searchQuery]);
 
     const visibleListings = useMemo(
         () => filteredListings.slice(0, ITEMS_PER_PAGE),
         [filteredListings]
     );
 
-    const pagedListings = useMemo(() => {
-        const pages: Listing[][] = [];
-        for (let index = 0; index < visibleListings.length; index += ITEMS_PER_PAGE) {
-            pages.push(visibleListings.slice(index, index + ITEMS_PER_PAGE));
-        }
-        return pages;
-    }, [visibleListings]);
-
-    const totalPages = pagedListings.length;
-    const currentPage = totalPages === 0 ? 0 : Math.min(page, totalPages - 1);
-    const currentPageListings = pagedListings[currentPage] ?? [];
-
-    const clearProgrammaticScroll = useCallback(() => {
-        programmaticPageRef.current = null;
-        if (programmaticScrollTimeoutRef.current) {
-            clearTimeout(programmaticScrollTimeoutRef.current);
-            programmaticScrollTimeoutRef.current = null;
-        }
-    }, []);
-
-    const markProgrammaticScroll = useCallback((targetPage: number) => {
-        programmaticPageRef.current = targetPage;
-        if (programmaticScrollTimeoutRef.current) {
-            clearTimeout(programmaticScrollTimeoutRef.current);
-        }
-        programmaticScrollTimeoutRef.current = setTimeout(clearProgrammaticScroll, 500);
-    }, [clearProgrammaticScroll]);
-
-    const scrollToPage = useCallback((nextPage: number, behavior: ScrollBehavior = 'smooth') => {
-        if (totalPages === 0) return;
-
-        const boundedPage = Math.max(0, Math.min(nextPage, totalPages - 1));
-        const track = pageTrackRef.current;
-
-        setPage(boundedPage);
-        if (track) {
-            markProgrammaticScroll(boundedPage);
-            track.scrollTo({
-                left: boundedPage * track.clientWidth,
-                behavior,
-            });
-        }
-    }, [markProgrammaticScroll, totalPages]);
-
-    useEffect(() => {
-        return clearProgrammaticScroll;
-    }, [clearProgrammaticScroll]);
-
-    useEffect(() => {
-        if (totalPages === 0) {
-            clearProgrammaticScroll();
-        }
-    }, [clearProgrammaticScroll, totalPages]);
-
-    useEffect(() => {
-        const track = pageTrackRef.current;
-        if (!track) return;
-
-        const syncPageFromScroll = () => {
-            const programmaticPage = programmaticPageRef.current;
-            if (programmaticPage !== null) {
-                const targetLeft = programmaticPage * track.clientWidth;
-                if (Math.abs(track.scrollLeft - targetLeft) < 2) {
-                    clearProgrammaticScroll();
-                }
-                return;
-            }
-
-            const nextPage = Math.round(track.scrollLeft / Math.max(track.clientWidth, 1));
-            const boundedPage = Math.max(0, Math.min(nextPage, Math.max(totalPages - 1, 0)));
-            setPage((currentPage) => (currentPage === boundedPage ? currentPage : boundedPage));
-        };
-
-        syncPageFromScroll();
-        track.addEventListener('scroll', syncPageFromScroll, { passive: true });
-
-        return () => {
-            track.removeEventListener('scroll', syncPageFromScroll);
-        };
-    }, [clearProgrammaticScroll, totalPages]);
-
-    useEffect(() => {
-        const track = pageTrackRef.current;
-        if (!track || totalPages === 0) return;
-
-        if (programmaticPageRef.current === currentPage) return;
-        markProgrammaticScroll(currentPage);
-        track.scrollTo({
-            left: currentPage * track.clientWidth,
-            behavior: 'auto',
-        });
-    }, [currentPage, markProgrammaticScroll, totalPages]);
-
-    useEffect(() => {
-        const track = pageTrackRef.current;
-        if (!track || typeof ResizeObserver === 'undefined') return;
-
-        const resizeObserver = new ResizeObserver(() => {
-            if (totalPages === 0) return;
-            markProgrammaticScroll(currentPage);
-            track.scrollTo({
-                left: currentPage * track.clientWidth,
-                behavior: 'auto',
-            });
-        });
-
-        resizeObserver.observe(track);
-        return () => {
-            resizeObserver.disconnect();
-        };
-    }, [currentPage, markProgrammaticScroll, totalPages]);
+    const currentPageListings = visibleListings;
 
     const handleLike = useCallback((listing: Listing) => {
         if (likedIds.has(listing.id)) return; // Already liked
@@ -288,6 +186,98 @@ export default function FeedPage() {
             }
         );
     }, [likedIds, swipeMutation]);
+
+    const advanceBatch = useCallback((direction: 'LEFT' | 'RIGHT') => {
+        const batch = currentPageListings;
+        if (batch.length === 0) return;
+
+        setDismissedIds((prev) => {
+            const next = new Set(prev);
+            batch.forEach((listing) => next.add(listing.id));
+            return next;
+        });
+
+        if (direction === 'RIGHT') {
+            const newLikes = batch.filter((listing) => !likedIds.has(listing.id));
+            if (newLikes.length > 0) {
+                setLikedIds((prev) => {
+                    const next = new Set(prev);
+                    newLikes.forEach((listing) => next.add(listing.id));
+                    return next;
+                });
+                setLikeCount((count) => count + newLikes.length);
+            }
+        }
+
+        batch.forEach((listing) => {
+            swipeMutation.mutate(
+                { listingId: listing.id, direction },
+                {
+                    onSuccess: (result) => {
+                        if (direction === 'RIGHT' && result.matched) {
+                            setMatchedListing(listing);
+                        }
+                    },
+                }
+            );
+        });
+    }, [currentPageListings, likedIds, swipeMutation]);
+
+    const resetFeedWindow = useCallback(() => {
+        setDismissedIds(new Set());
+    }, []);
+
+    const handleBatchPointerDown = useCallback((event: PointerEvent<HTMLElement>) => {
+        if (event.button !== 0) return;
+        const target = event.target as HTMLElement;
+        if (target.closest('button, input, textarea, select')) return;
+
+        batchSwipeStartRef.current = {
+            x: event.clientX,
+            y: event.clientY,
+            pointerId: event.pointerId,
+        };
+        event.currentTarget.setPointerCapture?.(event.pointerId);
+    }, []);
+
+    const handleBatchPointerUp = useCallback((event: PointerEvent<HTMLElement>) => {
+        const start = batchSwipeStartRef.current;
+        batchSwipeStartRef.current = null;
+        if (!start || start.pointerId !== event.pointerId) return;
+
+        event.currentTarget.releasePointerCapture?.(event.pointerId);
+        const deltaX = event.clientX - start.x;
+        const deltaY = event.clientY - start.y;
+        const isBatchSwipe = Math.abs(deltaX) > 80 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2;
+        if (!isBatchSwipe) return;
+
+        suppressCardClickRef.current = true;
+        window.setTimeout(() => {
+            suppressCardClickRef.current = false;
+        }, 0);
+        advanceBatch(deltaX > 0 ? 'RIGHT' : 'LEFT');
+    }, [advanceBatch]);
+
+    const handleBatchClickCapture = useCallback((event: MouseEvent<HTMLElement>) => {
+        if (!suppressCardClickRef.current) return;
+        event.preventDefault();
+        event.stopPropagation();
+    }, []);
+
+    const handleBatchKeyDown = useCallback((event: KeyboardEvent<HTMLElement>) => {
+        if (event.key === 'ArrowRight') {
+            event.preventDefault();
+            advanceBatch('RIGHT');
+        }
+        if (event.key === 'ArrowLeft') {
+            event.preventDefault();
+            advanceBatch('LEFT');
+        }
+    }, [advanceBatch]);
+
+    const handleBatchPointerCancel = useCallback(() => {
+        batchSwipeStartRef.current = null;
+    }, []);
 
     const handleBuy = useCallback((listing: Listing) => {
         if (listing.pricingType === 'free') {
@@ -341,7 +331,7 @@ export default function FeedPage() {
                             <button
                                 key={mode}
                                 className={`${styles.locationBtn} ${locationMode === mode ? styles.locationBtnActive : ''}`}
-                                onClick={() => { setLocationMode(mode); setPage(0); }}
+                                onClick={() => { setLocationMode(mode); resetFeedWindow(); }}
                             >
                                 {label}
                             </button>
@@ -367,11 +357,11 @@ export default function FeedPage() {
                     type="text"
                     placeholder="Search items..."
                     value={searchQuery}
-                    onChange={(e) => { setSearchQuery(e.target.value); setPage(0); }}
+                    onChange={(e) => { setSearchQuery(e.target.value); resetFeedWindow(); }}
                     className={styles.searchInput}
                 />
                 {searchQuery && (
-                    <button type="button" className={styles.searchClear} onClick={() => { setSearchQuery(''); setPage(0); }}>✕</button>
+                    <button type="button" className={styles.searchClear} onClick={() => { setSearchQuery(''); resetFeedWindow(); }}>✕</button>
                 )}
             </div>
 
@@ -379,7 +369,7 @@ export default function FeedPage() {
             {showFilters && (
                 <FilterPanel
                     filters={filters}
-                    onChange={(f) => { setFilters(f); setPage(0); }}
+                    onChange={(f) => { setFilters(f); resetFeedWindow(); }}
                     onClose={() => setShowFilters(false)}
                 />
             )}
@@ -414,105 +404,72 @@ export default function FeedPage() {
                             </button>
                         </div>
                     </div>
-                ) : pagedListings.length > 0 ? (
+                ) : currentPageListings.length > 0 ? (
                     <>
                         <div className={styles.pageViewport}>
                             <div
-                                ref={pageTrackRef}
                                 className={styles.pageTrack}
                                 aria-label="Browse listings pages"
                             >
-                                {pagedListings.map((listingPage, pageIndex) => (
-                                    <section
-                                        key={`page-${pageIndex}`}
-                                        className={styles.pagePanel}
-                                        aria-label={`Listings page ${pageIndex + 1} of ${totalPages}`}
-                                        aria-hidden={pageIndex !== currentPage}
-                                    >
-                                        <div className={styles.grid}>
-                                            {listingPage.slice(0, ITEMS_PER_PAGE).map((listing) => {
-                                                const priceDisplay = listing.pricingType === 'free'
-                                                    ? 'FREE'
-                                                    : listing.pricingType === 'negotiable'
-                                                        ? `~$${listing.price}`
-                                                        : `$${listing.price}`;
+                                <section
+                                    className={styles.pagePanel}
+                                    aria-label="Swipe listing batch"
+                                    tabIndex={0}
+                                    onPointerDown={handleBatchPointerDown}
+                                    onPointerUp={handleBatchPointerUp}
+                                    onPointerCancel={handleBatchPointerCancel}
+                                    onClickCapture={handleBatchClickCapture}
+                                    onKeyDown={handleBatchKeyDown}
+                                >
+                                    <div className={styles.grid}>
+                                        {currentPageListings.map((listing) => {
+                                            const priceDisplay = listing.pricingType === 'free'
+                                                ? 'FREE'
+                                                : listing.pricingType === 'negotiable'
+                                                    ? `~$${listing.price}`
+                                                    : `$${listing.price}`;
 
-                                                return (
-                                                    <div key={listing.id} className={styles.gridCard}>
-                                                        <Link href={`/listing/${listing.id}`} className={styles.gridCardImage}>
-                                                            <img
-                                                                src={listing.images[0]?.url}
-                                                                alt={listing.title}
-                                                                draggable={false}
-                                                            />
-                                                            <span className={styles.gridPriceBadge}>{priceDisplay}</span>
-                                                        </Link>
-                                                        <div className={styles.gridCardInfo}>
-                                                            <span className={styles.gridCardTitle}>{listing.title}</span>
-                                                            <span className={styles.gridCardMeta}>
-                                                                {listing.size} · {listing.brand || listing.category}
-                                                            </span>
-                                                        </div>
-                                                        <div className={styles.gridCardActions}>
-                                                            <button
-                                                                type="button"
-                                                                className={`${styles.gridActionBtn} ${styles.heartBtn} ${likedIds.has(listing.id) ? styles.heartActive : ''}`}
-                                                                onClick={() => handleLike(listing)}
-                                                                aria-label={`Like ${listing.title}`}
-                                                            >
-                                                                {likedIds.has(listing.id) ? '❤️' : '🤍'}
-                                                            </button>
-                                                            <button
-                                                                type="button"
-                                                                className={`${styles.gridActionBtn} ${styles.buyBtn}`}
-                                                                onClick={() => handleBuy(listing)}
-                                                                aria-label={`Make an offer for ${listing.title}`}
-                                                            >
-                                                                💲
-                                                            </button>
-                                                        </div>
+                                            return (
+                                                <div key={listing.id} className={styles.gridCard}>
+                                                    <Link href={`/listing/${listing.id}`} className={styles.gridCardImage}>
+                                                        <img
+                                                            src={listing.images[0]?.url}
+                                                            alt={listing.title}
+                                                            draggable={false}
+                                                        />
+                                                        <span className={styles.gridPriceBadge}>{priceDisplay}</span>
+                                                    </Link>
+                                                    <div className={styles.gridCardInfo}>
+                                                        <span className={styles.gridCardTitle}>{listing.title}</span>
+                                                        <span className={styles.gridCardMeta}>
+                                                            {listing.size} · {listing.brand || listing.category}
+                                                        </span>
                                                     </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </section>
-                                ))}
+                                                    <div className={styles.gridCardActions}>
+                                                        <button
+                                                            type="button"
+                                                            className={`${styles.gridActionBtn} ${styles.heartBtn} ${likedIds.has(listing.id) ? styles.heartActive : ''}`}
+                                                            onClick={() => handleLike(listing)}
+                                                            aria-label={`Like ${listing.title}`}
+                                                        >
+                                                            {likedIds.has(listing.id) ? '❤️' : '🤍'}
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className={`${styles.gridActionBtn} ${styles.buyBtn}`}
+                                                            onClick={() => handleBuy(listing)}
+                                                            aria-label={`Make an offer for ${listing.title}`}
+                                                        >
+                                                            💲
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </section>
                             </div>
                         </div>
-
-                        {/* Pagination */}
-                        {totalPages > 1 && (
-                            <div className={styles.pagination}>
-                                <button
-                                    className={styles.pageBtn}
-                                    disabled={currentPage === 0}
-                                    onClick={() => scrollToPage(currentPage - 1)}
-                                    aria-label="Previous group of listings"
-                                >
-                                    ‹
-                                </button>
-                                <div className={styles.pageDots} aria-label={`Page ${currentPage + 1} of ${totalPages}`}>
-                                    {pagedListings.map((_, index) => (
-                                        <button
-                                            key={index}
-                                            type="button"
-                                            className={`${styles.pageDot} ${index === currentPage ? styles.pageDotActive : ''}`}
-                                            onClick={() => scrollToPage(index)}
-                                            aria-label={`Go to listing group ${index + 1}`}
-                                            aria-current={index === currentPage ? 'page' : undefined}
-                                        />
-                                    ))}
-                                </div>
-                                <button
-                                    className={styles.pageBtn}
-                                    disabled={currentPage + 1 >= totalPages}
-                                    onClick={() => scrollToPage(currentPage + 1)}
-                                    aria-label="Next group of listings"
-                                >
-                                    ›
-                                </button>
-                            </div>
-                        )}
                     </>
                 ) : (
                     <div className={styles.emptyWrap}>
@@ -526,7 +483,7 @@ export default function FeedPage() {
                                 onClick={() => {
                                     setFilters(DEFAULT_FILTERS);
                                     setSearchQuery('');
-                                    setPage(0);
+                                    resetFeedWindow();
                                 }}
                             >
                                 Clear Search & Filters
@@ -544,12 +501,6 @@ export default function FeedPage() {
                 <span>❤️ {likeCount} liked</span>
                 <span>•</span>
                 <span>📦 {currentPageListings.length} shown</span>
-                {totalPages > 1 && (
-                    <>
-                        <span>•</span>
-                        <span>Page {currentPage + 1}/{totalPages}</span>
-                    </>
-                )}
             </div>
 
             {/* Match notification */}

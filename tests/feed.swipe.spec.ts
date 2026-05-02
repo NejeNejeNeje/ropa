@@ -11,7 +11,7 @@ import { test, expect } from '@playwright/test';
  *   2. Add a Playwright fixture or `test.beforeEach` that signs in via the
  *      credentials provider — either by hitting /api/auth/callback/credentials
  *      directly or by setting the next-auth session cookie.
- *   3. Seed at least 9 eligible listings so the 9-option feed can be verified.
+ *   3. Seed more than 9 eligible listings so batch-swipe navigation can be verified.
  *   4. Remove the .fixme() marker on each test below.
  *
  * Once enabled, this becomes the canonical regression test for the feed
@@ -19,11 +19,34 @@ import { test, expect } from '@playwright/test';
  * that every prod regression converts into a test case here.
  */
 
-test.fixme('feed exposes only one visible 9-option set', async ({ page, context }) => {
+test.fixme('right batch swipe favorites the visible 9 and advances to the next batch', async ({ page, context }) => {
     await context.clearCookies();
     await page.goto('/feed');
 
-    await expect(page.locator('[aria-label^="Listings page"]')).toHaveCount(1);
+    const currentBatch = page.getByLabel('Swipe listing batch');
+    const firstBatchFirstItem = await currentBatch.locator('[class*="gridCard"]').first().textContent();
+    await currentBatch.dragTo(currentBatch, {
+        sourcePosition: { x: 120, y: 260 },
+        targetPosition: { x: 420, y: 260 },
+    });
+
+    await expect(page.getByText(/9 liked/)).toBeVisible();
+    await expect(currentBatch.locator('[class*="gridCard"]').first()).not.toContainText(firstBatchFirstItem ?? 'unreachable listing title');
+});
+
+test.fixme('left batch swipe skips the visible 9 without liking them', async ({ page, context }) => {
+    await context.clearCookies();
+    await page.goto('/feed');
+
+    const currentBatch = page.getByLabel('Swipe listing batch');
+    const firstBatchFirstItem = await currentBatch.locator('[class*="gridCard"]').first().textContent();
+    await currentBatch.dragTo(currentBatch, {
+        sourcePosition: { x: 420, y: 260 },
+        targetPosition: { x: 120, y: 260 },
+    });
+
+    await expect(page.getByText(/0 liked/)).toBeVisible();
+    await expect(currentBatch.locator('[class*="gridCard"]').first()).not.toContainText(firstBatchFirstItem ?? 'unreachable listing title');
     await expect(page.getByRole('button', { name: /Next group of listings/i })).toHaveCount(0);
     await expect(page.getByText(new RegExp('Page 1/'))).toHaveCount(0);
 });
@@ -31,7 +54,7 @@ test.fixme('feed exposes only one visible 9-option set', async ({ page, context 
 test.fixme('feed never exposes more than 9 listing cards', async ({ page }) => {
     await page.goto('/feed');
 
-    const currentPanel = page.locator('[aria-label^="Listings page"][aria-hidden="false"]');
+    const currentPanel = page.getByLabel('Swipe listing batch');
     await expect(currentPanel.locator('[class*="gridCard"]')).toHaveCount(9);
     await expect(page.getByText(/9 shown/)).toBeVisible();
     await expect(page.getByText(/10 total/)).toHaveCount(0);

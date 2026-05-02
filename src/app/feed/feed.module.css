@@ -232,6 +232,13 @@
     scroll-snap-stop: always;
     padding-inline: 2px;
     overflow: hidden;
+    cursor: grab;
+    touch-action: pan-y pinch-zoom;
+    user-select: none;
+}
+
+.pagePanel:active {
+    cursor: grabbing;
 }
 
 .grid {
@@ -351,8 +358,7 @@
 }
 
 .gridActionBtn:focus-visible,
-.pageBtn:focus-visible,
-.pageDot:focus-visible,
+.pagePanel:focus-visible,
 .searchClear:focus-visible,
 .locationBtn:focus-visible,
 .filterBtn:focus-visible {
@@ -376,84 +382,6 @@
 
 .buyBtn {
     color: var(--color-success);
-}
-
-/* ─── Pagination ─────────────────────────────────────────────── */
-
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-2) 0 0;
-    flex: 0 0 auto;
-}
-
-.pageBtn {
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    border-radius: var(--radius-full);
-    background: var(--color-bg-elevated);
-    border: 1px solid var(--color-border);
-    color: var(--color-text-secondary);
-    font-size: 1.35rem;
-    line-height: 1;
-    font-weight: 700;
-    transition: all var(--transition-fast);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.pageBtn:hover:not(:disabled) {
-    background: var(--color-surface);
-    color: var(--color-text);
-}
-
-.pageBtn:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-}
-
-.pageDots {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    min-width: 56px;
-}
-
-.pageDot {
-    width: 44px;
-    height: 44px;
-    border-radius: var(--radius-full);
-    background: transparent;
-    border: none;
-    transition: transform var(--transition-fast), background var(--transition-fast), width var(--transition-fast);
-    position: relative;
-    cursor: pointer;
-}
-
-.pageDot::after {
-    content: '';
-    position: absolute;
-    inset: 50% auto auto 50%;
-    width: 7px;
-    height: 7px;
-    border-radius: var(--radius-full);
-    background: var(--color-border);
-    transform: translate(-50%, -50%);
-    transition: width var(--transition-fast), background var(--transition-fast);
-}
-
-.pageDotActive {
-    background: var(--color-primary-glow);
-}
-
-.pageDotActive::after {
-    width: 18px;
-    background: var(--color-primary);
 }
 
 @media (min-width: 768px) {
