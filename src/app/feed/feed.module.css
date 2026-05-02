@@ -201,6 +201,8 @@
 .pageViewport {
     flex: 1;
     min-height: 0;
+    min-width: 0;
+    width: 100%;
     overflow: hidden;
 }
 
@@ -224,10 +226,12 @@
 .pagePanel {
     flex: 0 0 100%;
     width: 100%;
+    box-sizing: border-box;
     min-height: 0;
     scroll-snap-align: start;
     scroll-snap-stop: always;
     padding-inline: 2px;
+    overflow: hidden;
 }
 
 .grid {

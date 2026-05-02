@@ -539,10 +539,10 @@ export default function FeedPage() {
                 <span>❤️ {likeCount} liked</span>
                 <span>•</span>
                 <span>📦 {currentPageListings.length} shown</span>
-                {filteredListings.length > currentPageListings.length && (
+                {totalPages > 1 && (
                     <>
                         <span>•</span>
-                        <span>{filteredListings.length} total</span>
+                        <span>Page {currentPage + 1}/{totalPages}</span>
                     </>
                 )}
             </div>

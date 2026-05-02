@@ -39,6 +39,7 @@ test.fixme('current page never exposes more than 9 listing cards', async ({ page
     const currentPanel = page.locator('[aria-label^="Listings page"][aria-hidden="false"]');
     await expect(currentPanel.locator('[class*="gridCard"]')).toHaveCount(9);
     await expect(page.getByText(/9 shown/)).toBeVisible();
+    await expect(page.getByText(/10 total/)).toHaveCount(0);
 });
 
 test.fixme('per-item like only likes the targeted item', async ({ page }) => {
