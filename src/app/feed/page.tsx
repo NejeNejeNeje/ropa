@@ -10,7 +10,7 @@ import {
     type PointerEvent,
 } from 'react';
 import Link from 'next/link';
-import { SlidersHorizontal } from 'lucide-react';
+import { Heart, SlidersHorizontal, X } from 'lucide-react';
 import FilterPanel from '@/components/FilterPanel';
 import MatchNotification from '@/components/MatchNotification';
 import OfferSheet from '@/components/OfferSheet';
@@ -408,69 +408,89 @@ export default function FeedPage() {
                     </div>
                 ) : currentPageListings.length > 0 ? (
                     <>
-                        <div className={styles.pageViewport}>
-                            <div
-                                className={styles.pageTrack}
-                                aria-label="Browse listings pages"
+                        <div className={styles.batchShell}>
+                            <button
+                                type="button"
+                                className={`${styles.desktopBatchAction} ${styles.desktopBatchSkip}`}
+                                onClick={() => advanceBatch('LEFT')}
+                                aria-label={`Skip ${currentPageListings.length} visible listings`}
                             >
-                                <section
-                                    className={styles.pagePanel}
-                                    aria-label="Swipe listing batch"
-                                    tabIndex={0}
-                                    onPointerDown={handleBatchPointerDown}
-                                    onPointerUp={handleBatchPointerUp}
-                                    onPointerCancel={handleBatchPointerCancel}
-                                    onClickCapture={handleBatchClickCapture}
-                                    onKeyDown={handleBatchKeyDown}
-                                >
-                                    <div className={styles.grid}>
-                                        {currentPageListings.map((listing) => {
-                                            const priceDisplay = listing.pricingType === 'free'
-                                                ? 'FREE'
-                                                : listing.pricingType === 'negotiable'
-                                                    ? `~$${listing.price}`
-                                                    : `$${listing.price}`;
+                                <X size={28} aria-hidden="true" />
+                            </button>
 
-                                            return (
-                                                <div key={listing.id} className={styles.gridCard}>
-                                                    <Link href={`/listing/${listing.id}`} className={styles.gridCardImage}>
-                                                        <img
-                                                            src={listing.images[0]?.url}
-                                                            alt={listing.title}
-                                                            draggable={false}
-                                                        />
-                                                        <span className={styles.gridPriceBadge}>{priceDisplay}</span>
-                                                    </Link>
-                                                    <div className={styles.gridCardInfo}>
-                                                        <span className={styles.gridCardTitle}>{listing.title}</span>
-                                                        <span className={styles.gridCardMeta}>
-                                                            {listing.size} · {listing.brand || listing.category}
-                                                        </span>
+                            <div className={styles.pageViewport}>
+                                <div
+                                    className={styles.pageTrack}
+                                    aria-label="Browse listings pages"
+                                >
+                                    <section
+                                        className={styles.pagePanel}
+                                        aria-label="Swipe listing batch"
+                                        tabIndex={0}
+                                        onPointerDown={handleBatchPointerDown}
+                                        onPointerUp={handleBatchPointerUp}
+                                        onPointerCancel={handleBatchPointerCancel}
+                                        onClickCapture={handleBatchClickCapture}
+                                        onKeyDown={handleBatchKeyDown}
+                                    >
+                                        <div className={styles.grid}>
+                                            {currentPageListings.map((listing) => {
+                                                const priceDisplay = listing.pricingType === 'free'
+                                                    ? 'FREE'
+                                                    : listing.pricingType === 'negotiable'
+                                                        ? `~$${listing.price}`
+                                                        : `$${listing.price}`;
+
+                                                return (
+                                                    <div key={listing.id} className={styles.gridCard}>
+                                                        <Link href={`/listing/${listing.id}`} className={styles.gridCardImage}>
+                                                            <img
+                                                                src={listing.images[0]?.url}
+                                                                alt={listing.title}
+                                                                draggable={false}
+                                                            />
+                                                            <span className={styles.gridPriceBadge}>{priceDisplay}</span>
+                                                        </Link>
+                                                        <div className={styles.gridCardInfo}>
+                                                            <span className={styles.gridCardTitle}>{listing.title}</span>
+                                                            <span className={styles.gridCardMeta}>
+                                                                {listing.size} · {listing.brand || listing.category}
+                                                            </span>
+                                                        </div>
+                                                        <div className={styles.gridCardActions}>
+                                                            <button
+                                                                type="button"
+                                                                className={`${styles.gridActionBtn} ${styles.heartBtn} ${likedIds.has(listing.id) ? styles.heartActive : ''}`}
+                                                                onClick={() => handleLike(listing)}
+                                                                aria-label={`Like ${listing.title}`}
+                                                            >
+                                                                {likedIds.has(listing.id) ? '❤️' : '🤍'}
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                className={`${styles.gridActionBtn} ${styles.buyBtn}`}
+                                                                onClick={() => handleBuy(listing)}
+                                                                aria-label={`Make an offer for ${listing.title}`}
+                                                            >
+                                                                💲
+                                                            </button>
+                                                        </div>
                                                     </div>
-                                                    <div className={styles.gridCardActions}>
-                                                        <button
-                                                            type="button"
-                                                            className={`${styles.gridActionBtn} ${styles.heartBtn} ${likedIds.has(listing.id) ? styles.heartActive : ''}`}
-                                                            onClick={() => handleLike(listing)}
-                                                            aria-label={`Like ${listing.title}`}
-                                                        >
-                                                            {likedIds.has(listing.id) ? '❤️' : '🤍'}
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            className={`${styles.gridActionBtn} ${styles.buyBtn}`}
-                                                            onClick={() => handleBuy(listing)}
-                                                            aria-label={`Make an offer for ${listing.title}`}
-                                                        >
-                                                            💲
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </section>
+                                                );
+                                            })}
+                                        </div>
+                                    </section>
+                                </div>
                             </div>
+
+                            <button
+                                type="button"
+                                className={`${styles.desktopBatchAction} ${styles.desktopBatchLike}`}
+                                onClick={() => advanceBatch('RIGHT')}
+                                aria-label={`Favorite ${currentPageListings.length} visible listings`}
+                            >
+                                <Heart size={28} aria-hidden="true" />
+                            </button>
                         </div>
                     </>
                 ) : (

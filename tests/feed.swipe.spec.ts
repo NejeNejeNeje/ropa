@@ -51,6 +51,20 @@ test.fixme('left batch swipe skips the visible 9 without liking them', async ({ 
     await expect(page.getByText(new RegExp('Page 1/'))).toHaveCount(0);
 });
 
+test.fixme('desktop side buttons skip or favorite the visible 9-card batch', async ({ page, context }) => {
+    await context.clearCookies();
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/feed');
+
+    const currentBatch = page.getByLabel('Swipe listing batch');
+    const firstBatchFirstItem = await currentBatch.locator('[class*="gridCard"]').first().textContent();
+    await page.getByRole('button', { name: /Favorite 9 visible listings/i }).click();
+
+    await expect(page.getByText(/9 liked/)).toBeVisible();
+    await expect(currentBatch.locator('[class*="gridCard"]').first()).not.toContainText(firstBatchFirstItem ?? 'unreachable listing title');
+    await expect(page.getByRole('button', { name: /Skip 9 visible listings/i })).toBeVisible();
+});
+
 test.fixme('feed never exposes more than 9 listing cards', async ({ page }) => {
     await page.goto('/feed');
 
