@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { SlidersHorizontal, Heart, DollarSign } from 'lucide-react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { SlidersHorizontal } from 'lucide-react';
 import FilterPanel from '@/components/FilterPanel';
 import MatchNotification from '@/components/MatchNotification';
 import OfferSheet from '@/components/OfferSheet';
@@ -37,6 +38,11 @@ const ITEMS_PER_PAGE = 9;
 
 type LocationMode = 'all' | 'current' | 'next' | 'both';
 
+const safeJsonParse = <T,>(val: unknown, fallback: T): T => {
+    if (typeof val !== 'string') return (val as T) ?? fallback;
+    try { return JSON.parse(val) as T; } catch { return fallback; }
+};
+
 export default function FeedPage() {
     const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
     const [showFilters, setShowFilters] = useState(false);
@@ -48,35 +54,9 @@ export default function FeedPage() {
     const [offerListing, setOfferListing] = useState<Listing | null>(null);
     const [offerSent, setOfferSent] = useState(false);
     const [page, setPage] = useState(0);
-    const [swipeOffset, setSwipeOffset] = useState(0);
-    const [isDragging, setIsDragging] = useState(false);
-    const [batchUndoIds, setBatchUndoIds] = useState<string[] | null>(null);
-    const [showSwipeHint, setShowSwipeHint] = useState(false);
-    const swipeState = useRef<{ x: number; y: number; lock: 'h' | 'v' | null } | null>(null);
-    const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    // Client-only: read localStorage after mount to avoid SSR/hydration mismatch.
-    useEffect(() => {
-        if (typeof window === 'undefined') return;
-        if (!window.localStorage.getItem('ropa.feed.swipeHintSeen')) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setShowSwipeHint(true);
-        }
-    }, []);
-
-    // Clear pending undo timer on unmount to avoid setState-on-unmounted warnings.
-    useEffect(() => {
-        return () => {
-            if (undoTimer.current) clearTimeout(undoTimer.current);
-        };
-    }, []);
-
-    const dismissSwipeHint = useCallback(() => {
-        if (typeof window !== 'undefined') {
-            window.localStorage.setItem('ropa.feed.swipeHintSeen', '1');
-        }
-        setShowSwipeHint(false);
-    }, []);
+    const pageTrackRef = useRef<HTMLDivElement | null>(null);
+    const programmaticPageRef = useRef<number | null>(null);
+    const programmaticScrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // User profile — needed for geo coords
     const { data: me } = trpc.user.me.useQuery(undefined, { retry: false });
@@ -90,43 +70,51 @@ export default function FeedPage() {
             nearLng: me?.lng ?? undefined,
             destLat: (me?.destLat ?? undefined) as number | undefined,
             destLng: (me?.destLng ?? undefined) as number | undefined,
-            radiusKm: 300, // spec default was 200; widened to 300 for better coverage
+            radiusKm: 300,
         };
     }, [locationMode, me]);
 
     // Live data from tRPC
-    const { data: feedData, isLoading: feedLoading } = trpc.listing.getFeed.useQuery(
+    const {
+        data: feedData,
+        isLoading: feedLoading,
+        error: feedError,
+        refetch: refetchFeed,
+    } = trpc.listing.getFeed.useQuery(
         { limit: 50, ...geoParams },
         { retry: false }
     );
     const swipeMutation = trpc.swipe.create.useMutation();
-    const unswipeMutation = trpc.swipe.unswipe.useMutation();
     const offerMutation = trpc.offer.create.useMutation();
 
-    // Use live data if available, fallback to mock
-    const safeJsonParse = <T,>(val: unknown, fallback: T): T => {
-        if (typeof val !== 'string') return (val as T) ?? fallback;
-        try { return JSON.parse(val) as T; } catch { return fallback; }
-    };
+    const useMockListings =
+        process.env.NODE_ENV === 'development' &&
+        !feedLoading &&
+        !feedError &&
+        !feedData?.listings;
 
-    const rawListings = feedData?.listings
-        ? feedData.listings.map((l) => ({
-            ...l,
-            images: safeJsonParse<{ url: string; id: string; sortOrder: number }[]>(l.images, []),
-            colors: safeJsonParse<string[]>(l.colors, []),
-            user: l.user ? {
-                ...l.user,
-                avatarUrl: l.user.image || '',
-                displayName: l.user.name,
-                trustTier: (l.user.trustTier || 'bronze') as 'bronze' | 'silver' | 'gold',
-                citiesVisited: safeJsonParse<string[]>(l.user.citiesVisited, []),
-                swapBuddyIds: [],
-            } : undefined,
-            dropZoneId: l.dropZoneId || undefined,
-        }))
-        : LISTINGS
-            .filter((l) => l.userId !== CURRENT_USER.id && l.isActive)
-            .map((l) => ({ ...l, user: USERS.find((u) => u.id === l.userId) }));
+    const rawListings = useMemo(() => (
+        feedData?.listings
+            ? feedData.listings.map((l) => ({
+                ...l,
+                images: safeJsonParse<{ url: string; id: string; sortOrder: number }[]>(l.images, []),
+                colors: safeJsonParse<string[]>(l.colors, []),
+                user: l.user ? {
+                    ...l.user,
+                    avatarUrl: l.user.image || '',
+                    displayName: l.user.name,
+                    trustTier: (l.user.trustTier || 'bronze') as 'bronze' | 'silver' | 'gold',
+                    citiesVisited: safeJsonParse<string[]>(l.user.citiesVisited, []),
+                    swapBuddyIds: [],
+                } : undefined,
+                dropZoneId: l.dropZoneId || undefined,
+            }))
+            : useMockListings
+                ? LISTINGS
+                    .filter((l) => l.userId !== CURRENT_USER.id && l.isActive)
+                    .map((l) => ({ ...l, user: USERS.find((u) => u.id === l.userId) }))
+                : []
+    ), [feedData, useMockListings]);
 
     // Apply client-side filters + search
     const filteredListings = useMemo(() => {
@@ -166,11 +154,118 @@ export default function FeedPage() {
         });
     }, [rawListings, filters, searchQuery]);
 
-    const totalPages = Math.ceil(filteredListings.length / ITEMS_PER_PAGE);
-    const pageListings = filteredListings.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
+    const pagedListings = useMemo(() => {
+        const pages: Listing[][] = [];
+        for (let index = 0; index < filteredListings.length; index += ITEMS_PER_PAGE) {
+            pages.push(filteredListings.slice(index, index + ITEMS_PER_PAGE));
+        }
+        return pages;
+    }, [filteredListings]);
+
+    const totalPages = pagedListings.length;
+    const currentPage = totalPages === 0 ? 0 : Math.min(page, totalPages - 1);
+
+    const clearProgrammaticScroll = useCallback(() => {
+        programmaticPageRef.current = null;
+        if (programmaticScrollTimeoutRef.current) {
+            clearTimeout(programmaticScrollTimeoutRef.current);
+            programmaticScrollTimeoutRef.current = null;
+        }
+    }, []);
+
+    const markProgrammaticScroll = useCallback((targetPage: number) => {
+        programmaticPageRef.current = targetPage;
+        if (programmaticScrollTimeoutRef.current) {
+            clearTimeout(programmaticScrollTimeoutRef.current);
+        }
+        programmaticScrollTimeoutRef.current = setTimeout(clearProgrammaticScroll, 500);
+    }, [clearProgrammaticScroll]);
+
+    const scrollToPage = useCallback((nextPage: number, behavior: ScrollBehavior = 'smooth') => {
+        if (totalPages === 0) return;
+
+        const boundedPage = Math.max(0, Math.min(nextPage, totalPages - 1));
+        const track = pageTrackRef.current;
+
+        setPage(boundedPage);
+        if (track) {
+            markProgrammaticScroll(boundedPage);
+            track.scrollTo({
+                left: boundedPage * track.clientWidth,
+                behavior,
+            });
+        }
+    }, [markProgrammaticScroll, totalPages]);
+
+    useEffect(() => {
+        return clearProgrammaticScroll;
+    }, [clearProgrammaticScroll]);
+
+    useEffect(() => {
+        if (totalPages === 0) {
+            clearProgrammaticScroll();
+        }
+    }, [clearProgrammaticScroll, totalPages]);
+
+    useEffect(() => {
+        const track = pageTrackRef.current;
+        if (!track) return;
+
+        const syncPageFromScroll = () => {
+            const programmaticPage = programmaticPageRef.current;
+            if (programmaticPage !== null) {
+                const targetLeft = programmaticPage * track.clientWidth;
+                if (Math.abs(track.scrollLeft - targetLeft) < 2) {
+                    clearProgrammaticScroll();
+                }
+                return;
+            }
+
+            const nextPage = Math.round(track.scrollLeft / Math.max(track.clientWidth, 1));
+            const boundedPage = Math.max(0, Math.min(nextPage, Math.max(totalPages - 1, 0)));
+            setPage((currentPage) => (currentPage === boundedPage ? currentPage : boundedPage));
+        };
+
+        syncPageFromScroll();
+        track.addEventListener('scroll', syncPageFromScroll, { passive: true });
+
+        return () => {
+            track.removeEventListener('scroll', syncPageFromScroll);
+        };
+    }, [clearProgrammaticScroll, totalPages]);
+
+    useEffect(() => {
+        const track = pageTrackRef.current;
+        if (!track || totalPages === 0) return;
+
+        if (programmaticPageRef.current === currentPage) return;
+        markProgrammaticScroll(currentPage);
+        track.scrollTo({
+            left: currentPage * track.clientWidth,
+            behavior: 'auto',
+        });
+    }, [currentPage, markProgrammaticScroll, totalPages]);
+
+    useEffect(() => {
+        const track = pageTrackRef.current;
+        if (!track || typeof ResizeObserver === 'undefined') return;
+
+        const resizeObserver = new ResizeObserver(() => {
+            if (totalPages === 0) return;
+            markProgrammaticScroll(currentPage);
+            track.scrollTo({
+                left: currentPage * track.clientWidth,
+                behavior: 'auto',
+            });
+        });
+
+        resizeObserver.observe(track);
+        return () => {
+            resizeObserver.disconnect();
+        };
+    }, [currentPage, markProgrammaticScroll, totalPages]);
 
     const handleLike = useCallback((listing: Listing) => {
-        if (showSwipeHint) dismissSwipeHint();
         if (likedIds.has(listing.id)) return; // Already liked
 
         setLikedIds((prev) => new Set(prev).add(listing.id));
@@ -186,58 +281,15 @@ export default function FeedPage() {
                 },
             }
         );
-    }, [likedIds, swipeMutation, showSwipeHint, dismissSwipeHint]);
-
-    const handleLikeAll = useCallback((listings: Listing[]) => {
-        const newlyLiked: string[] = [];
-        listings.forEach((listing) => {
-            if (likedIds.has(listing.id)) return;
-            newlyLiked.push(listing.id);
-            setLikedIds((prev) => new Set(prev).add(listing.id));
-            setLikeCount((c) => c + 1);
-            swipeMutation.mutate(
-                { listingId: listing.id, direction: 'RIGHT' },
-                {
-                    onSuccess: (result) => {
-                        if (result.matched) setMatchedListing(listing);
-                    },
-                }
-            );
-        });
-        if (newlyLiked.length > 0) {
-            // Subsequent batches replace the undoable set — older batches are committed.
-            setBatchUndoIds(newlyLiked);
-            if (undoTimer.current) clearTimeout(undoTimer.current);
-            undoTimer.current = setTimeout(() => setBatchUndoIds(null), 5000);
-        }
     }, [likedIds, swipeMutation]);
 
-    const handleUndoBatch = useCallback(() => {
-        if (!batchUndoIds || batchUndoIds.length === 0) return;
-        const ids = new Set(batchUndoIds);
-        setLikedIds((prev) => {
-            const next = new Set(prev);
-            ids.forEach((id) => next.delete(id));
-            return next;
-        });
-        setLikeCount((c) => Math.max(0, c - batchUndoIds.length));
-        // Server-side reversal: unswipe transactionally flips swipe direction to LEFT
-        // and deletes any Match row that involves this listing + the current user.
-        batchUndoIds.forEach((id) => {
-            unswipeMutation.mutate({ listingId: id });
-        });
-        if (undoTimer.current) clearTimeout(undoTimer.current);
-        setBatchUndoIds(null);
-    }, [batchUndoIds, unswipeMutation]);
-
     const handleBuy = useCallback((listing: Listing) => {
-        if (showSwipeHint) dismissSwipeHint();
         if (listing.pricingType === 'free') {
             handleLike(listing);
             return;
         }
         setOfferListing(listing);
-    }, [handleLike, showSwipeHint, dismissSwipeHint]);
+    }, [handleLike]);
 
     const handleOfferSubmit = useCallback((amount: number) => {
         if (!offerListing) return;
@@ -254,40 +306,6 @@ export default function FeedPage() {
         );
         setOfferListing(null);
     }, [offerListing, offerMutation]);
-
-    const onTouchStart = useCallback((e: React.TouchEvent) => {
-        const t = e.touches[0];
-        swipeState.current = { x: t.clientX, y: t.clientY, lock: null };
-        setIsDragging(true);
-        if (showSwipeHint) dismissSwipeHint();
-    }, [showSwipeHint, dismissSwipeHint]);
-
-    const onTouchMove = useCallback((e: React.TouchEvent) => {
-        const s = swipeState.current;
-        if (!s) return;
-        const dx = e.touches[0].clientX - s.x;
-        const dy = e.touches[0].clientY - s.y;
-        if (s.lock === null && (Math.abs(dx) > 12 || Math.abs(dy) > 12)) {
-            s.lock = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
-        }
-        if (s.lock === 'h') setSwipeOffset(dx);
-    }, []);
-
-    const onTouchEnd = useCallback(() => {
-        const s = swipeState.current;
-        const offset = swipeOffset;
-        swipeState.current = null;
-        setSwipeOffset(0);
-        setIsDragging(false);
-        if (!s || s.lock !== 'h') return;
-        const SWIPE_THRESHOLD = 100;
-        if (offset > SWIPE_THRESHOLD) {
-            handleLikeAll(pageListings);
-            if (page + 1 < totalPages) setPage((p) => p + 1);
-        } else if (offset < -SWIPE_THRESHOLD) {
-            if (page + 1 < totalPages) setPage((p) => p + 1);
-        }
-    }, [swipeOffset, pageListings, handleLikeAll, page, totalPages]);
 
     const activeCount = Object.entries(filters).filter(
         ([key, val]) => {
@@ -344,11 +362,10 @@ export default function FeedPage() {
                     placeholder="Search items..."
                     value={searchQuery}
                     onChange={(e) => { setSearchQuery(e.target.value); setPage(0); }}
-                    onFocus={() => { if (showSwipeHint) dismissSwipeHint(); }}
                     className={styles.searchInput}
                 />
                 {searchQuery && (
-                    <button className={styles.searchClear} onClick={() => { setSearchQuery(''); setPage(0); }}>✕</button>
+                    <button type="button" className={styles.searchClear} onClick={() => { setSearchQuery(''); setPage(0); }}>✕</button>
                 )}
             </div>
 
@@ -362,40 +379,7 @@ export default function FeedPage() {
             )}
 
             {/* Grid */}
-            <main
-                className={styles.gridArea}
-                onTouchStart={onTouchStart}
-                onTouchMove={onTouchMove}
-                onTouchEnd={onTouchEnd}
-                onTouchCancel={onTouchEnd}
-            >
-                {Math.abs(swipeOffset) > 30 && (
-                    <div
-                        className={`${styles.swipeHint} ${swipeOffset > 0 ? styles.swipeHintRight : styles.swipeHintLeft}`}
-                        style={{ opacity: Math.min(Math.abs(swipeOffset) / 100, 1) }}
-                    >
-                        {swipeOffset > 0 ? '❤️ Add all to favorites' : '→ Skip'}
-                    </div>
-                )}
-                {showSwipeHint && !feedLoading && pageListings.length > 0 && (
-                    <div className={styles.swipeOnboarding}>
-                        <span>💡 Swipe right to favorite all on this page · Swipe left to skip</span>
-                        <button
-                            className={styles.swipeOnboardingClose}
-                            onClick={dismissSwipeHint}
-                            aria-label="Dismiss hint"
-                        >
-                            ✕
-                        </button>
-                    </div>
-                )}
-                <div
-                    className={styles.swipeWrap}
-                    style={{
-                        transform: `translateX(${swipeOffset}px)`,
-                        transition: isDragging ? 'none' : 'transform 250ms ease',
-                    }}
-                >
+            <main className={styles.gridArea}>
                 {feedLoading ? (
                     <div className={styles.grid}>
                         {Array.from({ length: 9 }).map((_, i) => (
@@ -409,55 +393,84 @@ export default function FeedPage() {
                             </div>
                         ))}
                     </div>
-                ) : pageListings.length > 0 ? (
+                ) : feedError && !useMockListings ? (
+                    <div className={styles.emptyWrap}>
+                        <div className={styles.empty}>
+                            <span className={styles.emptyIcon}>⚠️</span>
+                            <h3>Couldn&apos;t load listings</h3>
+                            <p>Check your connection and try again.</p>
+                            <button
+                                type="button"
+                                className="btn btn-primary"
+                                onClick={() => void refetchFeed()}
+                            >
+                                Retry
+                            </button>
+                        </div>
+                    </div>
+                ) : pagedListings.length > 0 ? (
                     <>
-                        <div className={styles.grid}>
-                            {pageListings.map((listing) => {
-                                const priceDisplay = listing.pricingType === 'free'
-                                    ? 'FREE'
-                                    : listing.pricingType === 'negotiable'
-                                        ? `~$${listing.price}`
-                                        : `$${listing.price}`;
+                        <div className={styles.pageViewport}>
+                            <div
+                                ref={pageTrackRef}
+                                className={styles.pageTrack}
+                                aria-label="Browse listings pages"
+                            >
+                                {pagedListings.map((listingPage, pageIndex) => (
+                                    <section
+                                        key={`page-${pageIndex}`}
+                                        className={styles.pagePanel}
+                                        aria-label={`Listings page ${pageIndex + 1} of ${totalPages}`}
+                                    >
+                                        <div className={styles.grid}>
+                                            {listingPage.map((listing) => {
+                                                const priceDisplay = listing.pricingType === 'free'
+                                                    ? 'FREE'
+                                                    : listing.pricingType === 'negotiable'
+                                                        ? `~$${listing.price}`
+                                                        : `$${listing.price}`;
 
-                                return (
-                                    <div key={listing.id} className={styles.gridCard}>
-                                        <a href={`/listing/${listing.id}`} className={styles.gridCardImage}>
-                                            <img
-                                                src={listing.images[0]?.url}
-                                                alt={listing.title}
-                                                draggable={false}
-                                            />
-                                            <span className={styles.gridPriceBadge}>{priceDisplay}</span>
-                                        </a>
-                                        <div className={styles.gridCardInfo}>
-                                            <span className={styles.gridCardTitle}>{listing.title}</span>
-                                            <span className={styles.gridCardMeta}>
-                                                {listing.size} · {listing.brand || listing.category}
-                                            </span>
+                                                return (
+                                                    <div key={listing.id} className={styles.gridCard}>
+                                                        <Link href={`/listing/${listing.id}`} className={styles.gridCardImage}>
+                                                            <img
+                                                                src={listing.images[0]?.url}
+                                                                alt={listing.title}
+                                                                draggable={false}
+                                                            />
+                                                            <span className={styles.gridPriceBadge}>{priceDisplay}</span>
+                                                        </Link>
+                                                        <div className={styles.gridCardInfo}>
+                                                            <span className={styles.gridCardTitle}>{listing.title}</span>
+                                                            <span className={styles.gridCardMeta}>
+                                                                {listing.size} · {listing.brand || listing.category}
+                                                            </span>
+                                                        </div>
+                                                        <div className={styles.gridCardActions}>
+                                                            <button
+                                                                type="button"
+                                                                className={`${styles.gridActionBtn} ${styles.heartBtn} ${likedIds.has(listing.id) ? styles.heartActive : ''}`}
+                                                                onClick={() => handleLike(listing)}
+                                                                aria-label={`Like ${listing.title}`}
+                                                            >
+                                                                {likedIds.has(listing.id) ? '❤️' : '🤍'}
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                className={`${styles.gridActionBtn} ${styles.buyBtn}`}
+                                                                onClick={() => handleBuy(listing)}
+                                                                aria-label={`Make an offer for ${listing.title}`}
+                                                            >
+                                                                💲
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
-                                        <div className={styles.gridCardActions}>
-                                            <button
-                                                className={`${styles.gridActionBtn} ${styles.heartBtn} ${likedIds.has(listing.id) ? styles.heartActive : ''}`}
-                                                onClick={() => handleLike(listing)}
-                                                aria-label="Like"
-                                            >
-                                                <Heart
-                                                    size={20}
-                                                    fill={likedIds.has(listing.id) ? 'currentColor' : 'none'}
-                                                    strokeWidth={2}
-                                                />
-                                            </button>
-                                            <button
-                                                className={`${styles.gridActionBtn} ${styles.buyBtn}`}
-                                                onClick={() => handleBuy(listing)}
-                                                aria-label="Make offer"
-                                            >
-                                                <DollarSign size={20} strokeWidth={2.5} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                                    </section>
+                                ))}
+                            </div>
                         </div>
 
                         {/* Pagination */}
@@ -465,18 +478,31 @@ export default function FeedPage() {
                             <div className={styles.pagination}>
                                 <button
                                     className={styles.pageBtn}
-                                    disabled={page === 0}
-                                    onClick={() => { if (showSwipeHint) dismissSwipeHint(); setPage((p) => p - 1); }}
+                                    disabled={currentPage === 0}
+                                    onClick={() => scrollToPage(currentPage - 1)}
+                                    aria-label="Previous group of listings"
                                 >
-                                    Previous
+                                    ‹
                                 </button>
-                                <span>{page + 1} / {totalPages}</span>
+                                <div className={styles.pageDots} aria-label={`Page ${currentPage + 1} of ${totalPages}`}>
+                                    {pagedListings.map((_, index) => (
+                                        <button
+                                            key={index}
+                                            type="button"
+                                            className={`${styles.pageDot} ${index === currentPage ? styles.pageDotActive : ''}`}
+                                            onClick={() => scrollToPage(index)}
+                                            aria-label={`Go to listing group ${index + 1}`}
+                                            aria-current={index === currentPage ? 'page' : undefined}
+                                        />
+                                    ))}
+                                </div>
                                 <button
                                     className={styles.pageBtn}
-                                    disabled={page + 1 >= totalPages}
-                                    onClick={() => { if (showSwipeHint) dismissSwipeHint(); setPage((p) => p + 1); }}
+                                    disabled={currentPage + 1 >= totalPages}
+                                    onClick={() => scrollToPage(currentPage + 1)}
+                                    aria-label="Next group of listings"
                                 >
-                                    Next
+                                    ›
                                 </button>
                             </div>
                         )}
@@ -504,7 +530,6 @@ export default function FeedPage() {
                         </div>
                     </div>
                 )}
-                </div>
             </main>
 
             {/* Stats bar */}
@@ -541,14 +566,6 @@ export default function FeedPage() {
             {/* Offer sent toast */}
             {offerSent && (
                 <div className={styles.toast}>🎉 Offer sent! Seller has 24h to respond.</div>
-            )}
-
-            {/* Batch-like undo toast */}
-            {batchUndoIds && batchUndoIds.length > 0 && (
-                <div className={styles.undoToast}>
-                    <span>❤️ Liked {batchUndoIds.length} {batchUndoIds.length === 1 ? 'item' : 'items'}</span>
-                    <button className={styles.undoBtn} onClick={handleUndoBatch}>Undo</button>
-                </div>
             )}
 
             <Navigation />

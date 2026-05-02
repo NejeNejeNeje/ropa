@@ -65,7 +65,8 @@
 }
 
 .locationBtn {
-    padding: 3px 8px;
+    min-height: 44px;
+    padding: 0 10px;
     border-radius: var(--radius-full);
     background: transparent;
     border: none;
@@ -75,6 +76,9 @@
     cursor: pointer;
     transition: all var(--transition-fast);
     white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .locationBtn:hover {
@@ -88,6 +92,8 @@
 
 .filterBtn {
     position: relative;
+    min-width: 44px;
+    min-height: 44px;
     padding: var(--space-2) var(--space-3);
     border-radius: var(--radius-full);
     background: var(--color-bg-card);
@@ -163,8 +169,8 @@
 }
 
 .searchClear {
-    width: 24px;
-    height: 24px;
+    width: 44px;
+    height: 44px;
     border-radius: var(--radius-full);
     background: var(--color-surface);
     color: var(--color-text-muted);
@@ -185,45 +191,52 @@
 
 .gridArea {
     flex: 1;
+    min-height: 0;
     padding: 0 var(--space-2) var(--space-4);
     overflow-x: hidden;
-    position: relative;
-    touch-action: pan-y;
+    display: flex;
+    flex-direction: column;
 }
 
-.swipeWrap {
-    will-change: transform;
+.pageViewport {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
 }
 
-.swipeHint {
-    position: fixed;
-    top: 50%;
-    transform: translateY(-50%);
-    padding: var(--space-3) var(--space-5);
-    border-radius: var(--radius-full);
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: white;
-    z-index: 500;
-    pointer-events: none;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+.pageTrack {
+    display: flex;
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    touch-action: pan-x;
+    overscroll-behavior-x: contain;
 }
 
-.swipeHintRight {
-    right: var(--space-5);
-    background: linear-gradient(135deg, var(--color-nope), #ef4444);
+.pageTrack::-webkit-scrollbar {
+    display: none;
 }
 
-.swipeHintLeft {
-    left: var(--space-5);
-    background: linear-gradient(135deg, #6b7280, #4b5563);
+.pagePanel {
+    flex: 0 0 100%;
+    width: 100%;
+    min-height: 0;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    padding-inline: 2px;
 }
 
 .grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(3, minmax(0, 1fr));
     gap: 6px;
+    height: 100%;
+    min-height: 0;
 }
 
 /* ─── Grid Card ──────────────────────────────────────────────── */
@@ -237,6 +250,7 @@
     flex-direction: column;
     transition: transform 150ms ease, box-shadow 150ms ease;
     min-width: 0;
+    min-height: 0;
 }
 
 .gridCard:active {
@@ -245,9 +259,11 @@
 
 .gridCardImage {
     position: relative;
-    aspect-ratio: 3 / 4;
+    flex: 1 1 auto;
+    min-height: 0;
     overflow: hidden;
     background: var(--color-bg-elevated);
+    display: block;
 }
 
 .gridCardImage img {
@@ -275,7 +291,8 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
-    min-height: 36px;
+    min-height: 34px;
+    flex: 0 0 auto;
 }
 
 .gridCardTitle {
@@ -300,8 +317,10 @@
 .gridCardActions {
     display: flex;
     justify-content: space-around;
-    padding: var(--space-1) var(--space-2) var(--space-2);
+    padding: 2px var(--space-2) 4px;
     border-top: 1px solid var(--color-border);
+    gap: 4px;
+    flex: 0 0 auto;
 }
 
 .gridActionBtn {
@@ -316,6 +335,7 @@
     border: none;
     transition: transform 150ms ease;
     cursor: pointer;
+    touch-action: manipulation;
 }
 
 .gridActionBtn:hover {
@@ -326,8 +346,18 @@
     transform: scale(0.9);
 }
 
+.gridActionBtn:focus-visible,
+.pageBtn:focus-visible,
+.pageDot:focus-visible,
+.searchClear:focus-visible,
+.locationBtn:focus-visible,
+.filterBtn:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
 .heartBtn {
-    color: #ef4444;
+    color: var(--color-nope);
 }
 
 .heartActive {
@@ -341,7 +371,7 @@
 }
 
 .buyBtn {
-    color: #ffffff;
+    color: var(--color-success);
 }
 
 /* ─── Pagination ─────────────────────────────────────────────── */
@@ -350,25 +380,26 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: var(--space-4);
-    padding: var(--space-4) 0;
-}
-
-.pagination span {
-    font-size: 0.75rem;
-    color: var(--color-text-muted);
-    font-weight: 500;
+    gap: var(--space-3);
+    padding: var(--space-2) 0 0;
+    flex: 0 0 auto;
 }
 
 .pageBtn {
-    padding: var(--space-2) var(--space-4);
+    width: 44px;
+    height: 44px;
+    padding: 0;
     border-radius: var(--radius-full);
     background: var(--color-bg-elevated);
     border: 1px solid var(--color-border);
     color: var(--color-text-secondary);
-    font-size: 0.75rem;
-    font-weight: 500;
+    font-size: 1.35rem;
+    line-height: 1;
+    font-weight: 700;
     transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .pageBtn:hover:not(:disabled) {
@@ -379,6 +410,57 @@
 .pageBtn:disabled {
     opacity: 0.3;
     cursor: not-allowed;
+}
+
+.pageDots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 56px;
+}
+
+.pageDot {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-full);
+    background: transparent;
+    border: none;
+    transition: transform var(--transition-fast), background var(--transition-fast), width var(--transition-fast);
+    position: relative;
+    cursor: pointer;
+}
+
+.pageDot::after {
+    content: '';
+    position: absolute;
+    inset: 50% auto auto 50%;
+    width: 7px;
+    height: 7px;
+    border-radius: var(--radius-full);
+    background: var(--color-border);
+    transform: translate(-50%, -50%);
+    transition: width var(--transition-fast), background var(--transition-fast);
+}
+
+.pageDotActive {
+    background: var(--color-primary-glow);
+}
+
+.pageDotActive::after {
+    width: 18px;
+    background: var(--color-primary);
+}
+
+@media (min-width: 768px) {
+    .gridArea {
+        padding-inline: var(--space-4);
+    }
+
+    .pageViewport {
+        max-width: 720px;
+        margin: 0 auto;
+    }
 }
 
 /* ─── Empty State ────────────────────────────────────────────── */
@@ -456,10 +538,12 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
+    min-height: 0;
 }
 
 .skeletonImage {
-    aspect-ratio: 3 / 4;
+    flex: 1 1 auto;
+    min-height: 0;
     background: linear-gradient(
         90deg,
         var(--color-bg-elevated) 25%,
@@ -475,6 +559,7 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+    flex: 0 0 auto;
 }
 
 .skeletonLine {
@@ -500,7 +585,8 @@
 }
 
 .skeletonActions {
-    height: 44px;
+    height: 40px;
+    flex: 0 0 auto;
     border-top: 1px solid var(--color-border);
     background: linear-gradient(
         90deg,
@@ -526,81 +612,4 @@
     z-index: 600;
     animation: slideUp 0.3s ease-out;
     box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
-}
-
-/* ─── Swipe Onboarding Hint ──────────────────────────────────── */
-
-.swipeOnboarding {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-2) var(--space-3) var(--space-2) var(--space-4);
-    margin: 0 var(--space-2) var(--space-2);
-    border-radius: var(--radius-full);
-    background: rgba(0, 0, 0, 0.85);
-    color: white;
-    font-size: 0.78rem;
-    font-weight: 500;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
-    animation: slideDown 0.3s ease-out;
-}
-
-.swipeOnboardingClose {
-    width: 22px;
-    height: 22px;
-    border-radius: var(--radius-full);
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
-    border: none;
-    font-size: 0.7rem;
-    flex-shrink: 0;
-    transition: background var(--transition-fast);
-}
-
-.swipeOnboardingClose:hover {
-    background: rgba(255, 255, 255, 0.3);
-}
-
-@keyframes slideDown {
-    from { opacity: 0; transform: translateY(-8px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* ─── Undo Toast ─────────────────────────────────────────────── */
-
-.undoToast {
-    position: fixed;
-    bottom: 100px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
-    border-radius: var(--radius-full);
-    background: rgba(15, 15, 15, 0.95);
-    color: white;
-    font-size: 0.85rem;
-    font-weight: 500;
-    z-index: 600;
-    animation: slideUp 0.3s ease-out;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-    border: 1px solid var(--color-border);
-}
-
-.undoBtn {
-    padding: var(--space-1) var(--space-3);
-    border-radius: var(--radius-full);
-    background: var(--color-primary);
-    color: white;
-    border: none;
-    font-size: 0.78rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: transform var(--transition-fast);
-}
-
-.undoBtn:hover {
-    transform: scale(1.05);
 }

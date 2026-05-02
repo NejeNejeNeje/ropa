@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * E2E spec — full feed swipe + batch undo flow.
+ * E2E spec — full feed page-swipe + per-item action flow.
  *
  * STATUS: shell only. Requires authenticated test session + seeded data.
  *
@@ -11,58 +11,42 @@ import { test, expect } from '@playwright/test';
  *   2. Add a Playwright fixture or `test.beforeEach` that signs in via the
  *      credentials provider — either by hitting /api/auth/callback/credentials
  *      directly or by setting the next-auth session cookie.
- *   3. Optionally add a reciprocal RIGHT swipe in seed for one listing so the
- *      "undo deletes match" assertion has data to work with.
+ *   3. Seed more than 9 eligible listings so horizontal page navigation has
+ *      at least two pages to traverse.
  *   4. Remove the .fixme() marker on each test below.
  *
  * Once enabled, this becomes the canonical regression test for the feed
- * swipe + undo behavior. axiom_VI Phase 3 (Temporal Resilience) requires
+ * page-swipe behavior. axiom_VI Phase 3 (Temporal Resilience) requires
  * that every prod regression converts into a test case here.
  */
 
-test.fixme('first-visit hint appears, dismisses on swipe', async ({ page, context }) => {
-    // Clear localStorage so the hint shows
+test.fixme('horizontal swipe changes the visible 9-item page', async ({ page, context }) => {
     await context.clearCookies();
     await page.goto('/feed');
 
-    const hint = page.getByText(/Swipe right to favorite all/);
-    await expect(hint).toBeVisible();
+    const activePage = page.getByRole('button', { current: 'page' }).first();
+    await expect(activePage).toHaveAttribute('aria-label', /group 1/i);
 
-    // Simulate horizontal swipe right on the grid area
-    const grid = page.locator('[class*="gridArea"]');
-    const box = await grid.boundingBox();
-    if (!box) throw new Error('grid not found');
-    const startX = box.x + 50;
-    const y = box.y + box.height / 2;
-    await page.touchscreen.tap(startX, y);
-    // Playwright's touchscreen API doesn't have multi-step gestures —
-    // use page.dispatchEvent('touchstart' / 'touchmove' / 'touchend') instead.
-
-    await expect(hint).not.toBeVisible();
+    // Simulate horizontal swipe left on the page track. Playwright's touchscreen
+    // API does not have multi-step gestures, so dispatch pointer/touch events.
+    await expect(page.locator('[class*="pageTrack"]')).toBeVisible();
+    // Assert active page advances to group 2 after the gesture.
 });
 
-test.fixme('batch like → undo toast → undo restores feed state', async ({ page }) => {
+test.fixme('per-item like only likes the targeted item', async ({ page }) => {
     await page.goto('/feed');
-    // Swipe right past 100px threshold
-    // (implementation: dispatch touchstart at x=50, touchmove at x=200, touchend)
 
-    const undoToast = page.getByText(/Liked \d+ items?/);
-    await expect(undoToast).toBeVisible({ timeout: 1000 });
+    const firstCardLike = page.getByRole('button', { name: /^Like / }).first();
+    await firstCardLike.click();
 
-    await page.getByRole('button', { name: 'Undo' }).click();
-    await expect(undoToast).not.toBeVisible();
-
-    // After undo: navigate to /matches and verify the previously-matched item is gone
-    await page.goto('/matches');
-    // assert no match row contains the previously-liked listing id
+    await expect(firstCardLike).toContainText('❤️');
+    await expect(page.getByText(/1 liked/)).toBeVisible();
 });
 
-test.fixme('undo deletes server-side match (regression for swipe-orphan-match bug)', async ({ page }) => {
-    // Requires: seed with a reciprocal RIGHT swipe so a Match is created on batch like.
-    // After undo, query /matches — the match should be gone, not just hidden.
+test.fixme('per-item offer opens the offer sheet without liking sibling cards', async ({ page }) => {
     await page.goto('/feed');
-    // batch like (one of which will create a match)
-    // click undo within 5s
-    // navigate /matches
-    // expect no match for the previously-liked listing
+
+    await page.getByRole('button', { name: /^Make an offer for / }).first().click();
+    await expect(page.getByText('Make an Offer')).toBeVisible();
+    await expect(page.getByText(/0 liked/)).toBeVisible();
 });
