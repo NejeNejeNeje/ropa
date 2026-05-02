@@ -265,6 +265,8 @@ export default function FeedPage() {
     }, []);
 
     const handleBatchKeyDown = useCallback((event: KeyboardEvent<HTMLElement>) => {
+        if (event.target !== event.currentTarget) return;
+
         if (event.key === 'ArrowRight') {
             event.preventDefault();
             advanceBatch('RIGHT');
