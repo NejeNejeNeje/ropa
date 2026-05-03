@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Navigation from '@/components/Navigation';
 import MeetupSheet from '@/components/MeetupSheet';
+import OfferSheet from '@/components/OfferSheet';
 import ReviewModal from '@/components/ReviewModal';
 import { MATCHES } from '@/data/mockData';
 import { trpc } from '@/lib/trpc-client';
@@ -54,14 +55,38 @@ type MatchWithMeetup = {
     offer?: { escrowStatus?: string; amount?: number; currency?: string; ropaHeldAmount?: number } | null;
 };
 
+type FavoriteListing = {
+    id: string;
+    title: string;
+    brand?: string | null;
+    size?: string | null;
+    price?: number | null;
+    currency?: string | null;
+    pricingType?: string | null;
+    images?: string | { url: string }[];
+    user?: {
+        name?: string | null;
+        currentCity?: string | null;
+        country?: string | null;
+    } | null;
+};
+
+type FavoriteSwipe = {
+    id: string;
+    createdAt?: string | Date;
+    listing: FavoriteListing;
+};
+
 export default function MatchesPage() {
     const { data: session } = useSession();
     const currentUserId = (session?.user as { id?: string } | undefined)?.id ?? '';
 
     const { data: liveMatches, refetch } = trpc.match.getAll.useQuery(undefined, { retry: false });
+    const { data: liveFavorites = [], refetch: refetchFavorites } = trpc.swipe.getFavorites.useQuery(undefined, { retry: false });
 
     const [reviewTarget, setReviewTarget] = useState<{ matchId: string; otherUserName: string } | null>(null);
     const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
+    const [activeFavorite, setActiveFavorite] = useState<FavoriteListing | null>(null);
     const [sheetState, setSheetState] = useState<{ matchId: string; prefillCity: string } | null>(null);
     const [disputeState, setDisputeState] = useState<{ matchId: string; reason: string } | null>(null);
 
@@ -78,8 +103,15 @@ export default function MatchesPage() {
     });
 
     const disputeMutation = trpc.match.openDispute.useMutation({ onSuccess: () => refetch() });
+    const offerMutation = trpc.offer.create.useMutation({
+        onSuccess: () => {
+            setActiveFavorite(null);
+            void refetchFavorites();
+        },
+    });
 
     const matches = (liveMatches || MATCHES) as unknown as MatchWithMeetup[];
+    const favorites = liveFavorites as unknown as FavoriteSwipe[];
     const activeMatch = matches.find(m => m.id === activeMatchId);
 
     const safeImages = (val: unknown): { url: string }[] => {
@@ -87,52 +119,57 @@ export default function MatchesPage() {
         return (val as { url: string }[]) || [];
     };
 
+    const handleFavoriteOfferSubmit = (amount: number) => {
+        if (!activeFavorite) return;
+        offerMutation.mutate({
+            listingId: activeFavorite.id,
+            amount,
+            currency: activeFavorite.currency || 'USD',
+        });
+    };
+
     return (
         <div className={styles.page}>
             <header className={`${styles.header} glass-strong`}>
                 <h1 className={styles.title}>❤️ Favorites</h1>
-                <span className={styles.count}>{matches.length} matches</span>
+                <span className={styles.count}>{favorites.length} saved</span>
             </header>
 
             <main className={styles.gridArea}>
-                {matches.length === 0 ? (
+                {favorites.length === 0 ? (
                     <div className={styles.empty}>
                         <span className={styles.emptyIcon}>💫</span>
                         <h3>No favorites yet</h3>
-                        <p>Start swiping to find your first match!</p>
+                        <p>Tap a heart in the feed to save a listing here.</p>
                         <Link href="/feed" className="btn btn-primary">Go to Feed</Link>
                     </div>
                 ) : (
                     <div className={styles.grid}>
-                        {matches.map((match) => {
-                            const listB = match.listingB;
-                            const imagesB = safeImages(listB.images);
-                            const thumbUrl = imagesB[0]?.url || '';
-                            const isAccepted = match.status === 'accepted';
+                        {favorites.map((favorite) => {
+                            const listing = favorite.listing;
+                            const images = safeImages(listing.images);
+                            const thumbUrl = images[0]?.url || '';
+                            const isFree = listing.pricingType === 'free';
 
                             return (
-                                <div key={match.id} className={styles.gridCard}>
+                                <div key={favorite.id} className={styles.gridCard}>
                                     {/* Image */}
                                     <div className={styles.gridCardImage}>
                                         {thumbUrl
-                                            ? <img src={thumbUrl} alt={listB.title as string} draggable={false} />
+                                            ? <img src={thumbUrl} alt={listing.title} draggable={false} />
                                             : <div className={styles.gridCardImagePlaceholder}>👗</div>
                                         }
-                                        {/* Status badge overlay */}
-                                        <span className={`${styles.statusBadge} ${styles[`status_${match.status}`]}`}>
-                                            {STATUS_ICON[match.status]}
-                                        </span>
-                                        {/* Meetup badge */}
-                                        {isAccepted && match.meetupStatus === 'confirmed' && (
-                                            <span className={styles.meetupBadge}>📍</span>
-                                        )}
+                                        <span className={styles.statusBadge}>❤️</span>
                                     </div>
 
                                     {/* Info */}
                                     <div className={styles.gridCardInfo}>
-                                        <span className={styles.gridCardTitle}>{listB.title as string}</span>
+                                        <span className={styles.gridCardTitle}>{listing.title}</span>
                                         <span className={styles.gridCardMeta}>
-                                            {listB.size as string}{listB.brand ? ` · ${listB.brand}` : ''}
+                                            {listing.size}{listing.brand ? ` · ${listing.brand}` : ''}
+                                        </span>
+                                        <span className={styles.gridCardMeta}>
+                                            {listing.user?.currentCity || listing.user?.country || 'Saved listing'}
                                         </span>
                                     </div>
 
@@ -140,9 +177,10 @@ export default function MatchesPage() {
                                     <div className={styles.gridCardActions}>
                                         <button
                                             className={styles.offerBtn}
-                                            onClick={() => setActiveMatchId(match.id)}
+                                            onClick={() => !isFree && setActiveFavorite(listing)}
+                                            disabled={isFree}
                                         >
-                                            OFFER
+                                            {isFree ? 'SAVED' : 'OFFER'}
                                         </button>
                                     </div>
                                 </div>
@@ -375,6 +413,21 @@ export default function MatchesPage() {
                     otherUserName={reviewTarget.otherUserName}
                     onClose={() => setReviewTarget(null)}
                     onSuccess={() => { refetch(); setReviewTarget(null); }}
+                />
+            )}
+
+            {activeFavorite && (
+                <OfferSheet
+                    listing={{
+                        id: activeFavorite.id,
+                        title: activeFavorite.title,
+                        brand: activeFavorite.brand || '',
+                        price: activeFavorite.price ?? null,
+                        currency: activeFavorite.currency || 'USD',
+                        imageUrl: safeImages(activeFavorite.images)[0]?.url || '',
+                    }}
+                    onSubmit={handleFavoriteOfferSubmit}
+                    onClose={() => setActiveFavorite(null)}
                 />
             )}
         </div>

@@ -72,6 +72,21 @@ export const swipeRouter = router({
         return { swipe, matched: false };
     }),
 
+    getFavorites: protectedProcedure.query(async ({ ctx }) => {
+        return ctx.prisma.swipe.findMany({
+            where: {
+                swiperId: ctx.userId,
+                direction: { in: ['RIGHT', 'SUPER'] },
+            },
+            include: {
+                listing: {
+                    include: { user: true, dropZone: true },
+                },
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+    }),
+
     // Reverse a prior RIGHT/SUPER swipe: flip direction to LEFT and delete any
     // Match row that involves this listing AND the current user. Idempotent —
     // safe to call when no swipe exists or when it's already LEFT.
