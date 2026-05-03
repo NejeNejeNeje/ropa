@@ -150,7 +150,7 @@ model Swipe {
   id        String   @id @default(cuid())
   swiperId  String
   listingId String
-  direction String   // LEFT | RIGHT | SUPER
+  direction String   // LEFT | RIGHT | SUPER | REMOVED_FAVORITE
   offerId   String?  @unique
   createdAt DateTime @default(now())
 

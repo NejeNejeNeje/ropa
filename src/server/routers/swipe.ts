@@ -87,6 +87,25 @@ export const swipeRouter = router({
         });
     }),
 
+    removeFavorite: protectedProcedure.input(z.object({
+        listingId: z.string().max(100),
+    })).mutation(async ({ ctx, input }) => {
+        const existing = await ctx.prisma.swipe.findUnique({
+            where: { swiperId_listingId: { swiperId: ctx.userId, listingId: input.listingId } },
+        });
+
+        if (!existing || !['RIGHT', 'SUPER'].includes(existing.direction)) {
+            return { removed: false };
+        }
+
+        await ctx.prisma.swipe.update({
+            where: { swiperId_listingId: { swiperId: ctx.userId, listingId: input.listingId } },
+            data: { direction: 'REMOVED_FAVORITE' },
+        });
+
+        return { removed: true };
+    }),
+
     // Reverse a prior RIGHT/SUPER swipe: flip direction to LEFT and delete any
     // Match row that involves this listing AND the current user. Idempotent —
     // safe to call when no swipe exists or when it's already LEFT.

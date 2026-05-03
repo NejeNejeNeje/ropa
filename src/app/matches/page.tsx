@@ -10,6 +10,7 @@ import { MATCHES } from '@/data/mockData';
 import { trpc } from '@/lib/trpc-client';
 import styles from './matches.module.css';
 import Link from 'next/link';
+import { X } from 'lucide-react';
 
 const STATUS_ICON: Record<string, string> = {
     pending: '⏳',
@@ -87,6 +88,7 @@ export default function MatchesPage() {
     const [reviewTarget, setReviewTarget] = useState<{ matchId: string; otherUserName: string } | null>(null);
     const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
     const [activeFavorite, setActiveFavorite] = useState<FavoriteListing | null>(null);
+    const [removedFavoriteIds, setRemovedFavoriteIds] = useState<Set<string>>(() => new Set());
     const [sheetState, setSheetState] = useState<{ matchId: string; prefillCity: string } | null>(null);
     const [disputeState, setDisputeState] = useState<{ matchId: string; reason: string } | null>(null);
 
@@ -109,9 +111,26 @@ export default function MatchesPage() {
             void refetchFavorites();
         },
     });
+    const removeFavoriteMutation = trpc.swipe.removeFavorite.useMutation({
+        onMutate: ({ listingId }) => {
+            setRemovedFavoriteIds((prev) => new Set(prev).add(listingId));
+        },
+        onError: (_error, { listingId }) => {
+            setRemovedFavoriteIds((prev) => {
+                const next = new Set(prev);
+                next.delete(listingId);
+                return next;
+            });
+        },
+        onSuccess: () => {
+            void refetchFavorites();
+        },
+    });
 
     const matches = (liveMatches || MATCHES) as unknown as MatchWithMeetup[];
-    const favorites = liveFavorites as unknown as FavoriteSwipe[];
+    const favorites = (liveFavorites as unknown as FavoriteSwipe[]).filter(
+        (favorite) => !removedFavoriteIds.has(favorite.listing.id)
+    );
     const activeMatch = matches.find(m => m.id === activeMatchId);
 
     const safeImages = (val: unknown): { url: string }[] => {
@@ -179,6 +198,15 @@ export default function MatchesPage() {
                                             onClick={() => setActiveFavorite(listing)}
                                         >
                                             OFFER
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className={styles.removeFavoriteBtn}
+                                            onClick={() => removeFavoriteMutation.mutate({ listingId: listing.id })}
+                                            aria-label={`Remove ${listing.title} from favorites`}
+                                            disabled={removeFavoriteMutation.isPending}
+                                        >
+                                            <X size={16} strokeWidth={2.5} />
                                         </button>
                                     </div>
                                 </div>
