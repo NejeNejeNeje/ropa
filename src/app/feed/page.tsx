@@ -174,6 +174,7 @@ export default function FeedPage() {
         if (likedIds.has(listing.id)) return; // Already liked
 
         setLikedIds((prev) => new Set(prev).add(listing.id));
+        setDismissedIds((prev) => new Set(prev).add(listing.id));
         setLikeCount((c) => c + 1);
 
         swipeMutation.mutate(

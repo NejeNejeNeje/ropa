@@ -75,14 +75,17 @@ test.fixme('feed never exposes more than 9 listing cards', async ({ page }) => {
     await expect(page.getByRole('button', { name: 'Customer service' })).toHaveCount(0);
 });
 
-test.fixme('per-item like only likes the targeted item', async ({ page }) => {
+test.fixme('per-item like removes the targeted item and refills the 9-card batch', async ({ page }) => {
     await page.goto('/feed');
 
+    const currentBatch = page.getByLabel('Swipe listing batch');
+    const firstCardText = await currentBatch.locator('[class*="gridCard"]').first().textContent();
     const firstCardLike = page.getByRole('button', { name: /^Like / }).first();
     await firstCardLike.click();
 
-    await expect(firstCardLike).toContainText('❤️');
     await expect(page.getByText(/1 liked/)).toBeVisible();
+    await expect(currentBatch).not.toContainText(firstCardText ?? 'unreachable listing title');
+    await expect(currentBatch.locator('[class*="gridCard"]')).toHaveCount(9);
 });
 
 test.fixme('per-item offer opens the offer sheet without liking sibling cards', async ({ page }) => {
