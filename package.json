@@ -9,6 +9,7 @@
     "lint": "eslint",
     "postinstall": "prisma generate",
     "db:seed": "npx tsx prisma/seed.ts",
+    "db:ensure-feed-test-records": "npx tsx scripts/ensure-feed-test-records.ts",
     "db:reset": "npx prisma db push --force-reset && npm run db:seed",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui"

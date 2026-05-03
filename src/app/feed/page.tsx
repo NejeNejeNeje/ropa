@@ -43,6 +43,7 @@ const DEFAULT_FILTERS: Filters = {
 };
 
 const ITEMS_PER_PAGE = 9;
+const FEED_BATCH_FETCH_LIMIT = ITEMS_PER_PAGE * 12;
 
 type LocationMode = 'all' | 'current' | 'next' | 'both';
 
@@ -88,7 +89,7 @@ export default function FeedPage() {
         error: feedError,
         refetch: refetchFeed,
     } = trpc.listing.getFeed.useQuery(
-        { limit: 50, ...geoParams },
+        { limit: FEED_BATCH_FETCH_LIMIT, ...geoParams },
         { retry: false }
     );
     const swipeMutation = trpc.swipe.create.useMutation();

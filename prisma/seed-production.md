@@ -94,3 +94,20 @@ After seeding:
 - Post the app in **digital nomad Facebook groups** for the hub cities
 - Ask the first 5 users to list items — this creates social proof
 - The Karma system will naturally reward early users with Bronze → Silver upgrades, creating an engaged founding community
+
+---
+
+## Non-Destructive Feed Test Top-Up
+
+Do not rerun `prisma/seed.ts` against production for feed testing; that script clears existing data first.
+
+To add enough extra active listings for repeated 9-card like/skip testing without wiping the database:
+
+```bash
+DATABASE_URL="postgresql://..." FEED_TEST_RECORD_TARGET=108 npm run db:ensure-feed-test-records
+```
+
+Defaults:
+- `FEED_TEST_USER_EMAIL=test3@ropa.trade`
+- `FEED_TEST_RECORD_TARGET=108` (12 full feed batches)
+- `FEED_TEST_SELLER_COUNT=6`

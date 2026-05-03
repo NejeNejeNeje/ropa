@@ -74,7 +74,7 @@ export const listingRouter = router({
         category: z.string().optional(),
         city: z.string().optional(),
         cursor: z.string().optional(),
-        limit: z.number().min(1).max(50).default(20),
+        limit: z.number().min(1).max(150).default(20),
         // Geo-radius filtering
         nearLat: z.number().optional(),
         nearLng: z.number().optional(),
