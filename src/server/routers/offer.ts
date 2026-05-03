@@ -34,7 +34,7 @@ export const offerRouter = router({
     // Buyer creates an offer on a listing
     create: protectedProcedure.input(z.object({
         listingId: z.string().max(100),
-        amount: z.number().positive(),
+        amount: z.number().min(0),
         currency: z.string().max(10).default('USD'),
     })).mutation(async ({ ctx, input }) => {
         const listing = await ctx.prisma.listing.findUniqueOrThrow({
@@ -65,6 +65,10 @@ export const offerRouter = router({
 
         // Determine offer type
         const askingPrice = listing.price || 0;
+        if (input.amount === 0 && askingPrice > 0) {
+            throw new Error('Zero-dollar offers are only allowed for $0 listings');
+        }
+
         let offerType: string;
         if (input.amount > askingPrice) offerType = 'OVERBID';
         else if (input.amount === askingPrice) offerType = 'MATCH';

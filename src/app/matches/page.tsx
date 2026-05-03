@@ -149,7 +149,6 @@ export default function MatchesPage() {
                             const listing = favorite.listing;
                             const images = safeImages(listing.images);
                             const thumbUrl = images[0]?.url || '';
-                            const isFree = listing.pricingType === 'free';
 
                             return (
                                 <div key={favorite.id} className={styles.gridCard}>
@@ -177,10 +176,9 @@ export default function MatchesPage() {
                                     <div className={styles.gridCardActions}>
                                         <button
                                             className={styles.offerBtn}
-                                            onClick={() => !isFree && setActiveFavorite(listing)}
-                                            disabled={isFree}
+                                            onClick={() => setActiveFavorite(listing)}
                                         >
-                                            {isFree ? 'SAVED' : 'OFFER'}
+                                            OFFER
                                         </button>
                                     </div>
                                 </div>

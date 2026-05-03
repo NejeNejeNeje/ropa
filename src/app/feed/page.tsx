@@ -284,12 +284,8 @@ export default function FeedPage() {
     }, []);
 
     const handleBuy = useCallback((listing: Listing) => {
-        if (listing.pricingType === 'free') {
-            handleLike(listing);
-            return;
-        }
         setOfferListing(listing);
-    }, [handleLike]);
+    }, []);
 
     const handleOfferSubmit = useCallback((amount: number) => {
         if (!offerListing) return;

@@ -22,6 +22,7 @@ interface OfferSheetProps {
 
 export default function OfferSheet({ listing, onSubmit, onClose }: OfferSheetProps) {
     const askingPrice = listing.price || 0;
+    const minOffer = askingPrice <= 0 ? 0 : 1;
     const [bidType, setBidType] = useState<BidType>('match');
     const [amount, setAmount] = useState(askingPrice);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,7 +35,7 @@ export default function OfferSheet({ listing, onSubmit, onClose }: OfferSheetPro
     };
 
     const handleSubmit = async () => {
-        if (amount <= 0 || isSubmitting) return;
+        if (amount < minOffer || isSubmitting) return;
         setIsSubmitting(true);
         try {
             // We await onSubmit if it is an async function (or wrap in Promise if needed)
@@ -116,7 +117,7 @@ export default function OfferSheet({ listing, onSubmit, onClose }: OfferSheetPro
                                 type="number"
                                 value={amount}
                                 onChange={(e) => setAmount(Number(e.target.value))}
-                                min={1}
+                                min={minOffer}
                                 className={styles.amountInput}
                             />
                         </div>
@@ -127,7 +128,7 @@ export default function OfferSheet({ listing, onSubmit, onClose }: OfferSheetPro
 
                     <div className={styles.actions}>
                         <button className={styles.cancelBtn} onClick={onClose} disabled={isSubmitting}>Cancel</button>
-                        <button className={styles.submitBtn} onClick={handleSubmit} disabled={isSubmitting} style={{ opacity: isSubmitting ? 0.7 : 1 }}>
+                        <button className={styles.submitBtn} onClick={handleSubmit} disabled={isSubmitting || amount < minOffer} style={{ opacity: isSubmitting ? 0.7 : 1 }}>
                             {isSubmitting ? (
                                 <Loader2 className="spinner" size={18} />
                             ) : (
